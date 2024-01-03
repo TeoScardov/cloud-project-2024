@@ -1,0 +1,17 @@
+*.gz
+*.log
+*.fls
+*.aux
+*.fdb_latexmk
+*.xml
+*.bcf
+*.out
+*.toc
+.DS_Store
+.vscode
+*_gitignore*
+*_gitignore/
+*.synctex.gz
+*.blg
+*.bbl
+__pycache__/
