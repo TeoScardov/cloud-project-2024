@@ -1,0 +1,17 @@
+{
+    "user1": {
+        "password": "pass",
+        "role": "admin",
+        "info": {}
+    },
+    "user2": {
+        "password": "pass",
+        "role": "user",
+        "info": "changed the field"
+    },
+    "user3": {
+        "password": "pass",
+        "role": "user",
+        "info": ""
+    }
+}
