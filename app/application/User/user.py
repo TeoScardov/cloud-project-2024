@@ -4,6 +4,6 @@ from flask import jsonify
 
 user_bp = Blueprint('user', __name__)
 
-@user_bp.route('/user/<id>/token', methods=['POST'])
+@user_bp.route('<id>/token', methods=['POST'])
 def token(id):
     return jsonify({'token' : int(id)*33}), 200

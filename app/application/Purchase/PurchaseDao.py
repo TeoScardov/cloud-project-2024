@@ -1,3 +1,4 @@
+import sqlite3
 
 class PurchaseDao:
     def __init__(self):
