@@ -53,7 +53,7 @@ def update_info():
         return jsonify({"message": "Token not valid"}), 401
 
 
-@account.route('/authenticate', methods=['GET'])
+@account.route('/authenticate', methods=['POST'])
 @jwt_required()
 def authenticate():
     # Retrieve the JWT token
@@ -61,9 +61,9 @@ def authenticate():
     # Check if the token is valid and return the associated user
     user, role = model.authenticate_token(token)
     if user is not None:
-        return jsonify({"message": "User authenticated", "user": user, "role": role}), 200
+        return jsonify({"message": "User authenticated", "username": user, "role": role}), 200
     else:
-        return jsonify({"message": "Token not valid", "user": None, "role": None}), 401
+        return jsonify({"message": "Token not valid", "username": None, "role": None}), 401
     
 
 @account.route('/changepassword', methods=['GET'])
