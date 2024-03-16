@@ -22,26 +22,40 @@ def check_cart_id(cart_id):
     return cart is not None
 
 
-def update_cart(cart_id, item, new_quantity, user_id):
+def add_item(cart_id, item, user_id):
     # Retrieve existing cart items and total
     existing_items = CartItem.query.filter_by(cart_id=cart_id).with_entities(CartItem.product_id).all()
     item_id = item['product_id']
     existing_product_ids = [existing_item[0] for existing_item in existing_items]
     if item_id in existing_product_ids:
         # update existing item
-        if new_quantity == 0:
-            # delete the item
-            cart_item_to_delete = CartItem.query.filter_by(cart_id=cart_id, product_id=item_id).first()
-            db.session.delete(cart_item_to_delete)
-            db.session.commit()
-        else:
-            # change the quantity
-            CartItem.query.filter_by(cart_id=cart_id, product_id=item_id).update({'quantity': new_quantity})
-            db.session.commit()
+        cart_item_to_update = CartItem.query.filter_by(cart_id=cart_id, product_id=item_id).first()
+        cart_item_to_update.quantity += 1
+        db.session.commit()
     else:
         # add new item
-        insert_item(cart_id, item_id, item['name'], new_quantity, item['price'])
+        insert_item(cart_id, item_id, item['name'], 1, item['price'])
 
+    return update_total_price(cart_id, user_id)
+
+
+def delete_item(cart_id, item, user_id):
+    item_id = item['product_id']
+    cart_item_to_modify = CartItem.query.filter_by(cart_id=cart_id, product_id=item_id).first()
+    if cart_item_to_modify:
+        if cart_item_to_modify.quantity == 1:
+            # delete the item
+            db.session.delete(cart_item_to_modify)
+            db.session.commit()
+        elif cart_item_to_modify.quantity > 1:
+            # change the quantity
+            cart_item_to_modify.quantity = cart_item_to_modify.quantity - 1
+            db.session.commit()
+
+    return update_total_price(cart_id, user_id)
+
+
+def update_total_price(cart_id, user_id):
     # Retrieve new cart items price and quantity
     selected_items = CartItem.query.filter_by(cart_id=cart_id).with_entities(
         CartItem.product_id,
@@ -55,7 +69,7 @@ def update_cart(cart_id, item, new_quantity, user_id):
         product_id, price, quantity = item
         updated_total += price * quantity
     # Update the total in the cart
-    Cart.query.filter_by(cart_id=cart_id).update({'total': updated_total,'user_id': user_id})
+    Cart.query.filter_by(cart_id=cart_id).update({'total': updated_total, 'user_id': user_id})
     db.session.commit()
     return Cart.query.filter_by(cart_id=cart_id).first()
 
