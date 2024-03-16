@@ -69,13 +69,19 @@ def update_total_price(cart_id, user_id):
         product_id, price, quantity = item
         updated_total += price * quantity
     # Update the total in the cart
-    Cart.query.filter_by(cart_id=cart_id).update({'total': updated_total, 'user_id': user_id})
+    if user_id is not None:
+        Cart.query.filter_by(cart_id=cart_id).update({'total': updated_total, 'user_id': user_id})
+    else:
+        Cart.query.filter_by(cart_id=cart_id).update({'total': updated_total})
     db.session.commit()
     return Cart.query.filter_by(cart_id=cart_id).first()
 
 
 def renew_cart_expiry(cart_id, user_id):
-    Cart.query.filter_by(cart_id=cart_id).update({'exp_date': generate_ttl(3), 'user_id': user_id})
+    if user_id is not None:
+        Cart.query.filter_by(cart_id=cart_id).update({'exp_date': generate_ttl(3), 'user_id': user_id})
+    else:
+        Cart.query.filter_by(cart_id=cart_id).update({'exp_date': generate_ttl(3)})
     db.session.commit()
     return Cart.query.get(cart_id)
 
