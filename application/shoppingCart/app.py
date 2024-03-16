@@ -8,7 +8,8 @@ app = Flask(__name__)
 app.register_blueprint(cart, url_prefix='/api/cart')
 jwt = JWTManager(app)
 app.config.from_pyfile('config.py')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///identifier.sqlite'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///identifier.sqlite'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://onlineshop:cloud2024@localhost/flask_db'
 db.init_app(app)
 
 # Create the tables
