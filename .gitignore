@@ -14,6 +14,4 @@
 *.synctex.gz
 *.blg
 *.bbl
-application/start.sh
-user/
 __pycache__/
