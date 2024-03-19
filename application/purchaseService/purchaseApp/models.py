@@ -1,4 +1,4 @@
-from db import db
+from purchaseApp import db
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 import datetime

@@ -1,5 +1,5 @@
 import requests
-from models import PaymentDao, PurchaseDao, PurchaseItemDao
+from purchaseApp.models import PaymentDao, PurchaseDao, PurchaseItemDao
 
 def createNewPurchase(request):
     try:

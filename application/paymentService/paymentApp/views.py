@@ -1,7 +1,7 @@
 from flask import Blueprint
 from flask import request
 from flask import jsonify
-from controller import perform_payment
+from paymentApp.controller import perform_payment
 
 blueprint = Blueprint('payment', __name__)
 

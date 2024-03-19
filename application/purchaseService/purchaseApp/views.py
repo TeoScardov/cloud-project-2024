@@ -2,8 +2,7 @@ from flask import Blueprint
 from flask import request
 from flask import jsonify
 from flask_jwt_extended import jwt_required
-from utils import isAuthenticated, get_username, get_cart
-from controller import performPayment, createNewPurchase, associateBooksToPurchase, associateBooksToAccount
+from purchaseApp.controller import performPayment, createNewPurchase, associateBooksToPurchase, associateBooksToAccount
 import requests
 
 blueprint = Blueprint('purchase', __name__)
