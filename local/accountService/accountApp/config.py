@@ -1,4 +1,6 @@
 class Config(object):
     """Base config."""
     JWT_SECRET_KEY = 'keyabc123456'
-    DB_PATH = 'local/accountService/accounts.json'
+    #'postgresql://username:password@localhost/mydatabase'
+    SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:admin22@localhost/flask_db'
+    JWT_TOKEN_TTL = 3600
