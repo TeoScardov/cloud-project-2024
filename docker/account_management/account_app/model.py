@@ -2,15 +2,33 @@ import datetime
 from flask import jsonify
 from flask_jwt_extended import create_access_token, decode_token
 from werkzeug.security import generate_password_hash, check_password_hash
-from accountApp.config import Config
-from accountApp.database import db
-from accountApp.dbmodel import *
+from account_app.config import Config
+from account_app.database import db
+from account_app.dbmodel import *
 
-# delete all accounts
+'''# delete all accounts
 def nuke():
     num_rows_deleted = db.session.query(Account).delete()
     db.session.commit()
-    print(f"Deleted {num_rows_deleted} accounts.")
+    print(f"Deleted {num_rows_deleted} accounts.")'''
+
+'''If not present, initialize the database with an admin user called admin1'''
+def create_admin_user():
+    try:
+        if not Account.query.filter_by(username='admin1').first():
+            admin_user = Account(
+                username='admin1',
+                password_hash=generate_password_hash(Config.ADMIN_PASSWORD),
+                role='Admin',
+                name='Admin',
+                surname='User',
+                suspended=False
+            )
+            db.session.add(admin_user)
+            db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error creating admin user: {e}")
 
 '''Register a new account, provided all the information. To create an account with higher priviledges, an admin JWT token has to be provided'''
 def register_account(data, token=None):

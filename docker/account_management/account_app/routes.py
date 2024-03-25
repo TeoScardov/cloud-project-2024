@@ -5,6 +5,7 @@ from . import account, model
 # /api/account
 @account.route('/')
 def index():
+    model.create_admin_user()
     return "Welcome to the account service API section."
 
 

@@ -1,5 +1,5 @@
 from enum import Enum, unique
-from accountApp.database import db
+from account_app.database import db
 
 @unique
 class Role(Enum):
@@ -15,7 +15,7 @@ class Account(db.Model):
     suspended = db.Column(db.Boolean, default=False)
     name = db.Column(db.String(50), nullable=False)
     surname = db.Column(db.String(50), nullable=False)
-
+        
     def __init__(self, username, password_hash, role, name, surname, suspended=False):
         self.username = username
         self.password_hash = password_hash
