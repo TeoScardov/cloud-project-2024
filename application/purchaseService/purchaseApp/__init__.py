@@ -13,3 +13,7 @@ db = SQLAlchemy(app)
 
 from purchaseApp.views import blueprint
 app.register_blueprint(blueprint, url_prefix='/api/purchase')
+
+from purchaseApp import models
+with app.app_context():
+    db.create_all()
