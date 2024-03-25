@@ -1,6 +1,8 @@
 from flask import Blueprint
 from flask import request
 from flask import jsonify
+from flask_jwt_extended import jwt_required
+
 from paymentApp.controller import perform_payment
 
 blueprint = Blueprint('payment', __name__)
@@ -12,6 +14,7 @@ def health():
     )
 
 @blueprint.route('/', methods=['POST'])
+#@jwt_required()
 def pay():
 
     if request.authorization is None:

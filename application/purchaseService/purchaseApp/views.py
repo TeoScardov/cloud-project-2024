@@ -15,6 +15,7 @@ def health():
 
 
 @blueprint.route('/', methods=['POST'])
+#@jwt_required()
 def placeOrder():
     #check login
     if not True:#isAuthenticated(request):
@@ -58,6 +59,7 @@ def placeOrder():
             }), 500
 
 @blueprint.route('/details', methods=['GET'])
+#@jwt_required()
 def getPurchaseDetails():
     purchase_id = request.get_json()
 
