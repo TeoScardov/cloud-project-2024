@@ -20,6 +20,22 @@ def createNewPurchase(request):
 def performPayment(purchase):
 
     try:
+        #getPriceFromCart = requests.get('http://localhost:5000/api/cart/price/' + purchase_id)
+
+        data_payment = {"amount": 30, "card" : 3344567826351444, "cvv" : 366, "expiration" : "12/27", "billing_address": "Via Ciao Ciao 36"}
+
+        #call payment
+        payment = requests.post('http://localhost:5001/api/payment/', json=data_payment)
+
+        if payment.status_code != 200:
+            return None
+    
+    except Exception as e:
+        print(e)
+        return None
+
+
+    try:
         purchase_id = purchase.id
 
         payment = PaymentDao(purchase_id=purchase_id)
