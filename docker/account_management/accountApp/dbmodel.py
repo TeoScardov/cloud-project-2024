@@ -1,5 +1,5 @@
 from enum import Enum, unique
-from account_app.database import db
+from accountApp.database import db
 
 @unique
 class Role(Enum):

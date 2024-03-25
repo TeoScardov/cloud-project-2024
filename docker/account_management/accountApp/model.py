@@ -2,9 +2,9 @@ import datetime
 from flask import jsonify
 from flask_jwt_extended import create_access_token, decode_token
 from werkzeug.security import generate_password_hash, check_password_hash
-from account_app.config import Config
-from account_app.database import db
-from account_app.dbmodel import *
+from accountApp.config import Config
+from accountApp.database import db
+from accountApp.dbmodel import *
 
 '''# delete all accounts
 def nuke():
@@ -166,7 +166,14 @@ def authenticate_token(token):
             return jsonify({"message": "Account not found."}), 400
         id_ = account.id
         role = account.role.value   # role is an Enum
-        return jsonify({"message": "User authenticated", "id": id_, "username": username, "role": role}), 200
+        return jsonify({"message": "User authenticated", 
+                        "id": account.id, 
+                        "username": username, 
+                        "role": account.role.value,   # role is an Enum
+                        "suspended": account.suspended,
+                        "name": account.name,
+                        "surname": account.surname
+                        }), 200
     except Exception as e:
         print(e)
         return jsonify({"message": "There was a problem with the database querying."}), 500
