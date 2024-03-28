@@ -65,3 +65,11 @@ def authenticate():
     # Get the username and role associated to the JWT token
     message, code = model.authenticate_token(token)
     return jsonify(message), code
+
+@account.route('/info', methods=['POST'])
+def info():
+    # Retrieve the JWT token, if present
+    token = request.headers.get('Authorization', None)
+    # Register the new account in the database
+    message, code = model.get_info(token)
+    return jsonify(message), code

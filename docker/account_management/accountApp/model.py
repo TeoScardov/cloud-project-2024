@@ -1,7 +1,7 @@
 import datetime
 from flask_jwt_extended import create_access_token, decode_token
-from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm.attributes import flag_modified
+from werkzeug.security import generate_password_hash, check_password_hash
 from accountApp.config import Config
 from accountApp.database import db
 from accountApp.dbmodel import *
@@ -81,7 +81,7 @@ def register_account(data, token=None):
         try:
             new_customer = Customer(
                 account_id = new_account.id,
-                library = None,
+                library = [],
                 phone_number = None,
                 billing_address = None
             )
@@ -132,7 +132,6 @@ def update_info(token, data):
     auth_msg, code = authenticate_token(token)
     if code != 200:
         return auth_msg, code   # The authentication was not successful
-    token = token.split(' ')[1]     # The auth token is in the form "Bearer <token_string>"
     requesting_account_id = auth_msg['account_id']
     requesting_role = auth_msg['role']
 
@@ -160,13 +159,18 @@ def update_info(token, data):
             if updating_account.role.value == "USER":
                 updating_customer = Customer.query.filter_by(account_id=updating_account_id).first()
                 if 'library' in data:
+                    new_library = updating_customer.library
+                    if not new_library: # The library could be empty
+                        new_library = []
                     if 'add' in data['library']:
                         for new_book in data['library']['add']:
-                            updating_customer.library.append(new_book)
+                            new_library.append(new_book)
                     if 'delete' in data['library']:
                         for book in data['library']['delete']:
-                            updating_customer.library.remove(book)
-                    flag_modified(updating_customer, "library")    # Ensure SQLAlchemy issues an update
+                            if book in new_library:
+                                new_library.remove(book)
+                    updating_customer.library = new_library
+                    flag_modified(updating_customer, "library")
                 if 'phone_number' in data:
                     updating_customer.phone_number = data['phone_number']
                 if 'billing_address' in data:
@@ -209,3 +213,28 @@ def authenticate_token(token):
     except Exception as e:
         print(e)
         return {"message": "There was a problem with the database querying."}, 500
+    
+
+'''Return all the info of the account specified in the JWT token'''
+def get_info(token):
+    auth_msg, code = authenticate_token(token)
+    try:
+        account = Account.query.filter_by(id=auth_msg['account_id']).first()
+        account_info = {
+        "id": account.id,
+        "email_address": account.email_address,
+        "username": account.username,
+        "name": account.name,
+        "surname": account.surname,
+        "role": account.role.value,
+        "suspended": account.suspended
+        }
+        if account.role.value == "USER":
+            customer = Customer.query.filter_by(account_id=auth_msg['account_id']).first()
+            account_info['library'] = customer.library
+            account_info['phone_numer'] = customer.phone_number
+            account_info['billing_address'] = customer.billing_address
+    except Exception as e:
+        print(e)
+        return {"message": "Error."}, 400
+    return account_info, 200
