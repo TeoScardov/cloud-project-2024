@@ -1,179 +1,211 @@
 import datetime
-from flask import jsonify
 from flask_jwt_extended import create_access_token, decode_token
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.orm.attributes import flag_modified
 from accountApp.config import Config
 from accountApp.database import db
 from accountApp.dbmodel import *
 
-'''# delete all accounts
-def nuke():
-    num_rows_deleted = db.session.query(Account).delete()
-    db.session.commit()
-    print(f"Deleted {num_rows_deleted} accounts.")'''
-
-'''If not present, initialize the database with an admin user called admin1'''
-def create_admin_user():
+'''If not present, initialize the database with an admin account called admin1'''
+def create_admin_account():
     try:
         if not Account.query.filter_by(username='admin1').first():
-            admin_user = Account(
+            admin_account = Account(
+                email_address='admin@example.com',
                 username='admin1',
                 password_hash=generate_password_hash(Config.ADMIN_PASSWORD),
-                role='Admin',
                 name='Admin',
                 surname='User',
-                suspended=False
+                role='ADMIN'
             )
-            db.session.add(admin_user)
+            db.session.add(admin_account)
             db.session.commit()
     except Exception as e:
         db.session.rollback()
-        print(f"Error creating admin user: {e}")
+        print(f"Error creating admin account: {e}")
 
-'''Register a new account, provided all the information. To create an account with higher priviledges, an admin JWT token has to be provided'''
+
+'''Register a new account. To create an account with higher priviledges, an admin JWT token has to be provided'''
 def register_account(data, token=None):
-    # Check if the username is available
+    # Check if username and e-mail address are available
     try:
         acc = Account.query.filter_by(username=data['username']).first()
-        if acc is not None:
-            return jsonify({"message": "Username already taken."}), 400
+        if acc:
+            return {"message": "Username already taken."}, 400
+        acc = Account.query.filter_by(email_address=data['email_address']).first()
+        if acc:
+            return {"message": "E-mail address already in use."}, 400
     except Exception as e:
         print(e)
-        return jsonify({"message": "There was a problem with the database querying."}), 500
-    
-    new_account_role = "User"   # The default role for a new account
+        return {"message": "There was a problem with the database querying."}, 500
+
+    new_account_role = "USER"   # The default role for a new account
     try:
         # If a JWT token is provided, check if the registration request was made by an admin
-        if token is not None:
+        if token:
             auth_msg, code = authenticate_token(token)
-            if code != 200:     # If code == 200, the authentication was successful
-                return auth_msg, code
+            if code != 200:
+                return auth_msg, code   # The authentication was not successful
             # Check the role
-            if auth_msg.get_json()['role']  == "Admin": 
+            if auth_msg['role'] == "ADMIN": 
                 new_account_role = data['role']
     except Exception as e:
         print(e)
-        return jsonify({"message": "There was an error related to the authorization token."}), 400
-    
+        return {"message": "There was an error related to the authorization token."}, 400
+
     # Create the new account
     try:
         new_account = Account(
+            email_address = data['email_address'],
             username = data['username'],
             password_hash = generate_password_hash(data['password']),
-            role = new_account_role, 
-            suspended = False,
             name = data['name'],
-            surname = data['surname']
+            surname = data['surname'],
+            role = new_account_role
         )
     except Exception as e:
         print(e)
-        return jsonify({"message": "There was an error while parsing the data."}), 400
-
+        return {"message": "There was an error while parsing the data."}, 400
+    
+    # Add the account to the database
     try:
         db.session.add(new_account)
         db.session.commit()
-        return jsonify({"message": "The registration was succesful."}), 200
     except Exception as e:
         print(e)
         db.session.rollback()
-        return jsonify({"message": "There was an error in the database registration process."}), 500
-
-
-'''Check login credentials given username and password'''
-def check_login_info(data):
-    # Verify that the data is valid
-    if data is not None:
-        # Get username and password
-        username = data.get('username', None)
-        password = data.get('password', None)
-        # Query the db to check if the username exists
+        return {"message": "There was an error in the database registration process for the account."}, 500
+    
+    # Create the customer entry in the database
+    if new_account_role == "USER":
         try:
-            acc = Account.query.filter_by(username=username).first()
+            new_customer = Customer(
+                account_id = new_account.id,
+                library = None,
+                phone_number = None,
+                billing_address = None
+            )
+            db.session.add(new_customer)
+            db.session.commit()
         except Exception as e:
             print(e)
-            return jsonify({"message": "There was a problem with the db querying."}), 500
-        # Check the query result
-        if acc == None:
-            return jsonify({"message": "Username not found."}), 400
-        # Check that the password matches
-        if check_password_hash(acc.password_hash, password):
-            # Password matches, authentication successful
-            token_ttl = Config.JWT_TOKEN_TTL
-            token = create_access_token(identity=username, fresh=True, expires_delta=datetime.timedelta(token_ttl))
-            return jsonify({"message": "Login successful.", "access_token" : token}), 200
-        # Authentication failed
-        return jsonify({"message": "The password is not correct."}), 400
+            db.session.rollback()
+            return {"message": "There was an error in the database registration process for the customer."}, 500
+    return {"message": "The registration was succesful."}, 200
+
+
+'''Check login credentials given username (or email) and password'''
+def check_login_info(data):
+    # Get login credentials
+    email = data.get('email_address', None)
+    username = data.get('username', None)
+    password = data.get('password', None)
+    # Query the db to check if the username or email exist
+    try:
+        acc = Account.query.filter_by(username=username).first()
+        if not acc:
+            acc = Account.query.filter_by(email_address=email).first()
+    except Exception as e:
+        print(e)
+        return {"message": "There was a problem with the database querying."}, 500
+    # Check the query result
+    if not acc:
+        return {"message": "Account not found."}, 400
+    
+    # Check that the account has not been suspended
+    if acc.suspended:
+        return {"message": "The account was suspended."}, 400
+
+    # Check that the password matches
+    if check_password_hash(acc.password_hash, password):
+        # Password matches, authentication successful
+        token_ttl = Config.JWT_TOKEN_TTL
+        token = create_access_token(identity=acc.id, fresh=True, expires_delta=datetime.timedelta(token_ttl))
+        return {"message": "Login successful.", "access_token" : token}, 200
+    # Authentication failed
+    return {"message": "The password is not correct."}, 400
 
 
 '''Update the information of the account specified in the json. This could be either requested by a user to update their own account, or by an admin to update any account'''
-def update_account_info(token, data): 
-    # Provided a JWT token, get the username and role of the account that is requesting the modification
+def update_info(token, data): 
+    # Provided a JWT token, get the id and role of the account that is requesting the modification
     auth_msg, code = authenticate_token(token)
-    if code != 200:     # If code == 200, the authentication was successful
-        return auth_msg, code
+    if code != 200:
+        return auth_msg, code   # The authentication was not successful
     token = token.split(' ')[1]     # The auth token is in the form "Bearer <token_string>"
-    requesting_username = auth_msg.get_json()['username']
-    requesting_role = auth_msg.get_json()['role']
-    # Get the username of the account that will be modified
-    username = data.get('username', None)
-    if username is None:
-        return jsonify({"message": "The request must specify the username of the account to change its information."}), 400
-    
+    requesting_account_id = auth_msg['account_id']
+    requesting_role = auth_msg['role']
+
+    updating_account_id = data.get('account_id', None)
     # Modify the account
     try:
-        # tbu stands for "to be updated"
-        account_tbu = Account.query.filter_by(username=username).first()
-        if account_tbu is None:
+        updating_account = Account.query.filter_by(id=updating_account_id).first()
+        if not updating_account:
             # the account isn't in the DB
-            return jsonify({"message": "Username not found."}), 500
+            return {"message": "Account id not valid."}, 400
         # The request could be either made by the owner of the account or by an admin
-        if (requesting_username == account_tbu.username) or (requesting_role == "Admin"):
-            # Updates with low priviledges
+        if (requesting_account_id == updating_account.id) or (requesting_role == "ADMIN"):
+            # Account updates with low priviledges
             if 'password' in data:
-                account_tbu.password_hash = generate_password_hash(data['password'])
+                updating_account.password_hash = generate_password_hash(data['password'])
             if 'name' in data:
-                account_tbu.name = data['name']
+                updating_account.name = data['name']
             if 'surname' in data:
-                account_tbu.surname = data['surname']
+                updating_account.surname = data['surname']
             # Updates with high priviledges
-            if requesting_role == "Admin":
+            if requesting_role == "ADMIN":
                 if 'suspended' in data:
-                    account_tbu.suspended = (data['suspended'] == True)
+                    updating_account.suspended = data['suspended']
+            # Customer updates
+            if updating_account.role.value == "USER":
+                updating_customer = Customer.query.filter_by(account_id=updating_account_id).first()
+                if 'library' in data:
+                    if 'add' in data['library']:
+                        for new_book in data['library']['add']:
+                            updating_customer.library.append(new_book)
+                    if 'delete' in data['library']:
+                        for book in data['library']['delete']:
+                            updating_customer.library.remove(book)
+                    flag_modified(updating_customer, "library")    # Ensure SQLAlchemy issues an update
+                if 'phone_number' in data:
+                    updating_customer.phone_number = data['phone_number']
+                if 'billing_address' in data:
+                    updating_customer.billing_address = data['billing_address']
             db.session.commit()
-            return jsonify({"message": "Account information updated."}), 200
+            return {"message": "Info successfully updated."}, 200
     except Exception as e:
         print(e)
         db.session.rollback()
-        return jsonify({"message": "The account information could not be updated."}), 500
+        return {"message": "The info could not be updated."}, 500
 
 
-'''Check if the token corresponds to an account in the database and return its id, username, and role'''
+'''Check if the token corresponds to an account in the database and return its information'''
 def authenticate_token(token):
-    if token is None:
-        return jsonify({"message": "Token not valid"}), 400
-    # Get the username from the token
+    # Get the account id from the token
     try:
-        token = token.split(' ')[1]     # The token is in the form "Bearer <token string>"
-        username = decode_token(token)['sub']
+        token = token.split(' ')[1]     # The token is in the form "Bearer <token_string>"
+        account_id = decode_token(token)['sub']
     except Exception as e:
         print(e)
-        return jsonify({"message": "Token not valid"}), 400
+        return {"message": "Token not valid"}, 400
     
-    # Query the database to obtain the id and role of the requesting account
+    # Query the database to obtain the information about the requesting account
     try:
-        account = Account.query.filter_by(username=username).first()
-        if account is None:     # No account was found
-            return jsonify({"message": "Account not found."}), 400
-        id_ = account.id
-        role = account.role.value   # role is an Enum
-        return jsonify({"message": "User authenticated", 
-                        "id": account.id, 
-                        "username": username, 
-                        "role": account.role.value,   # role is an Enum
-                        "suspended": account.suspended,
-                        "name": account.name,
-                        "surname": account.surname
-                        }), 200
+        account = Account.query.filter_by(id=account_id).first()
+        if not account:     # Account not found
+            return {"message": "Account not found."}, 400
+        # Return also the customer id (only for USERs)
+        customer_id = None
+        if account.role.value == "USER":
+            customer = Customer.query.filter_by(account_id=account_id).first()
+            customer_id = customer.id
+        return {"message": "Account successfully authenticated", 
+                "account_id": account.id, 
+                "customer_id": customer_id,                
+                "username": account.username, 
+                "role": account.role.value,   # role is an Enum
+                "suspended": account.suspended
+                }, 200
     except Exception as e:
         print(e)
-        return jsonify({"message": "There was a problem with the database querying."}), 500
+        return {"message": "There was a problem with the database querying."}, 500

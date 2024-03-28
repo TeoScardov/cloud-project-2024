@@ -5,7 +5,7 @@ from . import account, model
 # /api/account
 @account.route('/')
 def index():
-    model.create_admin_user()
+    model.create_admin_account()
     return "Welcome to the account service API section."
 
 
@@ -16,11 +16,11 @@ def register():
         data = request.get_json()
     except:
         return jsonify({"message": "There was a problem with the json file."}), 400
-    # Retrieve the JWT token
+    # Retrieve the JWT token, if present
     token = request.headers.get('Authorization', None)
     # Register the new account in the database
     message, code = model.register_account(data, token)
-    return message, code
+    return jsonify(message), code
 
 
 @account.route('/login', methods=['POST'])
@@ -32,7 +32,7 @@ def login():
         return jsonify({"message": "There was a problem with the json file."}), 400
     # Check login credentials, return the access token if the login is successful
     message, code = model.check_login_info(data)
-    return message, code
+    return jsonify(message), code
 
 
 @account.route('/logout', methods=['POST'])
@@ -44,7 +44,7 @@ def logout():
 
 @account.route('/update', methods=['POST'])
 @jwt_required(fresh=True)
-def update_info():
+def update():
     # Parse JSON data sent with the request
     try:
         data = request.get_json()
@@ -53,8 +53,8 @@ def update_info():
     # Retrieve the JWT token
     token = request.headers.get('Authorization', None)
     # The info could be updated by the owner of the account, or by an admin
-    message, code = model.update_account_info(token, data)
-    return message, code
+    message, code = model.update_info(token, data)
+    return jsonify(message), code
 
 
 @account.route('/authenticate', methods=['POST'])
@@ -64,4 +64,4 @@ def authenticate():
     token = request.headers.get('Authorization', None)
     # Get the username and role associated to the JWT token
     message, code = model.authenticate_token(token)
-    return message, code
+    return jsonify(message), code
