@@ -7,7 +7,7 @@ def insert_cart(total, user_id):
     # Add the new_cart to the session and commit to the database
     db.session.add(new_cart)
     db.session.commit()
-    return new_cart.cart_id
+    return new_cart.id
 
 
 def insert_item(cart_id, product_id, name, quantity, price):
@@ -18,7 +18,7 @@ def insert_item(cart_id, product_id, name, quantity, price):
 
 
 def check_cart_id(cart_id):
-    cart = Cart.query.filter_by(cart_id=cart_id).first()
+    cart = Cart.query.filter_by(id=cart_id).first()
     return cart is not None
 
 
@@ -70,24 +70,24 @@ def update_total_price(cart_id, user_id):
         updated_total += price * quantity
     # Update the total in the cart
     if user_id is not None:
-        Cart.query.filter_by(cart_id=cart_id).update({'total': updated_total, 'user_id': user_id})
+        Cart.query.filter_by(id=cart_id).update({'total': updated_total, 'user_id': user_id})
     else:
-        Cart.query.filter_by(cart_id=cart_id).update({'total': updated_total})
+        Cart.query.filter_by(id=cart_id).update({'total': updated_total})
     db.session.commit()
-    return Cart.query.filter_by(cart_id=cart_id).first()
+    return Cart.query.filter_by(id=cart_id).first()
 
 
 def renew_cart_expiry(cart_id, user_id):
     if user_id is not None:
-        Cart.query.filter_by(cart_id=cart_id).update({'exp_date': generate_ttl(3), 'user_id': user_id})
+        Cart.query.filter_by(id=cart_id).update({'exp_date': generate_ttl(3), 'user_id': user_id})
     else:
-        Cart.query.filter_by(cart_id=cart_id).update({'exp_date': generate_ttl(3)})
+        Cart.query.filter_by(id=cart_id).update({'exp_date': generate_ttl(3)})
     db.session.commit()
     return Cart.query.get(cart_id)
 
 
 def get_product_by_id(product_id):
-    return Product.query.filter_by(product_id=product_id).first()
+    return Product.query.filter_by(id=product_id).first()
 
 
 def get_cart_items_by_cart_id(cart_id):
@@ -95,7 +95,7 @@ def get_cart_items_by_cart_id(cart_id):
     if cart_items:
         # Convert the list of cart items to a list of dictionaries
         cart_items_list = [{
-            'product_id': item.product_id,
+            'product_id': str(item.product_id),
             'quantity': item.quantity,
             'name': item.name,
             'price': item.price,
@@ -106,13 +106,13 @@ def get_cart_items_by_cart_id(cart_id):
 
 
 def merge_carts(user_id):
-    existing_carts_id = Cart.query.filter_by(user_id=user_id).with_entities(Cart.cart_id).all()
+    existing_carts_id = Cart.query.filter_by(user_id=user_id).with_entities(Cart.id).all()
     # Extract cart IDs from the result
     cart_ids = [existing_carts_id[0] for cart_id in existing_carts_id]
     new_cart_id = insert_cart(0, user_id)
     for cart_id in cart_ids:
         CartItem.query.filter_by(cart_id=cart_id).update({'cart_id': new_cart_id})
-        Cart.query.filter_by(user_id=user_id, cart_id=cart_id).delete()
+        Cart.query.filter_by(user_id=user_id, id=cart_id).delete()
 
     # Retrieve new cart items price and quantity
     selected_items = CartItem.query.filter_by(cart_id=new_cart_id).with_entities(
@@ -127,7 +127,7 @@ def merge_carts(user_id):
         updated_total += price * quantity
 
     # Update the total in the cart
-    Cart.query.filter_by(cart_id=new_cart_id).update({'total': updated_total})
+    Cart.query.filter_by(id=new_cart_id).update({'total': updated_total})
 
     db.session.commit()
     return Cart.query.get(new_cart_id)
@@ -136,8 +136,8 @@ def merge_carts(user_id):
 def check_for_user_cart(user_id):
     existing_carts = Cart.query.filter_by(user_id=user_id).all()
     if len(existing_carts) > 1:
-        return merge_carts(user_id).cart_id
+        return merge_carts(user_id).id
     elif len(existing_carts) == 1:
-        return existing_carts[0].cart_id
+        return existing_carts[0].id
     else:
         return None

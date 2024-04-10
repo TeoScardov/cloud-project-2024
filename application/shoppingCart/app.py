@@ -2,7 +2,6 @@ from flask import Flask
 from flask_jwt_extended import JWTManager
 from cart_controller import cart
 from db import db
-from models import Cart, CartItem, Product
 
 app = Flask(__name__)
 app.register_blueprint(cart, url_prefix='/api/cart')

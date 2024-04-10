@@ -19,7 +19,7 @@ def get_product_from_external_service(product_id):
     product = get_product_by_id(product_id)
     if product is not None:
         return {
-            'product_id': product.product_id,
+            'product_id': product.id,
             'name': product.name,
             'price': product.price
         }
@@ -43,4 +43,5 @@ def authenticate_user_with_jwt(auth_header):
     # else:
     #     # Token is not valid, return None
     #     return None
+    # return auth_header
     return None

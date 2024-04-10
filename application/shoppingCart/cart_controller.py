@@ -81,7 +81,7 @@ def add_product():
             else:
                 return {
                     "statusCode": 404,
-                    "headers": utility.get_headers(cart_id=cart_id),
+                    "headers": utility.get_headers(cart_id),
                     "body": json.dumps({"message": "cart_id is not valid"}),
                 }
         else:
@@ -92,8 +92,8 @@ def add_product():
         "statusCode": 200,
         "headers": utility.get_headers(cart_id),
         "body": json.dumps(
-            {"productId": product_id, "message": "product added to cart",
-             "cart_id": current_cart.cart_id, "total": current_cart.total, "product": product}
+            {"productId": str(product_id), "message": "product added to cart",
+             "cart_id": str(current_cart.id), "total": current_cart.total, "product": {"name":product["name"], "price": product["price"]}}
         ),
     }
 
@@ -176,8 +176,8 @@ def remove_product():
         "statusCode": 200,
         "headers": utility.get_headers(cart_id),
         "body": json.dumps(
-            {"productId": product_id, "message": "product deleted from the cart",
-             "cart_id": current_cart.cart_id, "total": current_cart.total, "product": product}
+            {"productId": str(product_id), "message": "product deleted from the cart",
+             "cart_id": str(current_cart.id), "total": current_cart.total, "product": {"name":product["name"], "price": product["price"]}}
         ),
     }
 
@@ -189,7 +189,7 @@ def show_cart():
         if database.check_cart_id(cart_id):
             current_cart = database.renew_cart_expiry(cart_id, None)
             cart_items = database.get_cart_items_by_cart_id(cart_id)
-            response_data = {"cart_id": current_cart.cart_id, "total": current_cart.total, "items": cart_items}
+            response_data = {"cart_id": str(current_cart.id), "total": current_cart.total, "items": cart_items}
             return {
                 "statusCode": 200,
                 "headers": utility.get_headers(cart_id),
