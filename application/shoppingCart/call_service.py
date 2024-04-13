@@ -1,7 +1,6 @@
-import requests
 
-from database import get_product_by_id
-from config import USER_SERVICE_URL
+from .database import get_product_by_id
+# from config import USER_SERVICE_URL
 
 
 def get_product_from_external_service(product_id):

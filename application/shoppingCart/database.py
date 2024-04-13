@@ -1,5 +1,5 @@
-from utility import generate_ttl
-from models import db, Cart, CartItem, Product
+from .utility import generate_ttl
+from .models import db, Cart, CartItem, Product
 
 
 def insert_cart(total, user_id):

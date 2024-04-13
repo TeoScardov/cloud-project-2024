@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  flask_app:
+    container_name: flask_app
+    image: mahila/flask-live-app:1.0.0
+    build: .
+    ports:
+      - "4000:4000"
+    environment:
+      - DB_URL= postgresql://onlineshop:cloud2024@flask_cdb:5432/flask_db
+    depends_on:
+      - flask_cdb
+  flask_cdb:
+    container_name: flask_cdb
+    image: postgres:12
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=cloud2024
+      - POSTGRES_USER=onlineshop
+      - POSTGRES_DB=flask_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata: {}
+

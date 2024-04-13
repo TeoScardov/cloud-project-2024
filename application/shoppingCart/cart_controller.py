@@ -1,11 +1,12 @@
 from flask import jsonify, request
 import json
-import database
-import call_service
-from application.shoppingCart import cart
-import utility
+from . import database
+from . import call_service
+from . import utility
+from flask import Blueprint
 
 
+cart = Blueprint('cart', __name__)
 @cart.route("/health")
 def health():
     return jsonify(
