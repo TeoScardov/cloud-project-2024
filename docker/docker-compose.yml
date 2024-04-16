@@ -1,36 +1,47 @@
 version: '3.9'
 
 services:
+  account_management:
+    container_name: account_service
+    build: ./account_management
+    environment:
+      - JWT_SECRET_KEY=nyquist
+      - DATABASE_URL=postgresql://onlineshop:cloud2024@db:5432/flask_db
+    ports:
+      - "4001:4000"
+    depends_on:
+      - db
+
   payment-service:
     container_name: payment-service
     image: payment-service:1.0.0
-    build: .
+    build: ./payment-service
     ports:
-      - "4000:4000"
+      - "4002:4000"
     environment:
       - SECRET_KEY=nyquist
       
   purchase-service:
     container_name: purchase-service
     image: purchase-service:1.0.0
-    build: .
+    build: ./purchase-service
     ports:
-      - "4000:4000"
+      - "4003:4000"
     environment:
       - SECRET_KEY=nyquist
-      - SQLALCHEMY_DATABASE_URI=postgresql://postgres:postgres@purchase-db:5432/purchase
+      - SQLALCHEMY_DATABASE_URI=postgresql://onlineshop:cloud2024@db:5432/flask_db
     depends_on:
-      - purchase-db
+      - db
 
-  purchase-db:
-    container_name: purchase-db
+  db:
+    container_name: db
     image: postgres:13
     ports:
-      - "5433:5432"
+      - "5432:5432"
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=purchase
+      - POSTGRES_DB=flask_db
+      - POSTGRES_USER=onlineshop
+      - POSTGRES_PASSWORD=cloud2024
     volumes:
       - pgdata:/var/lib/postgresql/data
 
