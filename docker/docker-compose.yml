@@ -3,6 +3,7 @@ version: '3.9'
 services:
   account_management:
     container_name: account_service
+    image: account_service:1.0.0
     build: ./account_management
     environment:
       - JWT_SECRET_KEY=nyquist
