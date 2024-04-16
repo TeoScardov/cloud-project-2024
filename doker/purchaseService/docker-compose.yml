@@ -1,0 +1,29 @@
+version: '3.9'
+
+services:
+  purchase-service:
+    container_name: purchase-service
+    image: purchase-service:1.0.0
+    build: .
+    ports:
+      - "4000:4000"
+    environment:
+      - SECRET_KEY=nyquist
+      - SQLALCHEMY_DATABASE_URI=postgresql://postgres:postgres@purchase-db:5432/purchase
+    depends_on:
+      - purchase-db
+
+  purchase-db:
+    container_name: purchase-db
+    image: postgres:13
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=purchase
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata: {}
