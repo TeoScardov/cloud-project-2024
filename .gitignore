@@ -15,3 +15,5 @@
 *.blg
 *.bbl
 __pycache__/
+application/
+local/
