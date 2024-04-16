@@ -1,10 +1,10 @@
 version: "3.9"
 
 services:
-  flask_app:
-    container_name: flask_app
+  shopping_cart:
+    container_name: shopping_cart
     image: mahila/flask-live-app:1.0.0
-    build: .
+    build: shopping_cart
     ports:
       - "4000:4000"
     environment:
