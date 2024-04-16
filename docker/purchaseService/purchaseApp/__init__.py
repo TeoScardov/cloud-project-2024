@@ -3,8 +3,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from os import environ
 
-from purchaseApp.config import Config
-
 app = Flask(__name__)
 app.config['SECRET_KEY'] = environ.get("SECRET_KEY")
 app.config['SQLALCHEMY_DATABASE_URI'] = environ.get("SQLALCHEMY_DATABASE_URI")

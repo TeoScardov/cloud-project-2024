@@ -15,7 +15,7 @@ services:
   payment-service:
     container_name: payment-service
     image: payment-service:1.0.0
-    build: ./payment-service
+    build: ./paymentService
     ports:
       - "4002:4000"
     environment:
@@ -24,7 +24,7 @@ services:
   purchase-service:
     container_name: purchase-service
     image: purchase-service:1.0.0
-    build: ./purchase-service
+    build: ./purchaseService
     ports:
       - "4003:4000"
     environment:
