@@ -45,6 +45,17 @@ services:
     depends_on:
       - db
 
+  shopping_cart:
+    container_name: shopping_cart
+    image: shopping_cart:1.0.0
+    build: ./shopping_cart
+    ports:
+      - "4005:4000"
+    environment:
+      - DB_URL=postgresql://onlineshop:cloud2024@db:5432/flask_db
+    depends_on:
+      - db
+
   db:
     container_name: db
     image: postgres:13
