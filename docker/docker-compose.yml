@@ -12,24 +12,35 @@ services:
     depends_on:
       - db
 
-  payment-service:
-    container_name: payment-service
-    image: payment-service:1.0.0
-    build: ./paymentService
+  payment_service:
+    container_name: payment_service
+    image: payment_service:1.0.0
+    build: ./payment_service
     ports:
       - "4002:4000"
     environment:
       - SECRET_KEY=nyquist
       
-  purchase-service:
-    container_name: purchase-service
+  purchase_service:
+    container_name: purchase_service
     image: purchase-service:1.0.0
-    build: ./purchaseService
+    build: ./purchase_service
     ports:
       - "4003:4000"
     environment:
       - SECRET_KEY=nyquist
       - SQLALCHEMY_DATABASE_URI=postgresql://onlineshop:cloud2024@db:5432/flask_db
+    depends_on:
+      - db
+
+  product_catalog:
+    container_name: product_catalog
+    image: product_catalog:1.0.0
+    build: ./product_catalog
+    ports:
+      - "4004:4000"
+    environment:
+      - DB_URL=postgresql://onlineshop:cloud2024@db:5432/flask_db
     depends_on:
       - db
 
@@ -42,8 +53,3 @@ services:
       - POSTGRES_DB=flask_db
       - POSTGRES_USER=onlineshop
       - POSTGRES_PASSWORD=cloud2024
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
-volumes:
-  pgdata: {}
