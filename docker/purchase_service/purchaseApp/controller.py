@@ -1,6 +1,20 @@
 import requests
 from purchaseApp.models import PaymentDao, PurchaseDao, PurchaseItemDao
 
+def isAuthenticated(request):
+    try:
+        #get token from request
+        token = request.headers['Authorization']
+
+        #call authentication service
+        response = requests.post('http://account_management:8000/api/account/authenticate', headers={'Authorization': token})
+
+        return response.json()
+    
+    except Exception as e:
+        print(e)
+        return {'status_code': 500, 'message': 'Internal server error'}
+
 def createNewPurchase(request):
     try:
         account_id = request.get_json()['account_id']

@@ -2,7 +2,8 @@ from flask import Blueprint
 from flask import request
 from flask import jsonify
 from flask_jwt_extended import jwt_required
-from purchaseApp.controller import performPayment, createNewPurchase, associateBooksToPurchase, associateBooksToAccount
+from purchaseApp.controller import performPayment, createNewPurchase, associateBooksToPurchase, associateBooksToAccount, isAuthenticated
+
 import requests
 
 blueprint = Blueprint('purchase', __name__)
@@ -15,15 +16,23 @@ def health():
 
 
 @blueprint.route('/', methods=['POST'])
-#@jwt_required()
+@jwt_required()
 def placeOrder():
     #check login
-    if not True:#isAuthenticated(request):
+    responce = isAuthenticated(request)
+
+    if responce['status_code'] == 500:
         return jsonify({
-            'status': 'error',
-            'authenticate': 'Not authenticated'
-        }), 401
-    
+                'status': 'error',
+                'message': 'Authentication failed'
+            }), 500
+    elif responce['status_code'] == 401:
+        return jsonify({
+                'status': 'error',
+                'message': 'Unauthorized'
+            }), 401
+    else:
+        pass
 
     try:
         #create purchase
