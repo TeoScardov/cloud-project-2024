@@ -7,7 +7,7 @@ def isAuthenticated(request):
         token = request.headers['Authorization']
 
         #call authentication service
-        response = requests.post('http://account_management:8000/api/account/authenticate', headers={'Authorization': token})
+        response = requests.post('http://account_management:4000/api/account/authenticate', headers={'Authorization': token})
 
         return response.json()
     
