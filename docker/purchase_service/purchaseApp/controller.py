@@ -1,19 +1,43 @@
 import requests
+import flask
+from flask import jsonify, make_response
 from purchaseApp.models import PaymentDao, PurchaseDao, PurchaseItemDao
+from purchaseApp.utils import toFlaskResponse
 
-def isAuthenticated(request):
+def isAuthenticated(request: flask.Request)-> flask.Response:
+    """
+    This function is used to authenticate a user based on the token provided in the request header.
+    It sends a POST request to the authentication service with the token.
+    If the authentication is successful, it returns the response from the authentication service and the status code.
+    If the authentication fails, it returns a JSON response with an error message and a status code of 500.
+
+    :param 
+    request: flask.Request The request object containing the token in the header.
+
+    Returns:
+    flask.Response: The response from the authentication service.
+    """
+
+    SERVICE = "http://account_management:4000/api/account/authenticate"
+
     try:
         #get token from request
         token = request.headers['Authorization']
 
         #call authentication service
-        response = requests.post('http://account_management:4000/api/account/authenticate', headers={'Authorization': token})
+        response = requests.post(SERVICE, headers={'Authorization': token})
 
-        return response.json()
+        return toFlaskResponse(response)
     
     except Exception as e:
-        print(e)
-        return {'status_code': 500, 'message': 'Internal server error'}
+
+        response = make_response(jsonify({
+            'status': 'error',
+            'message': 'Authentication failed',
+            'error': e
+            }), 500)
+        
+        return response
 
 def createNewPurchase(request):
     try:
@@ -88,3 +112,36 @@ def associateBooksToAccount(purchase, request):
     except Exception as e:
         print(e)
         return None
+    
+
+def clearCart(cart_id: str)-> flask.Response:
+    """
+    This function is used to clear the cart after a successful purchase.
+    It sends a POST request to the cart service with the cart_id.
+    If the cart is cleared successfully, it returns the response from the cart service.
+    If the cart clearing fails, it returns a JSON response with an error message and a status code of 500.
+
+    :param
+    cart_id: str The unique identifier of the cart to be cleared.
+
+    Returns:
+    flask.Response: The response from the cart service.
+    """
+
+    SERVICE = 'http://localhost:5000/api/cart/removeProduct'
+
+    try:
+
+        response = requests.post(SERVICE, json={"cart_id": cart_id})
+        return toFlaskResponse(response)
+    
+    except Exception as e:
+
+        response = make_response(jsonify({
+            'status': 'error',
+            'message': 'Clear cart failed',
+            'error': e
+            }), 500)
+        
+        return response
+    

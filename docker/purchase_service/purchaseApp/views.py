@@ -2,9 +2,7 @@ from flask import Blueprint
 from flask import request
 from flask import jsonify
 from flask_jwt_extended import jwt_required
-from purchaseApp.controller import performPayment, createNewPurchase, associateBooksToPurchase, associateBooksToAccount, isAuthenticated
-
-import requests
+from purchaseApp.controller import *
 
 blueprint = Blueprint('purchase', __name__)
 
@@ -18,22 +16,20 @@ def health():
 @blueprint.route('/', methods=['POST'])
 @jwt_required()
 def placeOrder():
-    #check login
-    responce = isAuthenticated(request)
 
-    if responce['status_code'] == 500:
-        return jsonify({
-                'status': 'error',
-                'message': 'Authentication failed'
-            }), 500
-    elif responce['status_code'] == 401:
-        return jsonify({
-                'status': 'error',
-                'message': 'Unauthorized'
-            }), 401
-    else:
-        pass
+    #check if user is authenticated and get user info
+    auth_responce = isAuthenticated(request)
 
+    if auth_responce.status_code != 200:
+        return auth_responce
+
+    #return responce
+
+    account_id = auth_responce.data['account_id']
+
+    purchase_data = request.get_json()
+
+    #try to create a new purchase
     try:
         #create purchase
         purchase = createNewPurchase(request)
@@ -46,17 +42,8 @@ def placeOrder():
         #add books to account
         associateBooksToAccount(purchase, request)
 
-        #get the username
-        #username = get_username(request)
-
-        #get the cart
-        #cart = get_cart(username)
-
-        #create the purchase
-        #purchase = Purchase(username, cart)
-
         #clear the cart
-        #clearCart(username)
+        #clearCart(cart_id)
 
         return jsonify({
                 'status': 'success',
