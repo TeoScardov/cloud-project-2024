@@ -10,7 +10,7 @@ class Cart(db.Model):
     total = db.Column(db.REAL, nullable=True)
     user_id = db.Column(db.Integer, nullable=True)
     exp_date = db.Column(db.DateTime, default=datetime.utcnow, nullable=True)
-    items = db.relationship('CartItem', backref='cart', lazy=True)
+    items = db.relationship('CartItem', backref='cart', lazy=True, cascade='all, delete-orphan')
 
     def __init__(self, total=None, user_id=None, items=[], exp_date=None):
         self.id = str(uuid.uuid4())

@@ -43,4 +43,4 @@ def authenticate_user_with_jwt(auth_header):
     #     # Token is not valid, return None
     #     return None
     # return auth_header
-    return None
+    return 2

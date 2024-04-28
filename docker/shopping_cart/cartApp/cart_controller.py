@@ -1,10 +1,9 @@
-from flask import jsonify, request
 import json
-from . import database
-from . import call_service
-from . import utility
-from flask import Blueprint
 
+from flask import Blueprint
+from flask import jsonify, request
+
+from docker.shopping_cart.cartApp import database, call_service, utility
 
 cart = Blueprint('cart', __name__)
 @cart.route("/health")
@@ -138,7 +137,7 @@ def remove_product():
         if cart_id:
             if database.check_cart_id(cart_id):
                 database.renew_cart_expiry(cart_id, user_id)
-                current_cart = database.delete_item(cart_id, product,user_id)
+                current_cart = database.delete_item(cart_id, product, user_id)
             else:
                 return {
                     "statusCode": 404,
@@ -155,7 +154,7 @@ def remove_product():
         if cart_id:
             if cart_id == user_cart_id:
                 database.renew_cart_expiry(user_cart_id, user_id)
-                current_cart = database.delete_item(user_cart_id, product,user_id)
+                current_cart = database.delete_item(user_cart_id, product, user_id)
             elif database.check_cart_id(cart_id):
                 database.renew_cart_expiry(cart_id, user_id)
                 database.delete_item(cart_id, product, user_id)
@@ -202,3 +201,63 @@ def show_cart():
             "headers": utility.get_headers(cart_id=cart_id),
             "body": json.dumps({"message": "cart_id needed"}),
         }
+
+
+@cart.route("/removeCart", methods=["DELETE"])
+def remove_cart():
+    try:
+        request_payload = request.json
+    except (ValueError, TypeError) as e:
+        return {
+            "statusCode": 400,
+            "headers": utility.get_headers(None),
+            "body": json.dumps({"message": "No Request payload"}),
+        }
+    cart_id = request_payload["cart_id"]
+    user_id = None
+    user_cart_id = None
+
+    if 'Authorization' in request.headers:
+        try:
+            user_id = call_service.authenticate_user_with_jwt(request.headers['Authorization'])
+        except Exception as e:
+            return {
+                "statusCode": 404,
+                "headers": utility.get_headers(cart_id=cart_id),
+                "body": json.dumps({"message": str(e)}),
+            }
+    else:
+        return {
+            "statusCode": 404,
+            "headers": utility.get_headers(cart_id=cart_id),
+            "body": json.dumps({"message": "invalid request! no auth"}),
+        }
+
+    user_cart_id = str(database.check_for_user_cart(user_id))
+
+    if not user_cart_id:
+        return {
+            "statusCode": 404,
+            "headers": utility.get_headers(cart_id=cart_id),
+            "body": json.dumps({"message": "this user doesn't have cart to delete!"}),
+        }
+    else:
+        if cart_id:
+            if cart_id == user_cart_id:
+                database.delete_cart(user_cart_id, user_id)
+            else:
+                return {
+                    "statusCode": 404,
+                    "headers": utility.get_headers(cart_id=cart_id),
+                    "body": json.dumps({"message": "request is not valid"}),
+                }
+        else:
+            database.delete_cart(user_cart_id, user_id)
+
+    return {
+        "statusCode": 200,
+        "headers": utility.get_headers(user_cart_id),
+        "body": json.dumps(
+            {"message": "cart deleted"}
+        ),
+    }

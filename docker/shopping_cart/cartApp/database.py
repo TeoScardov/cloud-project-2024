@@ -108,7 +108,7 @@ def get_cart_items_by_cart_id(cart_id):
 def merge_carts(user_id):
     existing_carts_id = Cart.query.filter_by(user_id=user_id).with_entities(Cart.id).all()
     # Extract cart IDs from the result
-    cart_ids = [existing_carts_id[0] for cart_id in existing_carts_id]
+    cart_ids = [existing_carts_id[0][0] for cart_id in existing_carts_id]
     new_cart_id = insert_cart(0, user_id)
     for cart_id in cart_ids:
         CartItem.query.filter_by(cart_id=cart_id).update({'cart_id': new_cart_id})
@@ -141,3 +141,12 @@ def check_for_user_cart(user_id):
         return existing_carts[0].id
     else:
         return None
+
+
+def delete_cart(cart_id, user_id):
+    cart_to_delete = Cart.query.filter_by(id=cart_id, user_id=user_id).first()
+    if cart_to_delete:
+        db.session.delete(cart_to_delete)
+        db.session.commit()
+    return None
+
