@@ -14,27 +14,20 @@ def health():
     )
 
 @blueprint.route('/', methods=['POST'])
-#@jwt_required()
+@jwt_required()
 def pay():
 
-    if request.authorization is None:
+    payment = perform_payment(request)
+
+    if payment is None:
         return jsonify({
             'status': 'error',
-            'authenticate': 'Not authenticated'
-        }), 401
+            'message': 'Payment failed'
+        }), 500
+    
     else:
+        return jsonify({
+            "message": "Payment successful",
+            "status": payment,
 
-        payment = perform_payment(request)
-
-        if payment is None:
-            return jsonify({
-                'status': 'error',
-                'message': 'Payment failed'
-            }), 500
-        
-        else:
-            return jsonify({
-                "message": "Payment successful",
-                "status": payment,
-
-            }), 200
+        }), 200

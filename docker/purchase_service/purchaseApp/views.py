@@ -24,31 +24,57 @@ def placeOrder():
         return auth_responce
 
     #return responce
-
-    account_id = auth_responce.data['account_id']
-
+    account_id = auth_responce.json()['account_id']
+    auth = request.headers['Authorization']
     purchase_data = request.get_json()
 
     #try to create a new purchase
     try:
+
         #create purchase
-        purchase = createNewPurchase(request)
+        purchase = createNewPurchase(purchase_data, account_id)
 
+        if purchase is None:
+            return jsonify({
+                'status': 'error',
+                'message': 'Purchase failed',
+                'price': purchase_data['cart']['total_price']
+            }), 500
+    
         #call payment
-        payment = performPayment(purchase)
+        payment = performPayment(purchase, auth)
 
-        associateBooksToPurchase(purchase, request)
+        if payment is None:
+            return jsonify({
+                'status': 'error',
+                'message': 'Payment failed'
+            }), 500
+
+        if associateBooksToPurchase(purchase, purchase_data) is None:
+            return jsonify({
+                'status': 'error',
+                'message': 'Purchase failed'
+            }), 500
+
 
         #add books to account
-        associateBooksToAccount(purchase, request)
+        if associateBooksToAccount(purchase, purchase_data) is None:
+            return jsonify({
+                'status': 'error',
+                'message': 'Purchase failed'
+            }), 500
 
         #clear the cart
         #clearCart(cart_id)
-
+    
         return jsonify({
                 'status': 'success',
+                'purchase_id': purchase.id,
+                'payment_id': payment.id
             }), 200
+    
     except:
+
         return jsonify({
                 'status': 'error',
                 'message': 'Purchase failed'
