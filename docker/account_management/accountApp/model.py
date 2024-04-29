@@ -6,25 +6,6 @@ from accountApp.config import Config
 from accountApp.database import db
 from accountApp.dbmodel import *
 
-'''If not present, initialize the database with an admin account called admin1'''
-def create_admin_account():
-    try:
-        if not Account.query.filter_by(username='admin1').first():
-            admin_account = Account(
-                email_address='admin@example.com',
-                username='admin1',
-                password_hash=generate_password_hash(Config.ADMIN_PASSWORD),
-                name='Admin',
-                surname='User',
-                role='ADMIN'
-            )
-            db.session.add(admin_account)
-            db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        print(f"Error creating admin account: {e}")
-
-
 '''Register a new account. To create an account with higher priviledges, an admin JWT token has to be provided'''
 def register_account(data, token=None):
     # Check if username and e-mail address are available

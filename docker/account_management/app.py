@@ -14,6 +14,9 @@ db.init_app(app)
 # Create the tables
 with app.app_context():
     db.create_all()
+    
+    from accountApp.dbmodel import create_admin_account
+    create_admin_account()
 
 if __name__ == '__main__':
     app.run(debug=True)
