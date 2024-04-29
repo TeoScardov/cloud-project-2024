@@ -7,11 +7,11 @@ services:
     build: ./account_management
     environment:
       - JWT_SECRET_KEY=nyquist
-      - DATABASE_URL=postgresql://onlineshop:cloud2024@db:5432/flask_db
+      - DATABASE_URL=postgresql://onlineshop:cloud2024@db_purchase:5432/flask_db
     ports:
       - "4001:4000"
     depends_on:
-      - db
+      - db_account
 
   payment_service:
     container_name: payment_service
@@ -30,9 +30,9 @@ services:
       - "4003:4000"
     environment:
       - SECRET_KEY=nyquist
-      - SQLALCHEMY_DATABASE_URI=postgresql://onlineshop:cloud2024@db:5432/flask_db
+      - SQLALCHEMY_DATABASE_URI=postgresql://onlineshop:cloud2024@db_purchase:5432/flask_db
     depends_on:
-      - db
+      - db_purchase
 
   product_catalog:
     container_name: product_catalog
@@ -41,9 +41,9 @@ services:
     ports:
       - "4004:4000"
     environment:
-      - DB_URL=postgresql://onlineshop:cloud2024@db:5432/flask_db
+      - DB_URL=postgresql://onlineshop:cloud2024@db_proudct:5432/flask_db
     depends_on:
-      - db
+      - db_proudct
 
   shopping_cart:
     container_name: shopping_cart
@@ -52,12 +52,12 @@ services:
     ports:
       - "4005:4000"
     environment:
-      - DB_URL=postgresql://onlineshop:cloud2024@db:5432/flask_db
+      - DB_URL=postgresql://onlineshop:cloud2024@db_cart:5432/flask_db
     depends_on:
-      - db
+      - db_cart
 
-  db:
-    container_name: db
+  db_account:
+    container_name: db_account
     image: postgres:13
     ports:
       - "5432:5432"
@@ -65,3 +65,36 @@ services:
       - POSTGRES_DB=flask_db
       - POSTGRES_USER=onlineshop
       - POSTGRES_PASSWORD=cloud2024
+
+  db_purchase:
+    container_name: db_purchase
+    image: postgres:13
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=flask_db
+      - POSTGRES_USER=onlineshop
+      - POSTGRES_PASSWORD=cloud2024
+
+  db_proudct:
+    container_name: db_proudct
+    image: postgres:13
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_DB=flask_db
+      - POSTGRES_USER=onlineshop
+      - POSTGRES_PASSWORD=cloud2024
+
+  db_cart:
+    container_name: db_cart
+    image: postgres:13
+    ports:
+      - "5435:5432"
+    environment:
+      - POSTGRES_DB=flask_db
+      - POSTGRES_USER=onlineshop
+      - POSTGRES_PASSWORD=cloud2024
+  
+
+
