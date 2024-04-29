@@ -2,8 +2,7 @@ from flask import Blueprint
 from flask import request
 from flask import jsonify
 from flask_jwt_extended import jwt_required
-from purchaseApp.controller import performPayment, createNewPurchase, associateBooksToPurchase, associateBooksToAccount
-import requests
+from purchaseApp.controller import *
 
 blueprint = Blueprint('purchase', __name__)
 
@@ -15,44 +14,67 @@ def health():
 
 
 @blueprint.route('/', methods=['POST'])
-#@jwt_required()
+@jwt_required()
 def placeOrder():
-    #check login
-    if not True:#isAuthenticated(request):
-        return jsonify({
-            'status': 'error',
-            'authenticate': 'Not authenticated'
-        }), 401
-    
 
+    #check if user is authenticated and get user info
+    auth_responce = isAuthenticated(request)
+
+    if auth_responce.status_code != 200:
+        return auth_responce
+
+    #return responce
+    account_id = auth_responce.json()['account_id']
+    auth = request.headers['Authorization']
+    purchase_data = request.get_json()
+
+    #try to create a new purchase
     try:
+
         #create purchase
-        purchase = createNewPurchase(request)
+        purchase = createNewPurchase(purchase_data, account_id)
 
+        if purchase is None:
+            return jsonify({
+                'status': 'error',
+                'message': 'Purchase failed',
+                'price': purchase_data['cart']['total_price']
+            }), 500
+    
         #call payment
-        payment = performPayment(purchase)
+        payment = performPayment(purchase, auth)
 
-        associateBooksToPurchase(purchase, request)
+        if payment is None:
+            return jsonify({
+                'status': 'error',
+                'message': 'Payment failed'
+            }), 500
+
+        if associateBooksToPurchase(purchase, purchase_data) is None:
+            return jsonify({
+                'status': 'error',
+                'message': 'Purchase failed'
+            }), 500
+
 
         #add books to account
-        associateBooksToAccount(purchase, request)
-
-        #get the username
-        #username = get_username(request)
-
-        #get the cart
-        #cart = get_cart(username)
-
-        #create the purchase
-        #purchase = Purchase(username, cart)
+        if associateBooksToAccount(purchase, purchase_data) is None:
+            return jsonify({
+                'status': 'error',
+                'message': 'Purchase failed'
+            }), 500
 
         #clear the cart
-        #clearCart(username)
-
+        #clearCart(cart_id)
+    
         return jsonify({
                 'status': 'success',
+                'purchase_id': purchase.id,
+                'payment_id': payment.id
             }), 200
+    
     except:
+
         return jsonify({
                 'status': 'error',
                 'message': 'Purchase failed'
