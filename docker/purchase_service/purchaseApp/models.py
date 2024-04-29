@@ -12,7 +12,7 @@ class PurchaseDao(db.Model):
     id : str
         a unique identifier for the purchase
     account_id : str
-        a unique identifier for the account (foreign key)
+        a unique identifier for the account
     order_date : datetime
         the date of the purchase
     total_price : float
@@ -117,7 +117,7 @@ class PurchaseItemDao(db.Model):
     order_id : str
         a unique identifier for the order (foreign key)
     product_id : str
-        a unique identifier for the product (foreign key)
+        a unique identifier for the product
 
     Methods
     -------
@@ -138,9 +138,9 @@ class PurchaseItemDao(db.Model):
     __tablename__ = 'order_items'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True)
-    #order_id = db.Column(UUID(as_uuid=True), db.ForeignKey('orders.id'), nullable=False)
+    order_id = db.Column(UUID(as_uuid=True), db.ForeignKey('orders.id'), nullable=False)
     #book_id = db.Column(UUID(as_uuid=True), db.ForeignKey('book.id'), nullable=False)
-    order_id = db.Column(UUID(as_uuid=True), nullable=False)
+    #order_id = db.Column(UUID(as_uuid=True), nullable=False)
     product_id = db.Column(UUID(as_uuid=True), nullable=False)
 
     def __init__(self, order_id, product_id):
@@ -232,8 +232,8 @@ class PaymentDao(db.Model):
     __tablename__ = 'payment'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True)
-    #purchase_id = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=False)
-    purchase_id = db.Column(UUID(as_uuid=True), nullable=False)
+    purchase_id = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=False)
+    #purchase_id = db.Column(UUID(as_uuid=True), nullable=False)
 
     def __init__(self, purchase_id):
         """
