@@ -1,6 +1,6 @@
 
-from .database import get_product_by_id
-# from config import USER_SERVICE_URL
+from .config import USER_SERVICE_URL
+from .config import PRODUCT_SERVICE_URL
 
 
 def get_product_from_external_service(product_id):
@@ -15,15 +15,12 @@ def get_product_from_external_service(product_id):
     #     raise NotFoundException
     #
     # return response_dict
-    product = get_product_by_id(product_id)
-    if product is not None:
-        return {
-            'product_id': product.id,
-            'name': product.name,
-            'price': product.price
-        }
-    else:
-        raise Exception('Product not found')
+
+    return {
+        'product_id': '94ff3b8b-56bf-453d-af20-a2fd78feae55',
+        'name': '12 rules for life',
+        'price': 12
+    }
 
 
 def authenticate_user_with_jwt(auth_header):

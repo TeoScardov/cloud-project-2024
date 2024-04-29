@@ -1,5 +1,5 @@
 from .utility import generate_ttl
-from .models import db, Cart, CartItem, Product
+from .models import db, Cart, CartItem
 
 
 def insert_cart(total, user_id):
@@ -26,7 +26,7 @@ def add_item(cart_id, item, user_id):
     # Retrieve existing cart items and total
     existing_items = CartItem.query.filter_by(cart_id=cart_id).with_entities(CartItem.product_id).all()
     item_id = item['product_id']
-    existing_product_ids = [existing_item[0] for existing_item in existing_items]
+    existing_product_ids = [str(existing_item[0]) for existing_item in existing_items]
     if item_id in existing_product_ids:
         # update existing item
         cart_item_to_update = CartItem.query.filter_by(cart_id=cart_id, product_id=item_id).first()
@@ -84,10 +84,6 @@ def renew_cart_expiry(cart_id, user_id):
         Cart.query.filter_by(id=cart_id).update({'exp_date': generate_ttl(3)})
     db.session.commit()
     return Cart.query.get(cart_id)
-
-
-def get_product_by_id(product_id):
-    return Product.query.filter_by(id=product_id).first()
 
 
 def get_cart_items_by_cart_id(cart_id):

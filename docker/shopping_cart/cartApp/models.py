@@ -21,25 +21,12 @@ class Cart(db.Model):
             self.exp_date = exp_date
 
 
-class Product(db.Model):
-    __tablename__ = 'product'
-
-    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = db.Column(db.String(255), nullable=False)
-    price = db.Column(db.REAL, nullable=False)
-    cart_items = db.relationship('CartItem', backref='product', lazy=True)
-
-    def __init__(self, name, price):
-        self.id = str(uuid.uuid4())
-        self.name = name
-        self.price = price
-
 
 class CartItem(db.Model):
     __tablename__ = 'cart_item'
 
     cart_id = db.Column(UUID(as_uuid=True), db.ForeignKey('cart.id'), primary_key=True)
-    product_id = db.Column(UUID(as_uuid=True), db.ForeignKey('product.id'), primary_key=True)
+    product_id = db.Column(UUID(as_uuid=True), primary_key=True)
     quantity = db.Column(db.Integer, nullable=False, default=0)
     name = db.Column(db.String(255), nullable=False, default="")
     price = db.Column(db.REAL, nullable=False, default=0.0)
