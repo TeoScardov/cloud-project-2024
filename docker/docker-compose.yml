@@ -7,7 +7,7 @@ services:
     build: ./account_management
     environment:
       - JWT_SECRET_KEY=nyquist
-      - DATABASE_URL=postgresql://onlineshop:cloud2024@db_purchase:5432/flask_db
+      - DATABASE_URL=postgresql://onlineshop:cloud2024@db_account:5432/flask_db
     ports:
       - "4001:4000"
     depends_on:
