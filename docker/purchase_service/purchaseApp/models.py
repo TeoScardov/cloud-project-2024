@@ -37,8 +37,8 @@ class PurchaseDao(db.Model):
     __tablename__ = 'orders'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True)
-    account_id = db.Column(UUID(as_uuid=True), db.ForeignKey('account.id'), nullable=False)
-    #account_id = db.Column(UUID(as_uuid=True), nullable=False)
+    #account_id = db.Column(UUID(as_uuid=True), db.ForeignKey('account.id'), nullable=False)
+    account_id = db.Column(UUID(as_uuid=True), nullable=False)
     order_date = db.Column(db.DateTime, nullable=False)
     total_price = db.Column(db.Float, nullable=False)
     status = db.Column(db.Enum('PENDING', 'APPROVED', 'REJECTED', name='status_enum'), nullable=False)
@@ -138,10 +138,10 @@ class PurchaseItemDao(db.Model):
     __tablename__ = 'order_items'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True)
-    order_id = db.Column(UUID(as_uuid=True), db.ForeignKey('orders.id'), nullable=False)
-    book_id = db.Column(UUID(as_uuid=True), db.ForeignKey('book.id'), nullable=False)
-    #order_id = db.Column(UUID(as_uuid=True), nullable=False)
-    #product_id = db.Column(UUID(as_uuid=True), nullable=False)
+    #order_id = db.Column(UUID(as_uuid=True), db.ForeignKey('orders.id'), nullable=False)
+    #book_id = db.Column(UUID(as_uuid=True), db.ForeignKey('book.id'), nullable=False)
+    order_id = db.Column(UUID(as_uuid=True), nullable=False)
+    product_id = db.Column(UUID(as_uuid=True), nullable=False)
 
     def __init__(self, order_id, product_id):
         """
@@ -156,6 +156,7 @@ class PurchaseItemDao(db.Model):
         product_id : str
             a unique identifier for the product
         """
+        #self.id = str(uuid.uuid4())
         self.id = str(uuid.uuid4())
         self.order_id = order_id
         self.product_id = product_id
@@ -231,8 +232,8 @@ class PaymentDao(db.Model):
     __tablename__ = 'payment'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True)
-    purchase_id = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=False)
-    #purchase_id = db.Column(UUID(as_uuid=True), nullable=False)
+    #purchase_id = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=False)
+    purchase_id = db.Column(UUID(as_uuid=True), nullable=False)
 
     def __init__(self, purchase_id):
         """
