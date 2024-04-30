@@ -1,6 +1,6 @@
 from flask import Flask
-from docker.shopping_cart.cartApp.db import db
-from docker.shopping_cart.cartApp.cart_controller import cart
+from cartApp.db import db
+from cartApp.cart_controller import cart
 from os import environ
 
 app = Flask(__name__)
