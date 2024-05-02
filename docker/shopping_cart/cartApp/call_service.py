@@ -73,5 +73,5 @@ def authenticate_user_with_jwt(auth_header):
     except requests.exceptions.RequestException as e:
         # Handling any exceptions that might occur during the request
         print("Error:", e)
-        return "None"
+        return None
 
