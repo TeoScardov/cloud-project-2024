@@ -1,6 +1,6 @@
 from flask import Blueprint
 from flask import request
-from flask import jsonify
+from flask import jsonify, render_template
 from flask_jwt_extended import jwt_required
 from purchaseApp.controller import *
 
@@ -8,88 +8,85 @@ blueprint = Blueprint('purchase', __name__)
 
 @blueprint.route("/", methods=['GET'])
 def health():
-    return jsonify(
-        status="UP"
-    )
+    """
+    This function is used to check the health of the purchase service.
+    It returns a message indicating that the service is up and running.
+    """
+
+    return "Purchase service is up and running &#128640;"
+
 
 
 @blueprint.route('/', methods=['POST'])
 @jwt_required()
 def placeOrder():
+    """
+    This function is used to place an order.
+    It first checks if the user is authenticated.
+    If the user is authenticated, it gets the user info.
+    It then gets the account_id from the auth_responce.
+    It gets the auth token.
+    It gets the purchase data from the request.
+    It creates a new purchase.
+    It performs payment.
+    It associates books to purchase.
+    It associates books to account.
+    It clears the cart.
+    If the purchase process is successful, it returns a JSON response with a success message and a status code of 200.
+    If the purchase process fails, it returns a JSON response with an error message and a status code of 500.
+    """
 
-    #check if user is authenticated and get user info
+    # check if user is authenticated and get user info
     auth_responce = isAuthenticated(request)
 
-    if auth_responce.status_code != 200:
+    if auth_responce.status_code != 200: #type: ignore
         return auth_responce
 
-    #return responce
-    account_id = auth_responce.json()['account_id']
+    # get account_id from auth_responce
+    account_id = auth_responce.json()['account_id'] #type: ignore
+    # get auth token 
     auth = request.headers['Authorization']
+    # get purchase data from request
     purchase_data = request.get_json()
 
-    #try to create a new purchase
     try:
 
-        #create purchase
+        # create new purchase
         purchase = createNewPurchase(purchase_data, account_id)
-
-        if purchase is None:
-            return jsonify({
-                'status': 'error',
-                'message': 'Purchase failed',
-                'price': purchase_data['cart']['total_price']
-            }), 500
+        if purchase.status_code != 200: #type: ignore
+            return purchase
     
-        #call payment
+        # perform payment
         payment = performPayment(purchase, auth)
+        if payment.status_code != 200: #type: ignore
+            return payment
 
-        if payment is None:
-            return jsonify({
-                'status': 'error',
-                'message': 'Payment failed'
-            }), 500
+        # associate books to purchase
+        associate_books_to_purchase = associateBooksToPurchase(purchase, purchase_data)
+        if associate_books_to_purchase.status_code != 200: #type: ignore
+            return associate_books_to_purchase
 
-        if associateBooksToPurchase(purchase, purchase_data) is None:
-            return jsonify({
-                'status': 'error',
-                'message': 'Purchase failed'
-            }), 500
-
-
-        #add books to account
-        if associateBooksToAccount(purchase, purchase_data) is None:
-            return jsonify({
-                'status': 'error',
-                'message': 'Purchase failed'
-            }), 500
-
-        #clear the cart
-        #clearCart(cart_id)
+        # associate books to account
+        associate_books_to_account = associateBooksToAccount(account_id, purchase_data, auth)
+        if associate_books_to_account.status_code != 200: #type: ignore
+            return associate_books_to_account
+        
+        # clear the cart
+        cart = clearCart(purchase_data['cart']['cart_id'], auth)
+        if cart.status_code != 200:
+            return cart
     
+
         return jsonify({
                 'status': 'success',
-                'purchase_id': purchase.id,
-                'payment_id': payment.id
             }), 200
     
-    except:
+    except Exception as e:
 
         return jsonify({
                 'status': 'error',
-                'message': 'Purchase failed'
+                'message': 'Purchase process failed',
+                'error': e
             }), 500
-
-@blueprint.route('/details', methods=['GET'])
-#@jwt_required()
-def getPurchaseDetails():
-    purchase_id = request.get_json()
-
-    #purchase = Purchase.get_purchase(purchase_id)
-
-    return jsonify({
-            'status': 'success',
-            'purchase': purchase_id#purchase.to_dict()
-        }), 200
 
 

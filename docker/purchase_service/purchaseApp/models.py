@@ -37,7 +37,6 @@ class PurchaseDao(db.Model):
     __tablename__ = 'orders'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True)
-    #account_id = db.Column(UUID(as_uuid=True), db.ForeignKey('account.id'), nullable=False)
     account_id = db.Column(UUID(as_uuid=True), nullable=False)
     order_date = db.Column(db.DateTime, nullable=False)
     total_price = db.Column(db.Float, nullable=False)
@@ -59,7 +58,7 @@ class PurchaseDao(db.Model):
             the status of the purchase
         """
 
-        self.id = str(uuid.uuid4())
+        self.id = uuid.uuid4()
         self.account_id = account_id
         self.order_date = db.func.current_timestamp()
         self.total_price = total_price
@@ -139,8 +138,6 @@ class PurchaseItemDao(db.Model):
 
     id = db.Column(UUID(as_uuid=True), primary_key=True)
     order_id = db.Column(UUID(as_uuid=True), db.ForeignKey('orders.id'), nullable=False)
-    #book_id = db.Column(UUID(as_uuid=True), db.ForeignKey('book.id'), nullable=False)
-    #order_id = db.Column(UUID(as_uuid=True), nullable=False)
     product_id = db.Column(UUID(as_uuid=True), nullable=False)
 
     def __init__(self, order_id, product_id):
@@ -157,7 +154,7 @@ class PurchaseItemDao(db.Model):
             a unique identifier for the product
         """
         #self.id = str(uuid.uuid4())
-        self.id = str(uuid.uuid4())
+        self.id = uuid.uuid4()
         self.order_id = order_id
         self.product_id = product_id
 
@@ -232,8 +229,7 @@ class PaymentDao(db.Model):
     __tablename__ = 'payment'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True)
-    purchase_id = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=False)
-    #purchase_id = db.Column(UUID(as_uuid=True), nullable=False)
+    purchase_id = db.Column(UUID(as_uuid=True), db.ForeignKey('orders.id'), nullable=False)
 
     def __init__(self, purchase_id):
         """
@@ -244,7 +240,7 @@ class PaymentDao(db.Model):
         purchase_id : str
             a unique identifier for the purchase
         """
-        self.id = str(uuid.uuid4())
+        self.id = uuid.uuid4()
         self.purchase_id = purchase_id
 
     def save(self):
