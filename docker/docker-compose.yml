@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   account_management:
     container_name: account_service
