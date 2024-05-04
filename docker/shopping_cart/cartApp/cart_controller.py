@@ -2,8 +2,7 @@ import json
 
 from flask import Blueprint
 from flask import jsonify, request
-
-from docker.shopping_cart.cartApp import database, call_service, utility
+from . import database, call_service, utility
 
 cart = Blueprint('cart', __name__)
 @cart.route("/health")

@@ -1,6 +1,6 @@
 FROM python:3.6-slim-buster
 
-WORKDIR /docker
+WORKDIR /docker/shopping_cart
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 COPY . .
