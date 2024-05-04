@@ -34,16 +34,16 @@ services:
     depends_on:
       - db_purchase
 
-  product_catalog:
-    container_name: product_catalog
-    image: product_catalog:1.0.0
-    build: ./product_catalog
+  product_cat:
+    container_name: product_cat
+    image: product_cat:1.0.0
+    build: ./product_cat
     ports:
       - "4004:4000"
     environment:
-      - DB_URL=postgresql://onlineshop:cloud2024@db_proudct:5432/flask_db
+      - DB_URL=postgresql://onlineshop:cloud2024@db_product:5432/flask_db
     depends_on:
-      - db_proudct
+      - db_product
 
   shopping_cart:
     container_name: shopping_cart
@@ -76,8 +76,8 @@ services:
       - POSTGRES_USER=onlineshop
       - POSTGRES_PASSWORD=cloud2024
 
-  db_proudct:
-    container_name: db_proudct
+  db_product:
+    container_name: db_product
     image: postgres:13
     ports:
       - "5434:5432"
