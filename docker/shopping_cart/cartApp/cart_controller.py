@@ -5,6 +5,8 @@ from flask import jsonify, request
 from . import database, call_service, utility
 
 cart = Blueprint('cart', __name__)
+
+
 @cart.route("/health")
 def health():
     return jsonify(
@@ -78,10 +80,11 @@ def add_product():
                 database.add_item(cart_id, product, user_id)
                 current_cart = database.merge_carts(user_id)
             else:
+
                 return {
                     "statusCode": 404,
                     "headers": utility.get_headers(cart_id),
-                    "body": json.dumps({"message": "cart_id is not valid"}),
+                    "body": json.dumps({"message": "cart_id is not valid", "user_cart_id": str(user_cart_id)}),
                 }
         else:
             database.renew_cart_expiry(user_cart_id, user_id)
@@ -92,7 +95,8 @@ def add_product():
         "headers": utility.get_headers(cart_id),
         "body": json.dumps(
             {"productId": str(product_id), "message": "product added to cart",
-             "cart_id": str(current_cart.id), "total": current_cart.total, "product": {"name":product["name"], "price": product["price"]}}
+             "cart_id": str(current_cart.id), "total": current_cart.total,
+             "product": {"name": product["name"], "price": product["price"]}}
         ),
     }
 
@@ -141,7 +145,7 @@ def remove_product():
                 return {
                     "statusCode": 404,
                     "headers": utility.get_headers(cart_id=cart_id),
-                    "body": json.dumps({"message": "cart_id is not valid"}),
+                    "body": json.dumps({"message": "cart_id is not valid", "user_cart_id": str(user_cart_id)}),
                 }
         else:
             return {
@@ -162,7 +166,7 @@ def remove_product():
                 return {
                     "statusCode": 404,
                     "headers": utility.get_headers(cart_id=cart_id),
-                    "body": json.dumps({"message": "cart_id is not valid"}),
+                    "body": json.dumps({"message": "cart_id is not valid", "user_cart_id": str(user_cart_id)}),
                 }
         else:
             return {
@@ -176,7 +180,8 @@ def remove_product():
         "headers": utility.get_headers(cart_id),
         "body": json.dumps(
             {"productId": str(product_id), "message": "product deleted from the cart",
-             "cart_id": str(current_cart.id), "total": current_cart.total, "product": {"name":product["name"], "price": product["price"]}}
+             "cart_id": str(current_cart.id), "total": current_cart.total,
+             "product": {"name": product["name"], "price": product["price"]}}
         ),
     }
 
