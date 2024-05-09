@@ -1,8 +1,6 @@
 import requests
-import json
 from .config import USER_SERVICE_URL
 from .config import PRODUCT_SERVICE_URL
-
 
 
 def get_product_from_external_service(product_id):
@@ -11,34 +9,28 @@ def get_product_from_external_service(product_id):
     # """
     api_url = PRODUCT_SERVICE_URL + '/get-book-details'
 
-    # # Assuming headers you want to include in the request
-    # json_data = {
-    #     "id": product_id
-    # }
-    #
-    # # Convert the dictionary to JSON string
-    # json_string = json.dumps(json_data)
-    #
-    # try:
-    #     # Sending the POST request with JSON data and headers
-    #     response = requests.post(api_url, json=json_string)
-    #
-    #     # Checking if the request was successful (status code 200)
-    #     if response.status_code == 200:
-    #         return response.json()
-    #     else:
-    #         # If the request was not successful, raise an exception
-    #         response.raise_for_status()
-    # except requests.exceptions.RequestException as e:
-    #     # Handling any exceptions that might occur during the request
-    #     print("Error:", e)
-    #     return None
-
-    return {
-        'product_id': '94ff3b8b-56bf-453d-af20-a2fd78feae55',
-        'name': '12 rules for life',
-        'price': 12
+    # Assuming headers you want to include in the request
+    json_data = {
+        "id": product_id
     }
+
+    try:
+        # Sending the POST request with JSON data and headers
+        response = requests.post(api_url, json=json_data)
+
+        # Checking if the request was successful (status code 200)
+        if response.status_code == 200:
+            book_details = response.json()["book"]
+            return {
+                'product_id': book_details["id"],
+                'name': book_details["title"],
+                'price': book_details["price"]
+            }
+        else:
+            # If the request was not successful, raise an exception
+            response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        raise e
 
 
 def authenticate_user_with_jwt(auth_header):
@@ -71,7 +63,4 @@ def authenticate_user_with_jwt(auth_header):
             # If the request was not successful, raise an exception
             response.raise_for_status()
     except requests.exceptions.RequestException as e:
-        # Handling any exceptions that might occur during the request
-        print("Error:", e)
-        return None
-
+        raise e

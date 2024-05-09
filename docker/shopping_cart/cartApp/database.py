@@ -26,7 +26,7 @@ def add_item(cart_id, item, user_id):
     # Retrieve existing cart items and total
     existing_items = CartItem.query.filter_by(cart_id=cart_id).with_entities(CartItem.product_id).all()
     item_id = item['product_id']
-    existing_product_ids = [str(existing_item[0]) for existing_item in existing_items]
+    existing_product_ids = [existing_item[0] for existing_item in existing_items]
     if item_id in existing_product_ids:
         # update existing item
         cart_item_to_update = CartItem.query.filter_by(cart_id=cart_id, product_id=item_id).first()
@@ -91,7 +91,7 @@ def get_cart_items_by_cart_id(cart_id):
     if cart_items:
         # Convert the list of cart items to a list of dictionaries
         cart_items_list = [{
-            'product_id': str(item.product_id),
+            'product_id': item.product_id,
             'quantity': item.quantity,
             'name': item.name,
             'price': item.price,
