@@ -73,6 +73,8 @@ def createNewPurchase(purchase_data, account_id):
     except Exception as e:
         print(e)
 
+        purchase.rollback()
+
         return jsonify({
             'status': 'error',
             'message': 'Purchase failed',
@@ -126,6 +128,11 @@ def performPayment(purchase, auth_token):
         }), 200
     
     except Exception as e:
+
+        payment.rollback()
+        purchase.status = "REJECTED"
+        purchase.save()
+
         print(e)
         return jsonify({
             'status': 'error',
@@ -170,6 +177,10 @@ def associateBooksToPurchase(purchase, purchase_data):
         }), 200
 
     except Exception as e:
+
+        for item in list_of_books:
+            item.rollback()
+
         print(e)
         return jsonify({
             'status': 'error',
@@ -220,6 +231,7 @@ def associateBooksToAccount(account_id, purchase_data, auth_token):
         return response
     
     except Exception as e:
+        
         print(e)
         return jsonify({
             'status': 'error',

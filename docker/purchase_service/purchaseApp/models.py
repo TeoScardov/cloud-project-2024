@@ -90,6 +90,12 @@ class PurchaseDao(db.Model):
         db.session.delete(self)
         db.session.commit()
 
+    def rollback(self):
+        """
+        Rolls back the transaction
+        """
+        db.session.rollback()
+
     @staticmethod
     def get_all():
         """
@@ -182,6 +188,12 @@ class PurchaseItemDao(db.Model):
         db.session.delete(self)
         db.session.commit()
 
+    def rollback(self):
+        """
+        Rolls back the transaction
+        """
+        db.session.rollback()
+
     @staticmethod
     def get_all():
         """
@@ -249,6 +261,19 @@ class PaymentDao(db.Model):
         """
         db.session.add(self)
         db.session.commit()
+    
+    def delete(self):
+        """
+        Deletes the payment from the database
+        """
+        db.session.delete(self)
+        db.session.commit()
+
+    def rollback(self):
+        """
+        Rolls back the transaction
+        """
+        db.session.rollback()
 
     def to_dict(self):
         return {
