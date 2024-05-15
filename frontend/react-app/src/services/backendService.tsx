@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
 import { Book } from "../cart_items/columns";
 import { createContext, useContext, ReactNode } from "react";
+import { UserProfileToken } from "../auth/models";
+import axios from "axios";
+
+const api_account = "http://localhost:4001/api/account";
 
 class BackendService {
 
     private cart_books: Book[] | null = null;
+    private token: string | null = null;
 
     private static instance: BackendService | null = null;
 
@@ -28,7 +33,8 @@ class BackendService {
 
         return this.cart_books!;
 
-    }
+    } 
+
 }
 
 export const useBackend = (): BackendService => {
