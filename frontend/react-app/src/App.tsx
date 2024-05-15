@@ -4,23 +4,25 @@ import reactLogo from "./assets/react.svg";
 import Navbar from "./Navbar";
 import BookCard from "./BookCard";
 import Login from "./Login";
+import Signup from "./Signup";
+import BooksHome from "./BooksHome";
 import { BackendProvider } from "./services/backendService";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 
 function App() {
-    const [count, setCount] = useState(0);
 
     return (
-        <>
-            <Navbar />
-            <div className="flex justify-center items-center">
-            <BookCard title="Title1" description="ciao1" price={10}/>
-            <BookCard title="Title2" description="ciao2" price={20}/>
-            <BookCard title="Title3" description="ciao3" price={30}/>
-            <BookCard title="Title4" description="ciao4" price={40}/>
-            <BookCard title="Title5" description="ciao5" price={50}/>
-            </div>
-           
-        </>
+        <BackendProvider>
+            <BrowserRouter>
+                <Navbar />
+                <Routes>
+                    <Route path="/" element={<BooksHome />} />
+                    <Route path="/login" element={ <Login/> } />
+                    <Route path="/signup" element={ <Signup />} />
+                </Routes>
+            </BrowserRouter>
+        </BackendProvider>
     );
 }
 
