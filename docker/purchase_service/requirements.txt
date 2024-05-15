@@ -3,3 +3,4 @@ psycopg2-binary
 flask_jwt_extended
 flask_sqlalchemy
 requests
+flask_cors
