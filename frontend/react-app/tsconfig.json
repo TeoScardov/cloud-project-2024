@@ -14,7 +14,10 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "paths": {
+      "@/*": ["./*"]
+    }
   },
   "include": ["src", "src/services/cart-fetch.tsx"],
   "references": [{ "path": "./tsconfig.node.json" }]
