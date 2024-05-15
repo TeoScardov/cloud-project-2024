@@ -8,6 +8,8 @@ import Signup from "./Signup";
 import BooksHome from "./BooksHome";
 import { BackendProvider } from "./services/backendService";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Toaster } from "./components/ui/toaster";
+import Profile from "./Profile";
 
 
 function App() {
@@ -20,7 +22,9 @@ function App() {
                     <Route path="/" element={<BooksHome />} />
                     <Route path="/login" element={ <Login/> } />
                     <Route path="/signup" element={ <Signup />} />
+                    <Route path="/profile" element={ <Profile />} />
                 </Routes>
+                <Toaster />
             </BrowserRouter>
         </BackendProvider>
     );
