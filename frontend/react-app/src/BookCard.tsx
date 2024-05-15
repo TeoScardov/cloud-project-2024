@@ -18,7 +18,6 @@ import {
 } from "./components/ui/select";
 
 import "./BookCard.css"
-import { ReactElement, JSXElementConstructor, ReactNode, ReactPortal } from "react";
 
 function BookCard(props: { title: string; description: string; price: number; }) {
     return (
