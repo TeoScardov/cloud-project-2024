@@ -4,6 +4,7 @@ import { z } from "zod";
 import { Input } from "./components/ui/input";
 import { Button } from "./components/ui/button";
 import axios from "axios";
+import { useToast } from "./components/ui/use-toast";
 
 import {
     Form,
@@ -48,6 +49,7 @@ const SignupForm: React.FC<any> = () => {
 
     // const backend = useBackend();
     let navigate = useNavigate();
+    const { toast } = useToast();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -74,6 +76,10 @@ const SignupForm: React.FC<any> = () => {
                 }
             );
             console.log(responce);
+            toast({
+                title: "Account created successfully!",
+                description: "You can now log in.",
+            });
             navigate("/");
             
             // Optionally, you can redirect the user or show a success message
