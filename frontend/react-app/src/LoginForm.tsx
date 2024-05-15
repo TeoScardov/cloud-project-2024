@@ -20,6 +20,7 @@ import { useState } from "react";
 import { useBackend } from "./services/backendService";
 import { useNavigate } from "react-router-dom";
 import AlertError from "./AlertError";
+import { useToast } from "./components/ui/use-toast";
 
 const formSchema = z.object({
     username: z.string().min(2, {
@@ -35,11 +36,14 @@ interface LogInProps {
 }
 
 const LoginForm: React.FC<any> = () => {
+
+    const { toast } = useToast()
+
     const [token, setToken] = useState<string | null>(null);
     let [credentialError, setCredentialError] = useState<string | null>(null);
     let [backendError, setBackendError] = useState<string | null>(null);
 
-    //const backend = useBackend();
+
     let navigate = useNavigate();
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -66,6 +70,10 @@ const LoginForm: React.FC<any> = () => {
             console.log(responce);
             setToken(responce.data.token);
             localStorage.setItem("token", responce.data.token);
+            toast({
+                title: "Successfully logged in!",
+                //description: "You can view your cart by clicking the cart icon in the top right corner.",
+              })
             navigate("/");
             
             // Optionally, you can redirect the user or show a success message
