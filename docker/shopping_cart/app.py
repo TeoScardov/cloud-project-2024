@@ -8,7 +8,6 @@ app.register_blueprint(cart, url_prefix='/api/cart')
 app.config.from_pyfile('cartApp/config.py')
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///identifier.sqlite'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://onlineshop:cloud2024@localhost/flask_db'
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://onlineshop:cloud2024@db_cart:5432/flask_db'
 app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('DB_URL')
 db.init_app(app)
 
@@ -18,3 +17,4 @@ with app.app_context():
 
 if __name__ == '__main__':
     app.run(debug=True)
+    # app.run(port=5002, debug=True)

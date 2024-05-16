@@ -1,5 +1,6 @@
-from .utility import generate_ttl
+
 from .models import db, Cart, CartItem
+from .utility import generate_ttl
 
 
 def insert_cart(total, user_id):
@@ -101,14 +102,30 @@ def get_cart_items_by_cart_id(cart_id):
         return cart_items_list
 
 
-def merge_carts(user_id):
+def merge_carts(user_id, req_cart_id):
     existing_carts_id = Cart.query.filter_by(user_id=user_id).with_entities(Cart.id).all()
     # Extract cart IDs from the result
-    cart_ids = [existing_carts_id[0][0] for cart_id in existing_carts_id]
-    new_cart_id = insert_cart(0, user_id)
+    cart_ids = [str(cart_id[0]) for cart_id in existing_carts_id]
+    if req_cart_id not in cart_ids:
+        new_cart_id = insert_cart(0, user_id)
+    else:
+        new_cart_id = req_cart_id
+        cart_ids.remove(req_cart_id)
+
     for cart_id in cart_ids:
-        CartItem.query.filter_by(cart_id=cart_id).update({'cart_id': new_cart_id})
+        records = CartItem.query.filter_by(cart_id=cart_id).all()
+        # Update the cart_id for all retrieved records
+        for record in records:
+            item = CartItem.query.filter_by(product_id=record.product_id, cart_id=new_cart_id).first()
+            if item:
+                item.quantity += 1
+                db.session.delete(record)
+            else:
+                record.cart_id = new_cart_id
+        # Commit the changes
+        db.session.commit()
         Cart.query.filter_by(user_id=user_id, id=cart_id).delete()
+    db.session.commit()
 
     # Retrieve new cart items price and quantity
     selected_items = CartItem.query.filter_by(cart_id=new_cart_id).with_entities(
@@ -129,10 +146,10 @@ def merge_carts(user_id):
     return Cart.query.get(new_cart_id)
 
 
-def check_for_user_cart(user_id):
+def check_for_user_cart(user_id, req_cart_id):
     existing_carts = Cart.query.filter_by(user_id=user_id).all()
     if len(existing_carts) > 1:
-        return merge_carts(user_id).id
+        return merge_carts(user_id, req_cart_id).id
     elif len(existing_carts) == 1:
         return existing_carts[0].id
     else:
