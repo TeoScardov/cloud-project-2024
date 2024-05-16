@@ -2,6 +2,7 @@ import json
 
 from flask import Blueprint
 from flask import jsonify, request
+
 from . import database, call_service, utility
 
 cart = Blueprint('cart', __name__)
@@ -54,7 +55,7 @@ def add_product():
                 "body": json.dumps({"message": str(e)}),
             }
     if user_id:
-        user_cart_id = database.check_for_user_cart(user_id)
+        user_cart_id = database.check_for_user_cart(user_id, cart_id)
 
     if not user_cart_id:
         if cart_id:
@@ -72,9 +73,9 @@ def add_product():
             current_cart = database.add_item(cart_id, product, user_id)
     else:
         if cart_id:
-            if cart_id == user_cart_id:
-                database.renew_cart_expiry(user_cart_id, user_id)
-                current_cart = database.add_item(user_cart_id, product, user_id)
+            if cart_id == str(user_cart_id):
+                database.renew_cart_expiry(str(user_cart_id), user_id)
+                current_cart = database.add_item(str(user_cart_id), product, user_id)
             elif database.check_cart_id(cart_id):
                 database.renew_cart_expiry(cart_id, user_id)
                 database.add_item(cart_id, product, user_id)
@@ -134,7 +135,7 @@ def remove_product():
                 "body": json.dumps({"message": str(e)}),
             }
     if user_id:
-        user_cart_id = database.check_for_user_cart(user_id)
+        user_cart_id = database.check_for_user_cart(user_id, cart_id)
 
     if not user_cart_id:
         if cart_id:
@@ -155,13 +156,13 @@ def remove_product():
             }
     else:
         if cart_id:
-            if cart_id == user_cart_id:
-                database.renew_cart_expiry(user_cart_id, user_id)
-                current_cart = database.delete_item(user_cart_id, product, user_id)
+            if cart_id == str(user_cart_id):
+                database.renew_cart_expiry(str(user_cart_id), user_id)
+                current_cart = database.delete_item(str(user_cart_id), product, user_id)
             elif database.check_cart_id(cart_id):
                 database.renew_cart_expiry(cart_id, user_id)
                 database.delete_item(cart_id, product, user_id)
-                current_cart = database.merge_carts(user_id)
+                current_cart = database.merge_carts(user_id, cart_id)
             else:
                 return {
                     "statusCode": 404,
@@ -179,7 +180,7 @@ def remove_product():
         "statusCode": 200,
         "headers": utility.get_headers(cart_id),
         "body": json.dumps(
-            {"productId": str(product_id), "message": "product deleted from the cart",
+            {"productId": product_id, "message": "product deleted from the cart",
              "cart_id": str(current_cart.id), "total": current_cart.total,
              "product": {"name": product["name"], "price": product["price"]}}
         ),
@@ -237,7 +238,7 @@ def remove_cart():
             "body": json.dumps({"message": "invalid request! no auth"}),
         }
 
-    user_cart_id = str(database.check_for_user_cart(user_id))
+    user_cart_id = str(database.check_for_user_cart(user_id, cart_id))
 
     if not user_cart_id:
         return {
