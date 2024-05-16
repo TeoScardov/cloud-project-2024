@@ -4,10 +4,13 @@ from flask import Flask, jsonify, make_response, request
 from flask_sqlalchemy import SQLAlchemy
 from os import environ
 from sqlalchemy.exc import IntegrityError
+from flask_cors import CORS
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('DB_URL')
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://onlineshop:cloud2024@localhost/flask_db'
+
+CORS(app)
 
 db = SQLAlchemy(app)
 class Book(db.Model):
