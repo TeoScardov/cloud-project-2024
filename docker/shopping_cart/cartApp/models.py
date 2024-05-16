@@ -1,7 +1,10 @@
-from datetime import datetime
-from .db import db
 import uuid
+from datetime import datetime
+
 from sqlalchemy.dialects.postgresql import UUID
+
+from .db import db
+
 
 class Cart(db.Model):
     __tablename__ = 'cart'
@@ -26,7 +29,7 @@ class CartItem(db.Model):
     __tablename__ = 'cart_item'
 
     cart_id = db.Column(UUID(as_uuid=True), db.ForeignKey('cart.id'), primary_key=True)
-    product_id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.String(20), primary_key=True)
     quantity = db.Column(db.Integer, nullable=False, default=0)
     name = db.Column(db.String(255), nullable=False, default="")
     price = db.Column(db.REAL, nullable=False, default=0.0)
