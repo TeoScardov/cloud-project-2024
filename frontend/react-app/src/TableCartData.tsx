@@ -12,9 +12,9 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "../components/ui/table";
+} from "./components/ui/table";
 
-import { Skeleton } from "../components/ui/skeleton";
+import { Skeleton } from "./components/ui/skeleton";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
