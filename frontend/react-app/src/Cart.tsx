@@ -9,17 +9,51 @@ import {
     SheetClose,
 } from "./components/ui/sheet";
 
-import { Suspense } from "react";
-
-import { Button } from "./components/ui/button";
-import { DataTable } from "./TableCartData";
 import { useState, useEffect } from "react";
 
-import { columns } from "./TableCartBook";
+import { Button } from "./components/ui/button";
 import CartItems from "./CartItems";
-import { ShoppingCart} from "lucide-react";
+import { ShoppingCart } from "lucide-react";
+import { Cookies } from "react-cookie";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 function Cart() {
+    const [cart_id, setCartId] = useState<string | null>(null);
+    const cookies = new Cookies();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!cookies.get("cart_id")) {
+            console.log("No cart_id found");
+        } else {
+            setCartId(cookies.get("cart_id"));
+        }
+    }, []);
+
+    const clearCart = async () => {
+        if (cookies.get("cart_id")) {
+            setCartId(cookies.get("cart_id"));
+        }
+
+        try {
+            const response = await axios.delete(
+                "http://0.0.0.0:4005/api/cart/removeCart",
+                {
+                    data: { cart_id: cart_id},
+                    headers: {
+                        Authorization:
+                            "Bearer " + localStorage.getItem("token"),
+                    },
+                }
+            );
+
+            console.log("Cart cleared", response.data);
+        } catch (error) {
+            console.error("Error clearing cart", error);
+        }
+    };
+
     return (
         <Sheet>
             <SheetTrigger asChild>
@@ -30,25 +64,24 @@ function Cart() {
             <SheetContent>
                 <SheetHeader>
                     <SheetTitle>Cart</SheetTitle>
-                    <SheetDescription>
-                        Make changes to your profile here. Click save when
-                        you're done.
-                    </SheetDescription>
                 </SheetHeader>
-                <Suspense fallback={<div>Loading...</div>}>
-                    <CartItems />
-                </Suspense>
-                <SheetFooter>
-                    <SheetClose asChild>
-                        <Button variant="outline_destructive">
-                            Clear Cart
-                        </Button>
-                    </SheetClose>
-                    <div className="flex-grow" />
-                    <SheetClose asChild>
-                        <Button type="submit">Checkout</Button>
-                    </SheetClose>
-                </SheetFooter>
+                <CartItems />
+                {cart_id ? (
+                    <SheetFooter>
+                        <SheetClose asChild>
+                            <Button
+                                variant="outline_destructive"
+                                onClick={clearCart}
+                            >
+                                Clear Cart
+                            </Button>
+                        </SheetClose>
+                        <div className="flex-grow" />
+                        <SheetClose asChild>
+                            <Button type="submit" onClick={() => navigate("/checkout")}>Checkout</Button>
+                        </SheetClose>
+                    </SheetFooter>
+                ) : null}
             </SheetContent>
         </Sheet>
     );

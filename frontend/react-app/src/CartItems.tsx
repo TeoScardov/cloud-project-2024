@@ -1,19 +1,22 @@
 import { Book, columns } from "./TableCartBook";
 import { DataTable } from "./TableCartData";
 import { Suspense, useEffect, useState } from "react";
-// import { useBackend } from "../services/backendService";
-import { Skeleton } from "./components/ui/skeleton";
+import { Card } from "./components/ui/card";
+import { Cookies } from "react-cookie";
+import axios from "axios";
 
 export default function CartItems() {
-    const [data, setData] = useState<Book[]>([]);
-    let cart_books = useState<Book[] | null>(null)[0];
+    const [dataBook, setDataBook] = useState<Book[]>([]);
+    let cart_books = useState<Book[]>([])[0];
+
+    const cookies = new Cookies();
 
     const getData = async () => {
 
-        let cart_id = "2eb1b208-c65d-4125-9c08-354d0c3b9a4c";
+        let cart_id = null;
 
-        if (cart_books) {
-            return cart_books;
+        if (cookies.get("cart_id")) {
+            cart_id = cookies.get("cart_id");
         }
 
         var responce = await fetch(`http://0.0.0.0:4005/api/cart/show_cart?cart_id=${cart_id}`, {
@@ -33,16 +36,66 @@ export default function CartItems() {
 
         cart_books = json["items"];
 
-        return cart_books!;
+        if (cart_books === null) {
+            cart_books = [];
+        }
+
+        setDataBook(cart_books);
     };
 
     useEffect(() => {
         
-        getData().then((data) => {
-            setData(data);
-        });
+        if (!cookies.get("cart_id")) {
+            console.log("No cart_id found");
+
+            return;
+        } else {
+
+        getData()
+
+        }
 
     }, []);
 
-    return <DataTable columns={columns} data={data} />;
+    const handleClickDelete = async (product_id: any) => {
+        const cookies = new Cookies();
+        
+        console.log("Delete book with isbn", product_id)
+
+        try {
+          const response = await axios.delete(`http://0.0.0.0:4005/api/cart/removeProduct`, { data: { product_id: product_id, cart_id: cookies.get("cart_id")} });
+
+          console.log("Book deleted", response.data);
+
+            getData()
+
+      } catch (error) {
+          console.error("Error deleting book", error);
+      }
+      }
+
+
+    return (
+        <div>
+            {!cookies.get("cart_id") || dataBook.length===0 ? (
+                <Card>
+                <div
+                style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "60vh",
+                    fontSize: "1.5em",
+                    color: "#888",
+                }}
+            >
+                Empty cart
+            </div>
+            </Card>
+            ) : (
+                <DataTable columns={columns} data={dataBook} handleClickDelete={handleClickDelete}/>
+            )}
+        </div>
+    );
+
 }

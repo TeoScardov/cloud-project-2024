@@ -16,15 +16,21 @@ import {
 
 import { Skeleton } from "./components/ui/skeleton";
 
+import { Button } from "./components/ui/button";
+import { Trash2 } from "lucide-react";
+
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
+    handleClickDelete: (product_id: string) => void;
 }
 
 export function DataTable<TData, TValue>({
     columns,
     data,
+    handleClickDelete,
 }: DataTableProps<TData, TValue>) {
+    
     const table = useReactTable({
         data,
         columns,
@@ -68,6 +74,19 @@ export function DataTable<TData, TValue>({
                                         )}
                                     </TableCell>
                                 ))}
+                                <TableCell>
+                                    <Button
+                                        className="text-red-500"
+                                        variant="ghost"
+                                        onClick={() =>
+                                            handleClickDelete(
+                                                row.original.product_id
+                                            )
+                                        }
+                                    >
+                                        <Trash2 />
+                                    </Button>
+                                </TableCell>
                             </TableRow>
                         ))
                     ) : (
