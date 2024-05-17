@@ -12,15 +12,54 @@ import {
 } from "./components/ui/card";
 import { Input } from "./components/ui/input";
 import { useState } from "react";
+import Library from "./Library";
+import EditInformation from "./EditInformation";
+import Information, { PersonInformation } from "./Information";
+import axios from "axios";
+import { Book } from "./TableCartBook";
+
+// const personalInformation: PersonInformation = {
+//     name: "John",
+//     surname: "Doe",
+//     username: "johndoe",
+//     email: "hohn.doe@ymail.com",
+//     phone: "343663738",
+//     address: "1234 Main St",
+//     cc: "1234 5678 9012 3456",
+//     expiredate: "12/27",
+//     cvv: "123"
+// };
 
 function Profile() {
-
-    const [library, setLibrary] = useState<Boolean>(false);
+    const [showLibrary, setShowLibrary] = useState<Boolean>(false);
+    const [personalInformation, setPersonalInformation] = useState<PersonInformation>();
+    const [library, setLibrary] = useState<Array<Book>>([]);
 
     useEffect(() => {
         if (!localStorage.getItem("token")) {
             window.location.href = "/login";
         }
+
+        const token = localStorage.getItem("token");
+
+        axios
+            .post(
+                "http://127.0.0.1:4001/api/account/info",
+                {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            )
+            .then((response) => {
+                setPersonalInformation(response.data);
+                setLibrary(response.data.library);
+                console.log(response.data.library);
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+            });
     }, []);
 
     return (
@@ -36,61 +75,74 @@ function Profile() {
                         x-chunk="dashboard-04-chunk-0"
                     >
                         <ul className="flex flex-col gap-2">
-                            <Link onClick={() => setLibrary(false)} to="#"> Information </Link>
+                            <Link onClick={() => setShowLibrary(false)} to="#">
+                                {" "}
+                                Information{" "}
+                            </Link>
                         </ul>
                         <ul className="flex flex-col gap-2">
-                            <Link onClick={() => setLibrary(true)} to="#"> Library </Link>
+                            <Link onClick={() => setShowLibrary(true)} to="#">
+                                {" "}
+                                Library{" "}
+                            </Link>
                         </ul>
                     </nav>
                     <div className="grid gap-6">
-                        {library ? (
-                        <Card x-chunk="dashboard-04-chunk-1">
-                            <CardHeader>
-                                <CardTitle>Store Name</CardTitle>
-                                <CardDescription>
-                                    Used to identify your store in the
-                                    marketplace.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <form>
-                                    <Input placeholder="Store Name" />
-                                </form>
-                            </CardContent>
-                            <CardFooter className="border-t px-6 py-4">
-                                <Button>Save</Button>
-                            </CardFooter>
-                        </Card>
+                        {showLibrary ? (
+                            <Card x-chunk="dashboard-04-chunk-1">
+                                <Library library = {library}/>
+                            </Card>
                         ) : (
-                        <Card x-chunk="dashboard-04-chunk-2">
-                            <CardHeader>
-                                <CardTitle>Plugins Directory</CardTitle>
-                                <CardDescription>
-                                    The directory within your project, in which
-                                    your plugins are located.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <form className="flex flex-col gap-4">
-                                    <Input
-                                        placeholder="Project Name"
-                                        defaultValue="/content/plugins"
+                            <Card x-chunk="dashboard-04-chunk-2">
+                                <CardHeader>
+                                    <CardTitle>Personal Information</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <Information
+                                        name={personalInformation?.name ?? ""}
+                                        surname={
+                                            personalInformation?.surname ?? ""
+                                        }
+                                        username={
+                                            personalInformation?.username ?? ""
+                                        }
+                                        email={personalInformation?.email ?? ""}
+                                        phone={personalInformation?.phone ?? ""}
+                                        address={
+                                            personalInformation?.address ?? ""
+                                        }
+                                        cc={personalInformation?.cc ?? ""}
+                                        expiredate={
+                                            personalInformation?.expiredate ??
+                                            ""
+                                        }
+                                        cvv={personalInformation?.cvv ?? ""}
                                     />
-                                    <div className="flex items-center space-x-2">
-                                        <label
-                                            htmlFor="include"
-                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                        >
-                                            Allow administrators to change the
-                                            directory.
-                                        </label>
-                                    </div>
-                                </form>
-                            </CardContent>
-                            <CardFooter className="border-t px-6 py-4">
-                                <Button>Save</Button>
-                            </CardFooter>
-                        </Card> )}
+                                </CardContent>
+                                <CardFooter className="border-t px-6 py-4">
+                                    <EditInformation
+                                        name={personalInformation?.name ?? ""}
+                                        surname={
+                                            personalInformation?.surname ?? ""
+                                        }
+                                        username={
+                                            personalInformation?.username ?? ""
+                                        }
+                                        email={personalInformation?.email ?? ""}
+                                        phone={personalInformation?.phone ?? ""}
+                                        address={
+                                            personalInformation?.address ?? ""
+                                        }
+                                        cc={personalInformation?.cc ?? ""}
+                                        expiredate={
+                                            personalInformation?.expiredate ??
+                                            ""
+                                        }
+                                        cvv={personalInformation?.cvv ?? ""}
+                                    />
+                                </CardFooter>
+                            </Card>
+                        )}
                     </div>
                 </div>
             </main>
