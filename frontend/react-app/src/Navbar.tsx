@@ -42,7 +42,6 @@ function Navbar() {
                         <MenubarItem onClick={() => navigate("/profile")}>
                             Profile
                         </MenubarItem>
-                        <MenubarItem>Library</MenubarItem>
                         <MenubarItem
                             onClick={() => {
                                 navigate("/");
