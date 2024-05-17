@@ -11,6 +11,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "./components/ui/toaster";
 import Profile from "./Profile";
 import { ThemeProvider } from "./ThemeProvider";
+import Checkout from "./Checkout";
 
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
                     <Route path="/login" element={ <Login/> } />
                     <Route path="/signup" element={ <Signup />} />
                     <Route path="/profile" element={ <Profile />} />
+                    <Route path="/checkout" element={ <Checkout />} />
                 </Routes>
                 <Toaster />
             </ThemeProvider>
