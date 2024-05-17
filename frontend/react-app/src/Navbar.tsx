@@ -16,8 +16,9 @@ import {
 
 import Cart from "./Cart";
 import { useNavigate } from "react-router-dom";
-import { Menu } from "lucide-react";
-import Profile from "./Profile";
+import {CircleUserRound} from "lucide-react";
+import { ModeToggle } from "./ModeToggle";
+
 
 function Navbar() {
     let navigate = useNavigate();
@@ -28,22 +29,13 @@ function Navbar() {
         <Menubar>
             <MenubarMenu>
                 <MenubarTrigger onClick={() => navigate("/")}>
-                    Home
+                    eBook Store
                 </MenubarTrigger>
             </MenubarMenu>
             <div className="flex-grow"></div>
             <MenubarMenu>
                 <MenubarTrigger>
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="21"
-                        height="21"
-                        fill="currentColor"
-                        className="bi bi-person-fill"
-                        viewBox="0 -1 16 16"
-                    >
-                        <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6" />
-                    </svg>
+                    <CircleUserRound size={24} />
                 </MenubarTrigger>
                 {isAuth ? (
                     <MenubarContent>
@@ -73,6 +65,9 @@ function Navbar() {
             </MenubarMenu>
             <MenubarMenu>
                 <Cart />
+            </MenubarMenu>
+            <MenubarMenu>
+                <ModeToggle />
             </MenubarMenu>
         </Menubar>
     );
