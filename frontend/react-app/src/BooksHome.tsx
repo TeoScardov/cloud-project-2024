@@ -33,38 +33,46 @@ function BooksHome() {
         // </ScrollArea>
 
         // 50% on small screens and 33% on larger screens.
-        <div
-            style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                height: "60vh",
-            }}
-        >
-            <Carousel
-                opts={{
-                    align: "start",
-                }}
-                className="w-[100%] max-w-[80%]"
-            >
-                <CarouselPrevious />
-                <CarouselContent className="-ml-1">
-                    {bookList.map((book) => (
-                        <CarouselItem className="md:basis-1/2 lg:basis-1/4" key={book.isbn}>
-                            <div className="p-1" key={book.isbn}>
-                                <BookCard
+        <div className="flex min-h-screen w-full flex-col">
+            <main className="flex min-h-[calc(100vh_-_theme(spacing.16))] flex-1 flex-col gap-4 bg-muted/40 p-4 md:gap-8 md:p-10">
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        height: "60vh",
+                    }}
+                >
+                    <Carousel
+                        opts={{
+                            align: "start",
+                        }}
+                        className="w-[100%] max-w-[80%]"
+                    >
+                        <CarouselPrevious />
+                        <CarouselContent className="-ml-1">
+                            {bookList.map((book) => (
+                                <CarouselItem
+                                    className="md:basis-1/2 lg:basis-1/4"
                                     key={book.isbn}
-                                    title={book.title}
-                                    description={book.description}
-                                    price={book.price}
-                                    isbn={book.isbn}
-                                />
-                            </div>
-                        </CarouselItem>
-                    ))}
-                </CarouselContent>
-                <CarouselNext />
-            </Carousel>
+                                >
+                                    <div className="p-1" key={book.isbn}>
+                                        <BookCard
+                                            key={book.isbn}
+                                            title={book.title}
+                                            description={book.description}
+                                            price={book.price}
+                                            product_id={book.isbn}
+                                            isbn={book.isbn}
+                                        />
+                                    </div>
+                                </CarouselItem>
+                            ))}
+                        </CarouselContent>
+                        <CarouselNext />
+                    </Carousel>
+                </div>
+            </main>
         </div>
 
         // <ScrollArea className="h-100vh w-100ow whitespace-nowrap rounded-md border">
