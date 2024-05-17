@@ -17,7 +17,6 @@ import {
 } from "./components/ui/form";
 
 import { useState } from "react";
-import { useBackend } from "./services/backendService";
 import { useNavigate } from "react-router-dom";
 import AlertError from "./AlertError";
 import { useToast } from "./components/ui/use-toast";
@@ -68,10 +67,10 @@ const LoginForm: React.FC<any> = () => {
                 }
             );
             console.log(responce);
-            setToken(responce.data.token);
-            localStorage.setItem("token", responce.data.token);
+            setToken(responce.data.access_token);
+            localStorage.setItem("token", responce.data.access_token);
             toast({
-                title: "Successfully logged in!",
+                title: responce.data.message,
                 //description: "You can view your cart by clicking the cart icon in the top right corner.",
               })
             navigate("/");
@@ -81,7 +80,6 @@ const LoginForm: React.FC<any> = () => {
             if (error instanceof z.ZodError) {
                 console.error("Validation failed:", error.errors);
                 setCredentialError("Invalid credentials");    
-                setCredentialError("Invalid credentials");
                 // Optionally, you can handle validation errors, show error messages, etc.
             } else {
                 console.error("Error submitting form:", error);
