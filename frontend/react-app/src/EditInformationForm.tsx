@@ -16,53 +16,56 @@ import {
     FormMessage,
 } from "./components/ui/form";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AlertError from "./AlertError";
 
 const formSchema = z.object({
-    name: z.string().min(2, {
+    name: z.string().min(0, {
         message: "Name must be at least 2 characters.",
     }),
-    surname: z.string().min(2, {
+    surname: z.string().min(0, {
         message: "Surname must be at least 2 characters.",
     }),
-    username: z.string().min(2, {
+    username: z.string().min(0, {
         message: "Username must be at least 2 characters.",
     }),
     email_address: z.string().email({
         message: "Invalid email address.",
     }),
-    phone_number: z.string().min(2, {
+    phone_number: z.string().min(0, {
         message: "Phone number must be at least 2 characters.",
     }),
-    address: z.string().min(2, {
+    billing_address: z.string().min(0, {
         message: "Address must be at least 2 characters.",
     }),
-    cc: z.string().min(2, {
+    cc: z.string().min(0, {
         message: "Credit card must be at least 2 characters.",
     }),
-    expiredate: z.string().min(2, {
+    expiredate: z.string().min(0, {
         message: "Expire date must be at least 2 characters.",
     }),
-    cvv: z.string().min(2, {
+    cvv: z.string().min(0, {
         message: "CVV must be at least 2 characters.",
     }),
-    password: z.string().min(2, {
+    password: z.string().min(0, {
         message: "Password must be at least 2 characters.",
     }),
+    account_id: z.any(),
 });
 
 interface PersonInformation {
-    name: string;
-    surname: string;
-    username: string;
-    email: string;
-    phone: string;
-    address: string;
+    name?: string;
+    surname?: string;
+    username?: string;
+    email_address?: string;
+    phone_number?: string;
+    billing_address?: string;
     cc: string;
     expiredate: string;
     cvv: string;
+    password?: string;
+    account_id?: string;
 }
 
 interface PersonInformationFormProps {
@@ -70,12 +73,48 @@ interface PersonInformationFormProps {
 }
 
 const EditInformationForm: React.FC<any> = (props: PersonInformation) => {
-    let [credentialError, setCredentialError] = useState<string | null>(null);
-    let [backendError, setBackendError] = useState<string | null>(null);
+    const [credentialError, setCredentialError] = useState<string | null>(null);
+    const [backendError, setBackendError] = useState<string | null>(null);
+    const [account_id, account_id_set] = useState<string | null>(null);
 
     // const backend = useBackend();
     let navigate = useNavigate();
     const { toast } = useToast();
+
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await axios.post(
+                    "http://127.0.0.1:4001/api/account/authenticate",
+                    {},
+                    {
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer " + localStorage.getItem("token"),
+                        },
+                    }
+                );
+
+                console.log(response);
+
+                account_id_set(response.data.account_id);
+
+                console.log(account_id);
+
+            } catch (error: any) {
+                if (error instanceof z.ZodError) {
+                    console.error("Validation failed:", error.errors);
+                    setCredentialError("Invalid credentials");
+                } else {
+                    console.error("Error submitting form:", error);
+                    setBackendError(error.response?.data?.message || "Unknown error");
+                }
+            }
+        };
+
+        fetchData();
+    }, []);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -83,41 +122,51 @@ const EditInformationForm: React.FC<any> = (props: PersonInformation) => {
             name: props.name,
             surname: props.surname,
             username: props.username,
-            email_address: props.email,
-            phone_number: props.phone,
-            address: props.address,
-            cc: "",
-            expiredate: "",
-            cvv: "",
+            email_address: props.email_address,
+            phone_number: props.phone_number,
+            billing_address: props.billing_address,
+            cc: props.cc,
+            expiredate: props.expiredate,
+            cvv: props.cvv,
             password: "",
+            account_id: props.account_id,
         },
     });
 
     const onSubmitHandler = async (formData: z.infer<typeof formSchema>) => {
+        
         try {
+
+            console.log(account_id);
+            formData.account_id = account_id; //type: ignore
+
+            if (formData.password === "") {
+                delete formData.password;
+            }
+
             // Validate form data against the schema
             console.log("Form data is valid:", JSON.stringify(formData));
             const responce = await axios.post(
-                "http://127.0.0.1:4001/api/account/register",
+                "http://127.0.0.1:4001/api/account/update",
                 JSON.stringify(formData),
                 {
                     headers: {
                         "Content-Type": "application/json",
+                        "Authorization": "Bearer " + localStorage.getItem("token"),
                     },
                 }
             );
             console.log(responce);
             toast({
-                title: "Account created successfully!",
-                description: "You can now log in.",
+                title: "Information updated successfully!",
+                //description: "You can now log in.",
             });
-            navigate("/");
+            window.location.reload();
 
             // Optionally, you can redirect the user or show a success message
         } catch (error: any) {
             if (error instanceof z.ZodError) {
                 console.error("Validation failed:", error.errors);
-                setCredentialError("Invalid credentials");
                 setCredentialError("Invalid credentials");
                 // Optionally, you can handle validation errors, show error messages, etc.
             } else {
@@ -171,37 +220,6 @@ const EditInformationForm: React.FC<any> = (props: PersonInformation) => {
                 </div>
                 <FormField
                     control={form.control}
-                    name="username"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Username</FormLabel>
-                            <FormControl>
-                                <Input placeholder="nyquist" {...field} />
-                            </FormControl>
-
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="email_address"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                                <Input
-                                    placeholder="nyquist@cat.miao"
-                                    {...field}
-                                />
-                            </FormControl>
-
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
                     name="phone_number"
                     render={({ field }) => (
                         <FormItem>
@@ -216,7 +234,7 @@ const EditInformationForm: React.FC<any> = (props: PersonInformation) => {
                 />
                 <FormField
                     control={form.control}
-                    name="address"
+                    name="billing_address"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Address</FormLabel>
@@ -242,6 +260,7 @@ const EditInformationForm: React.FC<any> = (props: PersonInformation) => {
                                     <Input
                                         placeholder="Credit Card Number"
                                         {...field}
+                                        type="cc-number"
                                     />
                                 </FormControl>
 
@@ -256,10 +275,7 @@ const EditInformationForm: React.FC<any> = (props: PersonInformation) => {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormControl>
-                                        <Input
-                                            placeholder="MM/YY"
-                                            {...field}
-                                        />
+                                        <Input placeholder="MM/YY" {...field} type="cc-exp" />
                                     </FormControl>
 
                                     <FormMessage />
@@ -272,10 +288,7 @@ const EditInformationForm: React.FC<any> = (props: PersonInformation) => {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormControl>
-                                        <Input
-                                            placeholder="CVV"
-                                            {...field}
-                                        />
+                                        <Input placeholder="CVV" {...field} type="cc-csc" />
                                     </FormControl>
 
                                     <FormMessage />
@@ -292,7 +305,7 @@ const EditInformationForm: React.FC<any> = (props: PersonInformation) => {
                             <FormLabel>Password</FormLabel>
                             <FormControl>
                                 <Input
-                                    placeholder=""
+                                    placeholder="*************"
                                     type="password"
                                     {...field}
                                 />

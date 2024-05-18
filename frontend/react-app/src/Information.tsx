@@ -20,13 +20,13 @@ const PersonalInformation = (props: PersonInformation) => {
                 <strong>Username:</strong> {props.username}
             </p>
             <p>
-                <strong>Email:</strong> {props.email}
+                <strong>Email:</strong> {props.email_address}
             </p>
             <p>
-                <strong>Phone Number:</strong> {props.phone}
+                <strong>Phone Number:</strong> {props.phone_number}
             </p>
             <p>
-                <strong>Address:</strong> {props.address}
+                <strong>Address:</strong> {props.billing_address}
             </p>
             <p>
                 <strong>Credit Card:</strong>{" "}

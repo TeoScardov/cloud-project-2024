@@ -32,7 +32,7 @@ import { Book } from "./TableCartBook";
 
 function Profile() {
     const [showLibrary, setShowLibrary] = useState<Boolean>(false);
-    const [personalInformation, setPersonalInformation] = useState<PersonInformation>();
+    const [personalInformation, setPersonalInformation] =useState<PersonInformation>();
     const [library, setLibrary] = useState<Array<Book>>([]);
 
     useEffect(() => {
@@ -55,6 +55,7 @@ function Profile() {
             .then((response) => {
                 setPersonalInformation(response.data);
                 setLibrary(response.data.library);
+                console.log(response.data);
                 console.log(response.data.library);
             })
             .catch((error) => {
@@ -90,7 +91,7 @@ function Profile() {
                     <div className="grid gap-6">
                         {showLibrary ? (
                             <Card x-chunk="dashboard-04-chunk-1">
-                                <Library library = {library}/>
+                                <Library library={library} />
                             </Card>
                         ) : (
                             <Card x-chunk="dashboard-04-chunk-2">
@@ -106,10 +107,14 @@ function Profile() {
                                         username={
                                             personalInformation?.username ?? ""
                                         }
-                                        email={personalInformation?.email ?? ""}
-                                        phone={personalInformation?.phone ?? ""}
-                                        address={
-                                            personalInformation?.address ?? ""
+                                        email_address={
+                                            personalInformation?.email_address ??
+                                            ""
+                                        }
+                                        phone_number={personalInformation?.phone_number ?? ""}
+                                        billing_address={
+                                            personalInformation?.billing_address ??
+                                            ""
                                         }
                                         cc={personalInformation?.cc ?? ""}
                                         expiredate={
@@ -117,6 +122,9 @@ function Profile() {
                                             ""
                                         }
                                         cvv={personalInformation?.cvv ?? ""}
+                                        password={personalInformation?.password ?? ""}
+                                        account_id={personalInformation?.account_id ?? ""}
+
                                     />
                                 </CardContent>
                                 <CardFooter className="border-t px-6 py-4">
@@ -128,10 +136,10 @@ function Profile() {
                                         username={
                                             personalInformation?.username ?? ""
                                         }
-                                        email={personalInformation?.email ?? ""}
-                                        phone={personalInformation?.phone ?? ""}
-                                        address={
-                                            personalInformation?.address ?? ""
+                                        email_address={personalInformation?.email_address ?? ""}
+                                        phone_number={personalInformation?.phone_number ?? ""}
+                                        billing_address={
+                                            personalInformation?.billing_address ?? ""
                                         }
                                         cc={personalInformation?.cc ?? ""}
                                         expiredate={
@@ -139,6 +147,8 @@ function Profile() {
                                             ""
                                         }
                                         cvv={personalInformation?.cvv ?? ""}
+                                        password={personalInformation?.password ?? ""}
+                                        account_id={personalInformation?.account_id ?? ""}
                                     />
                                 </CardFooter>
                             </Card>
