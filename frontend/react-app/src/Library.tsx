@@ -28,6 +28,7 @@ function Library(props: LibraryProps) {
                         description={book.description}
                         price={book.price}
                         isbn={book.isbn}
+                        product_id={book.isbn}
                     />
                 ))}
             </ScrollBar>
