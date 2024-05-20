@@ -10,6 +10,13 @@ cart = Blueprint('cart', __name__)
 
 @cart.route("/health")
 def health():
+    """
+        This is an endpoint that checks for health of the service and returns 'up'
+        ---
+        responses:
+          200:
+            description: A simple string response "UP"
+        """
     return jsonify(
         status="UP"
     )
@@ -18,12 +25,31 @@ def health():
 @cart.route("/addProduct", methods=["POST"])
 def add_product():
     """
-    Add the provided quantity of a product to a cart. Where an item already exists in the cart, the quantities will
-    be summed.
+       This is an endpoint that Add the provided quantity of a product to a cart.
+       Where an item already exists in the cart, the quantities will be summed.
+       it does not depend on user being logged in or not however in the database there is a user_id field that will
+        be set as the user logs in and if a cart has a user_id it won't get deleted after expiry.
+       ---
+       parameters:
+            in: body
+            name: body
+            required: true
+            schema:
+              type: object
+              properties:
+                cart_id:
+                  type: string
+                product_id:
+                  type: string
+            description: JSON object containing id of the product to be added to the cart.
+            if the cart_id is null a new cart will be created else it will be added to the existing cart.
 
-    it does not depend on user being logged in or not however in the database there is a user_id field that will get set
-    as the user logs in and if a cart has a user_id it won't get deleted after expiry.
-    """
+       responses:
+         200:
+           description: successful operation
+         404:
+            description: any error occurred with additional information.
+       """
     try:
         request_payload = request.json
     except (ValueError, TypeError) as e:
@@ -104,6 +130,29 @@ def add_product():
 
 @cart.route("/removeProduct", methods=["DELETE"])
 def remove_product():
+    """
+       This is an endpoint that removes a product from a cart.
+       ---
+       parameters:
+            in: body
+            name: body
+            required: true
+            schema:
+              type: object
+              properties:
+                cart_id:
+                  type: string
+                product_id:
+                  type: string
+            description: JSON object containing id of the product to be deleted from the cart.
+            if the cart_id is null or it doesn't match user_id there will be error.
+
+       responses:
+         200:
+           description: successful operation
+         404:
+            description: any error occurred with additional information.
+       """
     try:
         request_payload = request.json
     except (ValueError, TypeError) as e:
@@ -189,6 +238,21 @@ def remove_product():
 
 @cart.route("/show_cart", methods=["GET"])
 def show_cart():
+    """
+       This is an endpoint that shows the cart content
+       ---
+       parameters:
+          - name: cart_id
+            in: path
+            type: string
+            required: true
+            description: The ID of the shopping cart to be shown.
+       responses:
+         200:
+           description: successful operation
+         404:
+            description: any error occurred with additional information.
+       """
     cart_id = request.args.get('cart_id')
     if cart_id:
         if database.check_cart_id(cart_id):
@@ -210,6 +274,21 @@ def show_cart():
 
 @cart.route("/removeCart", methods=["DELETE"])
 def remove_cart():
+    """
+       This is an endpoint that removes the cart entirely
+       ---
+       parameters:
+          - name: cart_id
+            in: path
+            type: string
+            required: true
+            description: The ID of the shopping cart to be shown.
+       responses:
+         200:
+           description: successful operation
+         404:
+            description: any error occurred with additional information.
+       """
     try:
         request_payload = request.json
     except (ValueError, TypeError) as e:
@@ -238,7 +317,7 @@ def remove_cart():
             "body": json.dumps({"message": "invalid request! no auth"}),
         }
 
-    user_cart_id = str(database.check_for_user_cart(user_id, cart_id))
+    user_cart_id = database.check_for_user_cart(user_id, cart_id)
 
     if not user_cart_id:
         return {
@@ -248,8 +327,8 @@ def remove_cart():
         }
     else:
         if cart_id:
-            if cart_id == user_cart_id:
-                database.delete_cart(user_cart_id, user_id)
+            if cart_id == str(user_cart_id):
+                database.delete_cart(str(user_cart_id), user_id)
             else:
                 return {
                     "statusCode": 404,
@@ -257,7 +336,7 @@ def remove_cart():
                     "body": json.dumps({"message": "request is not valid"}),
                 }
         else:
-            database.delete_cart(user_cart_id, user_id)
+            database.delete_cart(str(user_cart_id), user_id)
 
     return {
         "statusCode": 200,
