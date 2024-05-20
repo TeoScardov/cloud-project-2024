@@ -19,6 +19,7 @@ if not db_url:
 
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url  # Set the database URI for SQLAlchemy
 
+# Initialize Cors app
 CORS(app)
 
 # Initialize SQLAlchemy
