@@ -170,10 +170,10 @@ def delete_book(isbn):
         return make_response(jsonify({'message': f'error deleting book: {str(e)}'}), 500)
 
 # Route to get random books
-@app.route('/api/product/get-random-books', methods=['GET'])
-def get_random_books():
+@app.route('/api/product/get-random-books/<int:number>', methods=['GET'])
+def get_random_books(number):
     try:
-        random_books = Book.query.order_by(func.random()).limit(5).all()  # Query 5 random books
+        random_books = Book.query.order_by(func.random()).limit(number).all()  # Query 5 random books
         return make_response(jsonify([book.json() for book in random_books]), 200)
     except Exception as e:
         logger.error(f"Error getting random books: {e}")
