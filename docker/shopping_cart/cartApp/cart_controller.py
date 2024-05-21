@@ -76,21 +76,36 @@ def add_product():
         if cart_id:
             if database.check_cart_id(cart_id):
                 database.renew_cart_expiry(cart_id, user_id)
-                current_cart = database.add_item(cart_id, product, user_id)
+                try:
+                    current_cart = database.add_item(cart_id, product, user_id)
+                except Exception as e:
+                    return utility.create_response(cart_id, {"message": str(e)}, 404)
+
             else:
                 return utility.create_response(cart_id, {"message": "Invalid cart ID"}, 404)
 
         else:
             cart_id = database.insert_cart(0, user_id)
-            current_cart = database.add_item(cart_id, product, user_id)
+            try:
+                current_cart = database.add_item(cart_id, product, user_id)
+            except Exception as e:
+                return utility.create_response(cart_id, {"message": str(e)}, 404)
+
     else:
         if cart_id:
             if cart_id == str(user_cart_id):
                 database.renew_cart_expiry(str(user_cart_id), user_id)
-                current_cart = database.add_item(str(user_cart_id), product, user_id)
+                try:
+                    current_cart = database.add_item(str(user_cart_id), product, user_id)
+                except Exception as e:
+                    return utility.create_response(cart_id, {"message": str(e)}, 404)
+
             elif database.check_cart_id(cart_id):
                 database.renew_cart_expiry(cart_id, user_id)
-                database.add_item(cart_id, product, user_id)
+                try:
+                    database.add_item(cart_id, product, user_id)
+                except Exception as e:
+                    return utility.create_response(cart_id, {"message": str(e)}, 404)
                 current_cart = database.merge_carts(user_id, cart_id)
             else:
 
@@ -100,7 +115,10 @@ def add_product():
 
         else:
             database.renew_cart_expiry(user_cart_id, user_id)
-            current_cart = database.add_item(user_cart_id, product, user_id)
+            try:
+                current_cart = database.add_item(user_cart_id, product, user_id)
+            except Exception as e:
+                return utility.create_response(cart_id, {"message": str(e)}, 404)
 
     return utility.create_response(str(current_cart.id),
                                    {"message": "product added to cart",

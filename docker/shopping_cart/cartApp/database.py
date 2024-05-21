@@ -27,12 +27,9 @@ def add_item(cart_id, item, user_id):
     # Retrieve existing cart items and total
     existing_items = CartItem.query.filter_by(cart_id=cart_id).with_entities(CartItem.isbn).all()
     item_id = item['isbn']
-    existing_isbns = [existing_item[0] for existing_item in existing_items]
-    if item_id in existing_isbns:
-        # update existing item
-        cart_item_to_update = CartItem.query.filter_by(cart_id=cart_id, isbn=item_id).first()
-        cart_item_to_update.quantity += 1
-        db.session.commit()
+    existing_ids = [existing_item[0] for existing_item in existing_items]
+    if item_id in existing_ids:
+        raise Exception('Item already exists in cart, you cannot add each item more than once')
     else:
         # add new item
         insert_item(cart_id, item_id, item['name'], 1, item['price'])
