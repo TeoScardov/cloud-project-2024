@@ -29,14 +29,14 @@ class CartItem(db.Model):
     __tablename__ = 'cart_item'
 
     cart_id = db.Column(UUID(as_uuid=True), db.ForeignKey('cart.id'), primary_key=True)
-    product_id = db.Column(db.String(20), primary_key=True)
+    isbn = db.Column(db.String(20), primary_key=True)
     quantity = db.Column(db.Integer, nullable=False, default=0)
     name = db.Column(db.String(255), nullable=False, default="")
     price = db.Column(db.REAL, nullable=False, default=0.0)
 
-    def __init__(self, cart_id=None, product_id=None, quantity=0, name="", price=0.0):
+    def __init__(self, cart_id=None, isbn=None, quantity=0, name="", price=0.0):
         self.cart_id = cart_id
-        self.product_id = product_id
+        self.isbn = isbn
         self.quantity = quantity
         self.name = name
         self.price = price

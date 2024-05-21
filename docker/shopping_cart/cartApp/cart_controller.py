@@ -1,5 +1,3 @@
-import json
-
 from flask import Blueprint
 from flask import jsonify, request
 
@@ -39,47 +37,38 @@ def add_product():
               properties:
                 cart_id:
                   type: string
-                product_id:
+                isbn:
                   type: string
             description: JSON object containing id of the product to be added to the cart.
             if the cart_id is null a new cart will be created else it will be added to the existing cart.
 
        responses:
          200:
-           description: successful operation
+            description: successful operation
          404:
             description: any error occurred with additional information.
-       """
+    """
     try:
         request_payload = request.json
     except (ValueError, TypeError) as e:
-        return {
-            "statusCode": 400,
-            "headers": utility.get_headers(None),
-            "body": json.dumps({"message": "No Request payload"}),
-        }
-    product_id = request_payload["product_id"]
+        return utility.create_response(None, {"message": "No Request payload"}, 400)
+
+    isbn = request_payload["isbn"]
     cart_id = request_payload["cart_id"]
     user_id = None
     user_cart_id = None
     try:
-        product = call_service.get_product_from_external_service(product_id)
+        product = call_service.get_product_from_external_service(isbn)
     except Exception as e:
-        return {
-            "statusCode": 404,
-            "headers": utility.get_headers(cart_id=cart_id),
-            "body": json.dumps({"message": str(e)}),
-        }
+        return utility.create_response(cart_id
+                                       , {"message": "Invalid ISBN\n error body: " + str(e)}, 404)
 
     if 'Authorization' in request.headers:
         try:
             user_id = call_service.authenticate_user_with_jwt(request.headers['Authorization'])
         except Exception as e:
-            return {
-                "statusCode": 404,
-                "headers": utility.get_headers(cart_id=cart_id),
-                "body": json.dumps({"message": str(e)}),
-            }
+            return utility.create_response(cart_id, {"message": "Invalid JWT\n error body:" + str(e)}, 404)
+
     if user_id:
         user_cart_id = database.check_for_user_cart(user_id, cart_id)
 
@@ -89,11 +78,8 @@ def add_product():
                 database.renew_cart_expiry(cart_id, user_id)
                 current_cart = database.add_item(cart_id, product, user_id)
             else:
-                return {
-                    "statusCode": 404,
-                    "headers": utility.get_headers(cart_id=cart_id),
-                    "body": json.dumps({"message": "cart_id is not valid"}),
-                }
+                return utility.create_response(cart_id, {"message": "Invalid cart ID"}, 404)
+
         else:
             cart_id = database.insert_cart(0, user_id)
             current_cart = database.add_item(cart_id, product, user_id)
@@ -108,24 +94,20 @@ def add_product():
                 current_cart = database.merge_carts(user_id, cart_id)
             else:
 
-                return {
-                    "statusCode": 404,
-                    "headers": utility.get_headers(cart_id),
-                    "body": json.dumps({"message": "cart_id is not valid", "user_cart_id": str(user_cart_id)}),
-                }
+                return utility.create_response(cart_id,
+                                               {"message": "cart ID mismatch", "cart_id": cart_id,
+                                                "user_cart_id": str(user_cart_id)}, 404)
+
         else:
             database.renew_cart_expiry(user_cart_id, user_id)
             current_cart = database.add_item(user_cart_id, product, user_id)
 
-    return {
-        "statusCode": 200,
-        "headers": utility.get_headers(cart_id),
-        "body": json.dumps(
-            {"productId": str(product_id), "message": "product added to cart",
-             "cart_id": str(current_cart.id), "total": current_cart.total,
-             "product": {"name": product["name"], "price": product["price"]}}
-        ),
-    }
+    return utility.create_response(str(current_cart.id),
+                                   {"message": "product added to cart",
+                                    "cart_id": str(current_cart.id),
+                                    "total": current_cart.total,
+                                    "product": {"name": product["name"], "isbn": product["isbn"],
+                                                "price": product["price"]}}, 200)
 
 
 @cart.route("/removeProduct", methods=["DELETE"])
@@ -142,47 +124,37 @@ def remove_product():
               properties:
                 cart_id:
                   type: string
-                product_id:
+                isbn:
                   type: string
             description: JSON object containing id of the product to be deleted from the cart.
-            if the cart_id is null or it doesn't match user_id there will be error.
+            if the cart_id is null ,or it doesn't match user_id there will be error.
 
        responses:
          200:
-           description: successful operation
+            description: successful operation
          404:
             description: any error occurred with additional information.
-       """
+    """
     try:
         request_payload = request.json
     except (ValueError, TypeError) as e:
-        return {
-            "statusCode": 400,
-            "headers": utility.get_headers(None),
-            "body": json.dumps({"message": "No Request payload"}),
-        }
-    product_id = request_payload["product_id"]
+        return utility.create_response(None, {"message": "No Request payload"}, 400)
+
+    isbn = request_payload["isbn"]
     cart_id = request_payload["cart_id"]
     user_id = None
     user_cart_id = None
     try:
-        product = call_service.get_product_from_external_service(product_id)
+        product = call_service.get_product_from_external_service(isbn)
     except Exception as e:
-        return {
-            "statusCode": 404,
-            "headers": utility.get_headers(cart_id=cart_id),
-            "body": json.dumps({"message": str(e)}),
-        }
+        return utility.create_response(cart_id, {"message": "Invalid ISBN \n error body:" + str(e)}, 404)
 
     if 'Authorization' in request.headers:
         try:
             user_id = call_service.authenticate_user_with_jwt(request.headers['Authorization'])
         except Exception as e:
-            return {
-                "statusCode": 404,
-                "headers": utility.get_headers(cart_id=cart_id),
-                "body": json.dumps({"message": str(e)}),
-            }
+            return utility.create_response(cart_id,
+                                           {"message": "Invalid JWT\n error body:" + str(e)}, 404)
     if user_id:
         user_cart_id = database.check_for_user_cart(user_id, cart_id)
 
@@ -192,17 +164,13 @@ def remove_product():
                 database.renew_cart_expiry(cart_id, user_id)
                 current_cart = database.delete_item(cart_id, product, user_id)
             else:
-                return {
-                    "statusCode": 404,
-                    "headers": utility.get_headers(cart_id=cart_id),
-                    "body": json.dumps({"message": "cart_id is not valid", "user_cart_id": str(user_cart_id)}),
-                }
+                return utility.create_response(cart_id,
+                                               {"message": "cart ID mismatch", "cart_id": cart_id,
+                                                "user_cart_id": str(user_cart_id)}, 404)
+
         else:
-            return {
-                "statusCode": 404,
-                "headers": utility.get_headers(cart_id=cart_id),
-                "body": json.dumps({"message": "cart_id not provided "}),
-            }
+            return utility.create_response(cart_id, {"message": "cart ID not provided "}, 404)
+
     else:
         if cart_id:
             if cart_id == str(user_cart_id):
@@ -213,27 +181,19 @@ def remove_product():
                 database.delete_item(cart_id, product, user_id)
                 current_cart = database.merge_carts(user_id, cart_id)
             else:
-                return {
-                    "statusCode": 404,
-                    "headers": utility.get_headers(cart_id=cart_id),
-                    "body": json.dumps({"message": "cart_id is not valid", "user_cart_id": str(user_cart_id)}),
-                }
-        else:
-            return {
-                "statusCode": 404,
-                "headers": utility.get_headers(cart_id=cart_id),
-                "body": json.dumps({"message": "cart_id not provided"}),
-            }
+                return utility.create_response(cart_id,
+                                               {"message": "cart ID mismatch", "cart_id": cart_id,
+                                                "user_cart_id": str(user_cart_id)}, 404)
 
-    return {
-        "statusCode": 200,
-        "headers": utility.get_headers(cart_id),
-        "body": json.dumps(
-            {"productId": product_id, "message": "product deleted from the cart",
-             "cart_id": str(current_cart.id), "total": current_cart.total,
-             "product": {"name": product["name"], "price": product["price"]}}
-        ),
-    }
+        else:
+            return utility.create_response(cart_id, {"message": "cart ID not provided "}, 404)
+
+    return utility.create_response(str(current_cart.id),
+                                   {"message": "product removed from cart",
+                                    "cart_id": str(current_cart.id),
+                                    "total": current_cart.total,
+                                    "product": {"name": product["name"], "isbn": product["isbn"],
+                                                "price": product["price"]}}, 200)
 
 
 @cart.route("/show_cart", methods=["GET"])
@@ -258,18 +218,13 @@ def show_cart():
         if database.check_cart_id(cart_id):
             current_cart = database.renew_cart_expiry(cart_id, None)
             cart_items = database.get_cart_items_by_cart_id(cart_id)
-            response_data = {"cart_id": str(current_cart.id), "total": current_cart.total, "items": cart_items}
-            return {
-                "statusCode": 200,
-                "headers": utility.get_headers(cart_id),
-                "body": json.dumps(response_data),
-            }
+            return utility.create_response(str(current_cart.id),
+                                           {"cart_id": str(current_cart.id), "total": current_cart.total,
+                                            "items": cart_items}, 200)
+        else:
+            return utility.create_response(cart_id, {"message": "cart ID does not exist "}, 404)
     else:
-        return {
-            "statusCode": 404,
-            "headers": utility.get_headers(cart_id=cart_id),
-            "body": json.dumps({"message": "cart_id needed"}),
-        }
+        return utility.create_response(cart_id, {"message": "cart ID not provided "}, 404)
 
 
 @cart.route("/removeCart", methods=["DELETE"])
@@ -292,11 +247,8 @@ def remove_cart():
     try:
         request_payload = request.json
     except (ValueError, TypeError) as e:
-        return {
-            "statusCode": 400,
-            "headers": utility.get_headers(None),
-            "body": json.dumps({"message": "No Request payload"}),
-        }
+        return utility.create_response(None, {"message": "No Request payload"}, 400)
+
     cart_id = request_payload["cart_id"]
     user_id = None
     user_cart_id = None
@@ -305,43 +257,26 @@ def remove_cart():
         try:
             user_id = call_service.authenticate_user_with_jwt(request.headers['Authorization'])
         except Exception as e:
-            return {
-                "statusCode": 404,
-                "headers": utility.get_headers(cart_id=cart_id),
-                "body": json.dumps({"message": str(e)}),
-            }
-    else:
-        return {
-            "statusCode": 404,
-            "headers": utility.get_headers(cart_id=cart_id),
-            "body": json.dumps({"message": "invalid request! no auth"}),
-        }
+            return utility.create_response(cart_id,
+                                           {"message": "Invalid Authorization\n Error body:" + str(e)}, 404)
 
-    user_cart_id = database.check_for_user_cart(user_id, cart_id)
+    if user_id:
+        user_cart_id = database.check_for_user_cart(user_id, cart_id)
 
     if not user_cart_id:
-        return {
-            "statusCode": 404,
-            "headers": utility.get_headers(cart_id=cart_id),
-            "body": json.dumps({"message": "this user doesn't have cart to delete!"}),
-        }
+        if cart_id:
+            database.delete_cart(cart_id, user_id)
+        else:
+            return utility.create_response(cart_id, {"message": "cart ID not provided "}, 404)
     else:
         if cart_id:
             if cart_id == str(user_cart_id):
                 database.delete_cart(str(user_cart_id), user_id)
             else:
-                return {
-                    "statusCode": 404,
-                    "headers": utility.get_headers(cart_id=cart_id),
-                    "body": json.dumps({"message": "request is not valid"}),
-                }
+                return utility.create_response(cart_id, {"message": "cart ID mismatch", "cart_id": cart_id,
+                                                         "user_cart_id": str(user_cart_id)}, 404)
+
         else:
             database.delete_cart(str(user_cart_id), user_id)
 
-    return {
-        "statusCode": 200,
-        "headers": utility.get_headers(user_cart_id),
-        "body": json.dumps(
-            {"message": "cart deleted"}
-        ),
-    }
+    return utility.create_response(str(user_cart_id), {"message": "cart deleted successfully"}, 200)

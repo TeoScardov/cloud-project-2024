@@ -1,6 +1,7 @@
-import os
 import datetime
-from http.cookies import SimpleCookie
+import os
+
+from flask import jsonify
 
 HEADERS = {
     "Access-Control-Allow-Origin": os.environ.get("ALLOWED_ORIGIN"),
@@ -19,18 +20,22 @@ def generate_ttl(days=1):
 
 
 #
-def get_headers(cart_id):
-    """
-    Get the headers to add to response data
-    """
-    headers = HEADERS
-    cookie = SimpleCookie()
-    cookie["cartId"] = cart_id
-    cookie["cartId"]["max-age"] = (60 * 60) * 24  # 1 day
-    cookie["cartId"]["secure"] = True
-    cookie["cartId"]["httponly"] = True
-    cookie["cartId"]["path"] = "/"
-    headers["Set-Cookie"] = cookie["cartId"].OutputString()
-    return headers
 
+def create_response(cart_id, json_data, status_code):
+    response = jsonify(json_data)
+    response.status_code = status_code
+    response.mimetype = 'application/json'
 
+    for header, value in HEADERS.items():
+        response.headers[header] = value
+
+    response.set_cookie(
+        key='cartId',
+        value=cart_id,
+        max_age=60 * 60 * 24,  # 1 day in seconds
+        secure=True,
+        httponly=True,
+        path='/'
+    )
+
+    return response
