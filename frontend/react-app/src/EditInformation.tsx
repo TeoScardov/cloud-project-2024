@@ -10,8 +10,30 @@ import {
 import { Button } from "./components/ui/button";
 import { PersonInformation } from "./EditInformationForm";
 import EditInformationForm from "./EditInformationForm";
+import { useBackend } from "./services/backendService";
+import { useEffect, useState } from "react";
 
-function EditInformation(props: PersonInformation) {
+function EditInformation() {
+
+    const [personalInformation, setPersonalInformation] = useState<PersonInformation | null>(null);
+
+    const backend = useBackend();
+
+    useEffect(() => {
+
+
+        backend.getPersonalInfo().then((response: any) => {
+            if (response === null) {
+                throw new Error("No response");
+            }
+            setPersonalInformation(response);
+        });
+
+
+
+
+    }, []);
+
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -21,7 +43,7 @@ function EditInformation(props: PersonInformation) {
                 <DialogHeader>
                     <DialogTitle>Edit profile</DialogTitle>
                 </DialogHeader>
-                <EditInformationForm {...props} />
+                <EditInformationForm {...personalInformation}/>
             </DialogContent>
         </Dialog>
     );

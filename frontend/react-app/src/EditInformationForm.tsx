@@ -1,10 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Input } from "./components/ui/input";
 import { Button } from "./components/ui/button";
 import axios from "axios";
 import { useToast } from "./components/ui/use-toast";
+import { useBackend } from "./services/backendService";
 
 import {
     Form,
@@ -33,137 +34,103 @@ const formSchema = z.object({
     email_address: z.string().email({
         message: "Invalid email address.",
     }),
-    phone_number: z.string().min(0, {
-        message: "Phone number must be at least 2 characters.",
-    }),
-    billing_address: z.string().min(0, {
-        message: "Address must be at least 2 characters.",
-    }),
-    cc: z.string().min(0, {
-        message: "Credit card must be at least 2 characters.",
-    }),
-    expiredate: z.string().min(0, {
-        message: "Expire date must be at least 2 characters.",
-    }),
-    cvv: z.string().min(0, {
-        message: "CVV must be at least 2 characters.",
-    }),
-    password: z.string().min(0, {
-        message: "Password must be at least 2 characters.",
-    }),
-    account_id: z.any(),
+    phone_number: z.string().optional(),
+    billing_address: z.string().optional(),
+    cc: z.string().optional(),
+    expiredate: z.string().optional(),
+    cvv: z.string().optional(),
+    password: z.string().optional(),
+    account_id: z.any().optional(),
 });
 
 interface PersonInformation {
-    name?: string;
-    surname?: string;
-    username?: string;
-    email_address?: string;
-    phone_number?: string;
-    billing_address?: string;
+    name: string;
+    surname: string;
+    username: string;
+    email_address: string;
+}
+
+interface CustomerInformation extends PersonInformation {
+    phone_number: string;
+    billing_address: string;
     cc: string;
     expiredate: string;
     cvv: string;
-    password?: string;
-    account_id?: string;
 }
 
-interface PersonInformationFormProps {
+interface ModifyInformation extends CustomerInformation {
+    account_id: string | undefined;
+    password?: string | undefined;
+}
+
+
+
+interface ModifyInformationFormProps {
     onSubmit: (formData: z.infer<typeof formSchema>) => void;
 }
 
-const EditInformationForm: React.FC<any> = (props: PersonInformation) => {
+const EditInformationForm: React.FC<any> = (props: ModifyInformation) => {
     const [credentialError, setCredentialError] = useState<string | null>(null);
     const [backendError, setBackendError] = useState<string | null>(null);
-    const [account_id, account_id_set] = useState<string | null>(null);
+    const [accountId, setAccountId] = useState<string | null>(null);
 
     // const backend = useBackend();
     let navigate = useNavigate();
     const { toast } = useToast();
-
+    const backend = useBackend();
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await axios.post(
-                    "http://127.0.0.1:4001/api/account/authenticate",
-                    {},
-                    {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": "Bearer " + localStorage.getItem("token"),
-                        },
-                    }
-                );
+        if (!localStorage.getItem("token")) {
+            navigate("/login");
+        }
 
-                console.log(response);
-
-                account_id_set(response.data.account_id);
-
-                console.log(account_id);
-
-            } catch (error: any) {
-                if (error instanceof z.ZodError) {
-                    console.error("Validation failed:", error.errors);
-                    setCredentialError("Invalid credentials");
-                } else {
-                    console.error("Error submitting form:", error);
-                    setBackendError(error.response?.data?.message || "Unknown error");
-                }
+        backend.getAuth().then((response: any) => {
+            if (response === null) {
+                navigate("/login");
             }
-        };
-
-        fetchData();
+            setAccountId(response.data.account_id);
+        });
     }, []);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            name: props.name,
-            surname: props.surname,
-            username: props.username,
-            email_address: props.email_address,
-            phone_number: props.phone_number,
-            billing_address: props.billing_address,
-            cc: props.cc,
-            expiredate: props.expiredate,
-            cvv: props.cvv,
-            password: "",
-            account_id: props.account_id,
+            name: props.name || "",
+            surname: props.surname || "",
+            username: props.username || "",
+            email_address: props.email_address || "",
+            phone_number: props.phone_number || "",
+            billing_address: props.billing_address || "",
+            cc: props.cc || "",
+            expiredate: props.expiredate || "",
+            cvv: props.cvv || "",
+            password: undefined || "",
+            account_id: props.account_id || "",
         },
     });
 
     const onSubmitHandler = async (formData: z.infer<typeof formSchema>) => {
-        
         try {
+            console.log(accountId);
+            formData.account_id = accountId; //type: ignore
 
-            console.log(account_id);
-            formData.account_id = account_id; //type: ignore
-
-            if (formData.password === "") {
+            if (formData.password == null || formData.password == "") {
                 delete formData.password;
             }
 
             // Validate form data against the schema
             console.log("Form data is valid:", JSON.stringify(formData));
-            const responce = await axios.post(
-                "http://127.0.0.1:4001/api/account/update",
-                JSON.stringify(formData),
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": "Bearer " + localStorage.getItem("token"),
-                    },
-                }
-            );
-            console.log(responce);
-            toast({
-                title: "Information updated successfully!",
-                //description: "You can now log in.",
-            });
-            window.location.reload();
+            
+            backend.postUpdateInfo(formData).then((response: any) => {
+                console.log(response);
+                toast({
+                    title: "Information updated successfully!",
+                    //description: "You can now log in.",
+                });
+                window.location.reload();
 
-            // Optionally, you can redirect the user or show a success message
+            });
+
         } catch (error: any) {
             if (error instanceof z.ZodError) {
                 console.error("Validation failed:", error.errors);
@@ -275,7 +242,11 @@ const EditInformationForm: React.FC<any> = (props: PersonInformation) => {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormControl>
-                                        <Input placeholder="MM/YY" {...field} type="cc-exp" />
+                                        <Input
+                                            placeholder="MM/YY"
+                                            {...field}
+                                            type="cc-exp"
+                                        />
                                     </FormControl>
 
                                     <FormMessage />
@@ -288,7 +259,11 @@ const EditInformationForm: React.FC<any> = (props: PersonInformation) => {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormControl>
-                                        <Input placeholder="CVV" {...field} type="cc-csc" />
+                                        <Input
+                                            placeholder="CVV"
+                                            {...field}
+                                            type="cc-csc"
+                                        />
                                     </FormControl>
 
                                     <FormMessage />
@@ -324,4 +299,4 @@ const EditInformationForm: React.FC<any> = (props: PersonInformation) => {
 };
 
 export default EditInformationForm;
-export type { PersonInformation };
+export type { PersonInformation, CustomerInformation, ModifyInformation, ModifyInformationFormProps};

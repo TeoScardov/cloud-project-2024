@@ -1,7 +1,23 @@
-import React from "react";
-import { PersonInformation } from "./EditInformationForm";
+import { useEffect, useState } from "react";
+import { CustomerInformation } from "./EditInformationForm";
+import { useBackend } from "./services/backendService";
 
-const PersonalInformation = (props: PersonInformation) => {
+const PersonalInformation = () => {
+
+    const backend = useBackend();
+
+    const [personalInformation, setPersonalInformation] = useState<CustomerInformation | null>(null);
+
+    useEffect(() => {
+        backend.getPersonalInfo().then((response: any) => {
+            
+            if (response === null) {
+                throw new Error("No response");
+            }
+
+            setPersonalInformation(response);
+        });
+    }, []);
 
     return (
         <div
@@ -10,31 +26,45 @@ const PersonalInformation = (props: PersonInformation) => {
                 maxWidth: "600px",
             }}
         >
-            <p>
-                <strong>Name:</strong> {props.name}
-            </p>
-            <p>
-                <strong>Surname:</strong> {props.surname}
-            </p>
-            <p>
-                <strong>Username:</strong> {props.username}
-            </p>
-            <p>
-                <strong>Email:</strong> {props.email_address}
-            </p>
-            <p>
-                <strong>Phone Number:</strong> {props.phone_number}
-            </p>
-            <p>
-                <strong>Address:</strong> {props.billing_address}
-            </p>
-            <p>
-                <strong>Credit Card:</strong>{" "}
-                {"*".repeat(props.cc.slice(0, -4).length) + props.cc.slice(-4)}
-            </p>
+            {personalInformation && (
+                <p>
+                    <strong>Name:</strong> {personalInformation.name}
+                </p>
+            )}
+            {personalInformation && (
+                <p>
+                    <strong>Surname:</strong> {personalInformation.surname}
+                </p>
+            )}
+            {personalInformation && (
+                <p>
+                    <strong>Username:</strong> {personalInformation.username}
+                </p>
+            )}
+            {personalInformation && (
+                <p>
+                    <strong>Email:</strong> {personalInformation.email_address}
+                </p>
+            )}
+            {personalInformation && (
+                <p>
+                    <strong>Phone Number:</strong> {personalInformation.phone_number}
+                </p>
+            )}
+            {personalInformation && (
+                <p>
+                    <strong>Address:</strong> {personalInformation.billing_address}
+                </p>
+            )}
+            {/*             // NOT WORKIN
+            {personalInformation && (
+                <p>
+                    <strong>Credit Card:</strong>{" "}
+                    {"*".repeat(personalInformation.cc.slice(0, -4).length) + personalInformation.cc.slice(-4)}
+                </p>
+            )} */}
         </div>
     );
 };
 
 export default PersonalInformation;
-export type { PersonInformation };
