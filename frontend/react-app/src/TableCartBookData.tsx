@@ -30,7 +30,6 @@ export function DataTable<TData, TValue>({
     data,
     handleClickDelete,
 }: BookDataTableProps<TData, TValue>) {
-    
     const table = useReactTable({
         data,
         columns,
@@ -79,9 +78,8 @@ export function DataTable<TData, TValue>({
                                         className="text-red-500"
                                         variant="ghost"
                                         onClick={() =>
-                                            handleClickDelete(
-                                                row.original.isbn
-                                            )
+                                            // @ts-ignore
+                                            handleClickDelete(row.original.isbn) 
                                         }
                                     >
                                         <Trash2 />
