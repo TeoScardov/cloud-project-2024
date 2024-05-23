@@ -6,7 +6,7 @@ export type Book = {
   name: string
   price: number
   description: string
-  product_id: string
+  image_url: string
 }
  
 export const columns: ColumnDef<Book>[] = [

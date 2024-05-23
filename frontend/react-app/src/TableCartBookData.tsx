@@ -19,17 +19,17 @@ import { Skeleton } from "./components/ui/skeleton";
 import { Button } from "./components/ui/button";
 import { Trash2 } from "lucide-react";
 
-interface DataTableProps<TData, TValue> {
+interface BookDataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
-    handleClickDelete: (product_id: string) => void;
+    handleClickDelete: (isbn: string) => void;
 }
 
 export function DataTable<TData, TValue>({
     columns,
     data,
     handleClickDelete,
-}: DataTableProps<TData, TValue>) {
+}: BookDataTableProps<TData, TValue>) {
     
     const table = useReactTable({
         data,
@@ -80,7 +80,7 @@ export function DataTable<TData, TValue>({
                                         variant="ghost"
                                         onClick={() =>
                                             handleClickDelete(
-                                                row.original.product_id
+                                                row.original.isbn
                                             )
                                         }
                                     >
