@@ -27,6 +27,7 @@ class BackendService {
     public credentialError: string | null = null;
     public backendError: string | null = null;
     public personalInfo: CustomerInformation | null = null;
+    public numberOfBooksToDisplay: number = 5;
 
     public static getInstance(): BackendService {
         if (!BackendService.instance) {
@@ -311,7 +312,7 @@ class BackendService {
                 }
             );
 
-            return response.data;
+            return response;
         } catch (error: any) {
             console.error("Error:", error);
             return null;
