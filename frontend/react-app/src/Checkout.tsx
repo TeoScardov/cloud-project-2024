@@ -19,18 +19,21 @@ import {
 import { HandCoins } from "lucide-react";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Cookies } from "react-cookie";
 import { set } from "react-hook-form";
-import { PersonInformation } from "./EditInformationForm";
+import { CustomerInformation, PersonInformation } from "./EditInformationForm";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Book } from "./TableCartBook";
+import { useBackend } from "./services/backendService";
+import AlertError from "./AlertError";
+import { useToast } from "./components/ui/use-toast";
 
 function Checkout() {
     const [books, setBooks] = useState<Book[]>([]);
-    const [cart_id, setCartId] = useState(null);
     const [total, setTotal] = useState(0);
-    const [personalInfo, setPersonalInfo] = useState<PersonInformation>({
+    const [disabledClick, setDisabledClick] = useState(false);
+    const [missingInfo, setMissingInfo] = useState<string[]>([]);
+    const [personalInfo, setPersonalInfo] = useState<CustomerInformation>({
         name: "",
         surname: "",
         username: "",
@@ -42,71 +45,73 @@ function Checkout() {
         cvv: "",
     });
 
-    const cookies = new Cookies();
     const navigate = useNavigate();
+    const backend = useBackend();
+    const { toast } = useToast();
+
 
     useEffect(() => {
-        if (!cookies.get("cart_id")) {
-            console.log("No cart_id found");
+        if (localStorage.getItem("token") !== null) {
+            backend.getAuth().then((response: any) => {
+                if (response.status !== 200) {
+                    navigate("/login");
+                }
+            });
+
+            backend.getCartItems().then((data: any) => {
+                setBooks(data.items);
+                setTotal(data.total);
+    
+                console.log(data);
+            });
+    
+            backend.getPersonalInfo().then((data: any) => {
+                setPersonalInfo(data);
+                setMissingInfo([]);
+                for (const [key, value] of Object.entries(data)) {
+                    if (value === "" || value === null) {
+                        setMissingInfo((prev) => [...prev, key]);
+                    }
+                }
+            });
+
         } else {
-            setCartId(cookies.get("cart_id"));
+            toast({
+                title: "You need to log in first!",
+                type: "foreground",
+            });
+            navigate("/login");
         }
 
-        fetchBooks(cookies.get("cart_id"));
 
-        fetchPersonalInfo();
+
+
     }, []);
 
-    const fetchBooks = async (cart_id: any) => {
-        const responce = await axios.get(
-            `http://0.0.0.0:4005/api/cart/show_cart?cart_id=${cart_id}`,
-            {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+    const handleClick = async () => {
+
+        setDisabledClick(true);
+
+        backend.postPurchase().then((response: any) => {
+
+            if (response.status !== 200) {
+                toast({
+                    title: "Error!",
+                });
+
+            } else {
+                toast({
+                    title: "Purchase successful!",
+                });
+
+                backend.deleteCart().then(() => {
+                    navigate("/profile");
+                });
+
             }
-        );
 
-        console.log(responce.data.body);
-
-        const json = await JSON.parse(responce.data.body);
-
-        console.log(json);
-
-        const cart_books = json["items"];
-
-        if (cart_books === null) {
-            setBooks([]);
-            setTotal(0);
-        } else {
-            setBooks(cart_books);
-            setTotal(json["total"]);
-        }
+        });
     };
-
-    const fetchPersonalInfo = async () => {
-        try {
-            const response = await axios.post(
-                "http://127.0.0.1:4001/api/account/info",
-                {},
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": "Bearer " + localStorage.getItem("token"),
-                    },
-                }
-            );
-
-            console.log(response);
-
-            setPersonalInfo(response.data);
-
-        } catch (error: any) {
-            console.error("Error:", error);
-        }
-    }
-            
 
     return (
         <div
@@ -150,7 +155,7 @@ function Checkout() {
                                 <span className="text-muted-foreground">
                                     Total
                                 </span>
-                                <span>${total}</span>
+                                <span>${total.toFixed(2)}</span>
                             </li>
                         </ul>
                     </div>
@@ -160,9 +165,22 @@ function Checkout() {
                             <div className="font-semibold">
                                 Billing Information
                             </div>
-                            <address className="grid gap-0.5 not-italic text-muted-foreground">
-                                {personalInfo.billing_address}
-                            </address>
+                            {missingInfo.includes("billing_address") ? (
+                                <Link
+                                    to="/profile"
+                                    style={{
+                                        color: "#007bff",
+                                        fontWeight: "bold",
+                                        textDecoration: "none",
+                                    }}
+                                >
+                                    Add Billing Address
+                                </Link>
+                            ) : (
+                                <address className="grid gap-0.5 not-italic text-muted-foreground">
+                                    {personalInfo.billing_address}
+                                </address>
+                            )}
                         </div>
                     </div>
                     <Separator className="my-4" />
@@ -175,19 +193,38 @@ function Checkout() {
                                 <dt className="text-muted-foreground">
                                     Customer
                                 </dt>
-                                <dd>{personalInfo.name} {personalInfo.surname}</dd>
+                                <dd>
+                                    {personalInfo.name} {personalInfo.surname}
+                                </dd>
                             </div>
                             <div className="flex items-center justify-between">
                                 <dt className="text-muted-foreground">Email</dt>
                                 <dd>
-                                    <a href="mailto:">{personalInfo.email_address}</a>
+                                    <a href="mailto:">
+                                        {personalInfo.email_address}
+                                    </a>
                                 </dd>
                             </div>
                             <div className="flex items-center justify-between">
                                 <dt className="text-muted-foreground">Phone</dt>
-                                <dd>
-                                    <a href="tel:">{personalInfo.phone_number}</a>
-                                </dd>
+                                {missingInfo.includes("phone_number") ? (
+                                    <Link
+                                        to="/profile"
+                                        style={{
+                                            color: "#007bff",
+                                            fontWeight: "bold",
+                                            textDecoration: "none",
+                                        }}
+                                    >
+                                        Add Phone Number
+                                    </Link>
+                                ) : (
+                                    <dd>
+                                        <a href="tel:">
+                                            {personalInfo.phone_number}
+                                        </a>
+                                    </dd>
+                                )}
                             </div>
                         </dl>
                     </div>
@@ -200,24 +237,76 @@ function Checkout() {
                                     <CreditCard className="h-4 w-4" />
                                 </dt>
                                 {!personalInfo.cc ? (
-                                    <Link to="/profile">
+                                    <Link
+                                        to="/profile"
+                                        style={{
+                                            color: "#007bff",
+                                            fontWeight: "bold",
+                                            textDecoration: "none",
+                                        }}
+                                    >
                                         Add Payment Method
                                     </Link>
-                                 ) : (
-                                    <dd>{"*".repeat(personalInfo.cc.slice(0,-4).length) + personalInfo.cc.slice(-4)}</dd>
+                                ) : (
+                                    <dd>
+                                        {"*".repeat(
+                                            personalInfo.cc.slice(0, -4).length
+                                        ) + personalInfo.cc.slice(-4)}
+                                    </dd>
                                 )}
                             </div>
                         </dl>
                     </div>
                 </CardContent>
                 <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3 justify-end">
-                    <Button size="sm" variant="outline" className="h-8 gap-1">
+                    {/* {missingInfo.length > 0 ? (
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 gap-1"
+                            disabled
+                        >
+                            <span className="lg:sr-only xl:not-sr-only xl:whitespace-nowrap">
+                                Pay
+                            </span>
+                            <HandCoins size={24} />
+                        </Button>
+                    ) : (
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 gap-1"
+                            onClick={handleClick}
+                            disabled={missingInfo.length > 0 || disabledClick}
+                        >
+                            <span className="lg:sr-only xl:not-sr-only xl:whitespace-nowrap">
+                                Pay
+                            </span>
+                            <HandCoins size={24} />
+                        </Button>
+                    )} */}
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 gap-1"
+                        onClick={handleClick}
+                        disabled={missingInfo.length > 0 || disabledClick}
+                    >
                         <span className="lg:sr-only xl:not-sr-only xl:whitespace-nowrap">
                             Pay
                         </span>
                         <HandCoins size={24} />
                     </Button>
                 </CardFooter>
+                {missingInfo.length > 0 ? (
+                    <AlertError
+                        message={
+                            "Missing Information" +
+                            ": " +
+                            missingInfo.join(", ")
+                        }
+                    />
+                ) : null}
             </Card>
         </div>
     );
