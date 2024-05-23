@@ -60,11 +60,6 @@ services:
     build: ./react-app
     ports:
       - "8000:8000"
-    volumes:
-     - type: bind
-       source: ./
-       target: /srv/app
-    tty: true
 
   db_account:
     container_name: db_account
