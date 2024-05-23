@@ -5,6 +5,7 @@ import { Input } from "./components/ui/input";
 import { Button } from "./components/ui/button";
 import axios from "axios";
 import { useToast } from "./components/ui/use-toast";
+import { useBackend } from "./services/backendService";
 
 import {
     Form,
@@ -43,12 +44,13 @@ interface SignUpProps {
 }
 
 const SignupForm: React.FC<any> = () => {
-    let [credentialError, setCredentialError] = useState<string | null>(null);
-    let [backendError, setBackendError] = useState<string | null>(null);
+    const [credentialError, setCredentialError] = useState<string | null>(null);
+    const [backendError, setBackendError] = useState<string | null>(null);
 
     // const backend = useBackend();
-    let navigate = useNavigate();
+    const navigate = useNavigate();
     const { toast } = useToast();
+    const backend = useBackend();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -63,30 +65,24 @@ const SignupForm: React.FC<any> = () => {
 
     const onSubmitHandler = async (formData: z.infer<typeof formSchema>) => {
         try {
-            // Validate form data against the schema
-            console.log("Form data is valid:", JSON.stringify(formData));
-            const responce = await axios.post(
-                "http://127.0.0.1:4001/api/account/register",
-                JSON.stringify(formData),
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
+
+            backend.postSignup(formData.name, formData.surname, formData.email_address, formData.username, formData.password).then((response: any) => {
+                console.log(response);
+                if (response) {
+                    toast({
+                        title: "Account created successfully!",
+                        description: "You can now log in.",
+                    });
+                    navigate("/login");
+                } else {
+                    setCredentialError("Invalid credentials");
                 }
-            );
-            console.log(responce);
-            toast({
-                title: "Account created successfully!",
-                description: "You can now log in.",
             });
-            navigate("/");
-            
             // Optionally, you can redirect the user or show a success message
         } catch (error: any) {
             if (error instanceof z.ZodError) {
                 console.error("Validation failed:", error.errors);
                 setCredentialError("Invalid credentials");    
-                setCredentialError("Invalid credentials");
                 // Optionally, you can handle validation errors, show error messages, etc.
             } else {
                 console.error("Error submitting form:", error);
