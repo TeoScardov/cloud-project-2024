@@ -18,7 +18,7 @@ function BooksHome() {
 
     useEffect(() => {
 
-        backend.getHomeBooks(5).then((response: any) => {
+        backend.getHomeBooks(backend.numberOfBooksToDisplay).then((response: any) => {
             if (response === null) {
                 throw new Error("No response");
             }

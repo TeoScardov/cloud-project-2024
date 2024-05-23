@@ -3,27 +3,30 @@ import {
     MenubarContent,
     MenubarItem,
     MenubarMenu,
-    MenubarSeparator,
-    MenubarShortcut,
     MenubarTrigger,
-    MenubarSub,
-    MenubarSubContent,
-    MenubarSubTrigger,
-    MenubarCheckboxItem,
-    MenubarRadioGroup,
-    MenubarRadioItem,
 } from "./components/ui/menubar";
 
-import Cart from "./Cart";
+import SheetCart from "./SheetCart";
 import { useNavigate } from "react-router-dom";
 import {CircleUserRound} from "lucide-react";
 import { ModeToggle } from "./ModeToggle";
+import { useBackend } from "./services/backendService";
+import { useEffect, useState } from "react";
 
 
 function Navbar() {
     let navigate = useNavigate();
+    let backend = useBackend();
+    
+    const [isAuth, setIsAuth] = useState(false);
 
-    const isAuth = localStorage.getItem("token") !== null;
+    if (localStorage.getItem("token") !== null) {
+        backend.getAuth().then((data: any) => {
+            if (data.status === 200) {
+                setIsAuth(true);
+            }
+        });
+    }
 
     return (
         <Menubar>
@@ -44,8 +47,15 @@ function Navbar() {
                         </MenubarItem>
                         <MenubarItem
                             onClick={() => {
-                                navigate("/");
-                                localStorage.removeItem("token");
+                                backend.logOut().then(() => {
+                                    setIsAuth(false);
+                                    backend.token = null;
+                                    backend.getHomeBooks(backend.numberOfBooksToDisplay).then(() => {
+                                        navigate("/");
+                                        window.location.reload();
+                                    });
+                                    
+                                });
                             }}
                         >
                             Log out
@@ -53,6 +63,7 @@ function Navbar() {
                     </MenubarContent>
                 ) : (
                     <MenubarContent>
+                       
                         <MenubarItem onClick={() => navigate("/login")}>
                             Log in
                         </MenubarItem>
@@ -63,7 +74,7 @@ function Navbar() {
                 )}
             </MenubarMenu>
             <MenubarMenu>
-                <Cart />
+                <SheetCart />
             </MenubarMenu>
             <MenubarMenu>
                 <ModeToggle />
