@@ -213,7 +213,7 @@ def get_info(token):
         if account.role.value == "USER":
             customer = Customer.query.filter_by(account_id=auth_msg['account_id']).first()
             account_info['library'] = customer.library
-            account_info['phone_numer'] = customer.phone_number
+            account_info['phone_number'] = customer.phone_number
             account_info['billing_address'] = customer.billing_address
     except Exception as e:
         print(e)
