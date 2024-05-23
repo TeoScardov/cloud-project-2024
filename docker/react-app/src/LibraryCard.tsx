@@ -56,7 +56,7 @@ function LibraryCard(props:{isbn: Book["isbn"]}) {
         </div>
     </CardContent>
 
-    <CardFooter className="flex justify-between p-4 bg-gray-100 rounded-b-lg">
+    <CardFooter className="flex justify-between p-4 bg-muted/40 rounded-b-lg">
         <Button className="card_button" variant="outline">
             Read
         </Button>
