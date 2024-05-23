@@ -77,17 +77,17 @@ def placeOrder():
         #    return cart
     
 
-        return jsonify({
+        return make_response(jsonify({
                 'status': 'success',
-            }), 200
+            }), 200)
     
     except Exception as e:
 
-        return jsonify({
+        return make_response(jsonify({
                 'status': 'error',
                 'message': 'Purchase process failed',
                 'error': e
-            }), 500
+            }), 500)
     
 @blueprint.route('/orders', methods=['GET'])
 @jwt_required()
