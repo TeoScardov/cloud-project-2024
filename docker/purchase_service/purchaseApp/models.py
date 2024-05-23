@@ -109,6 +109,13 @@ class PurchaseDao(db.Model):
         Returns the purchase with the given id
         """
         return PurchaseDao.query.get(id)
+
+    @staticmethod
+    def get_by_account_id(account_id):
+        """
+        Returns all purchases with the given account id
+        """
+        return PurchaseDao.query.filter_by(account_id=account_id).all()
     
     
 class PurchaseItemDao(db.Model):
@@ -144,7 +151,7 @@ class PurchaseItemDao(db.Model):
 
     id = db.Column(UUID(as_uuid=True), primary_key=True)
     order_id = db.Column(UUID(as_uuid=True), db.ForeignKey('orders.id'), nullable=False)
-    product_id = db.Column(UUID(as_uuid=True), nullable=False)
+    product_id = db.Column(db.String, nullable=False)
 
     def __init__(self, order_id, product_id):
         """
