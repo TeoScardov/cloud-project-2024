@@ -54,6 +54,18 @@ services:
     depends_on:
       - db_cart
 
+  react_app:
+    container_name: react_app
+    image: frontend:1.0.0
+    build: ./react-app
+    ports:
+      - "8000:8000"
+    volumes:
+     - type: bind
+       source: ./
+       target: /srv/app
+    tty: true
+
   db_account:
     container_name: db_account
     image: postgres:13
