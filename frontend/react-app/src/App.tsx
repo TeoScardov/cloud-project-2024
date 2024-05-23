@@ -6,7 +6,7 @@ import BookCard from "./BookCard";
 import Login from "./Login";
 import Signup from "./Signup";
 import BooksHome from "./BooksHome";
-// import { BackendProvider } from "./services/backendService";
+import { BackendProvider } from "./services/backendService";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "./components/ui/toaster";
 import Profile from "./Profile";
@@ -17,7 +17,7 @@ import Checkout from "./Checkout";
 function App() {
 
     return (
-        // <BackendProvider>
+        <BackendProvider>
             <BrowserRouter>
             <ThemeProvider>
                 <Navbar />
@@ -31,7 +31,7 @@ function App() {
                 <Toaster />
             </ThemeProvider>
             </BrowserRouter>
-        // </BackendProvider>
+         </BackendProvider>
     );
 }
 
