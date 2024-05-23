@@ -52,7 +52,7 @@ export function OrderTable<TData, TValue>({
             table.getRowModel().rows.map((row) => (
               <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell) =>
-                  cell.column.columnDef.accessorKey === "status" ? (
+                  cell.column.columnDef.id === "status" ? (
                     <TableCell key={cell.id}>
                       <Badge variant="secondary">{flexRender(cell.column.columnDef.cell, cell.getContext())}</Badge>
                     </TableCell>
