@@ -20,6 +20,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AlertError from "./AlertError";
 import { useToast } from "./components/ui/use-toast";
+import { useBackend } from "./services/backendService";
 
 const formSchema = z.object({
     username: z.string().min(2, {
@@ -35,15 +36,13 @@ interface LogInProps {
 }
 
 const LoginForm: React.FC<any> = () => {
+    const { toast } = useToast();
+    const backend = useBackend();
 
-    const { toast } = useToast()
+    const [credentialError, setCredentialError] = useState<string | null>(null);
+    const [backendError, setBackendError] = useState<string | null>(null);
 
-    const [token, setToken] = useState<string | null>(null);
-    let [credentialError, setCredentialError] = useState<string | null>(null);
-    let [backendError, setBackendError] = useState<string | null>(null);
-
-
-    let navigate = useNavigate();
+    const navigate = useNavigate();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -52,73 +51,35 @@ const LoginForm: React.FC<any> = () => {
             password: "",
         },
     });
-    
+
     const onSubmitHandler = async (formData: z.infer<typeof formSchema>) => {
-        try {
-            // Validate form data against the schema
-            console.log("Form data is valid:", JSON.stringify(formData));
-            const responce = await axios.post(
-                "http://127.0.0.1:4001/api/account/login",
-                JSON.stringify(formData),
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
-            console.log(responce);
-            setToken(responce.data.access_token);
-            localStorage.setItem("token", responce.data.access_token);
-            toast({
-                title: responce.data.message,
-                //description: "You can view your cart by clicking the cart icon in the top right corner.",
-              })
-            navigate("/");
-            
-            // Optionally, you can redirect the user or show a success message
-        } catch (error: any) {
-            if (error instanceof z.ZodError) {
-                console.error("Validation failed:", error.errors);
-                setCredentialError("Invalid credentials");    
-                // Optionally, you can handle validation errors, show error messages, etc.
-            } else {
-                console.error("Error submitting form:", error);
-                setBackendError(error.response.data.message);
-                // Optionally, you can handle other types of errors
-            }
-        }
-    };
 
-    // // 2. Define a submit handler.
-    // function onSubmit(values: z.infer<typeof formSchema>) {
-    //     setCredentialError(null);
-
-    //     try {
-    //         backend
-    //             .loginAPI(values.username, values.username, values.password)
-    //             .then(([token, message]) => {
-    //                 setToken(token);
-    //                 setMessage(message);
-    //             });
-    //     } catch (error) {
-    //         console.error(error);
-    //     }
-
-    //     if (token) {
-    //         localStorage.setItem("token", token);
-    //     } else {
-    //         setCredentialError("Invalid credentials");
-    //     }
-
-    //     if (token) {
-    //         navigate("/");
-    //     }
-    // }
-
+            backend
+                .postLogin(
+                    formData.username,
+                    formData.username,
+                    formData.password
+                )
+                .then(([token, message]:[string, string]) => {
+                    if (token) {
+                        localStorage.setItem("token", token);
+                        navigate("/");
+                    } else {
+                        // Imposta l'errore delle credenziali se le credenziali non sono corrette
+                        setCredentialError(message);
+                    }
+                }).catch((error: any) => {
+                    console.error(error);
+                    setBackendError("Errore durante l'accesso");
+                });
+            };
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmitHandler)} className="space-y-8">
+            <form
+                onSubmit={form.handleSubmit(onSubmitHandler)}
+                className="space-y-8"
+            >
                 <FormField
                     control={form.control}
                     name="username"
@@ -155,11 +116,11 @@ const LoginForm: React.FC<any> = () => {
                 />
                 <Button type="submit">Submit</Button>
             </form>
-            {backendError ? <AlertError message = {backendError}/> : null}
-            {credentialError ? <AlertError message = {credentialError}/> : null}
+            {backendError ? <AlertError message={backendError} /> : null}
+            {credentialError ? <AlertError message={credentialError} /> : null}
         </Form>
     );
-}
+};
 
 /*
  {credentialError ? <AlertLogin/> : null}
