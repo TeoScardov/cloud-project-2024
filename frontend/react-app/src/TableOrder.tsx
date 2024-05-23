@@ -9,18 +9,22 @@ export type Order = {
 
 export const columns: ColumnDef<Order>[] = [
     {
+        id: "id",
         accessorKey: "id",
         header: "Order ID",
     },
     {
+        id: "order_date",
         accessorKey: "order_date",
         header: "Order Date",
     },
     {
+        id: "status",
         accessorKey: "status",
         header: "Status",
     },
     {
+        id: "total_price",
         accessorKey: "total_price",
         header: "Total Price",
     },
