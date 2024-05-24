@@ -19,7 +19,7 @@ const API_ACCOUNT = "http://localhost:4001/api/account";
 const API_PURCHASE = "http://localhost:4003/api/purchase";
 const API_PRODUCT = "http://localhost:4004/api/product";
 const API_CART = "http://localhost:4005/api/cart";
-
+const NUMBER_OF_BOOKS_TO_DISPLAY = 10;
 
 // const API_ACCOUNT = process.env.ACCOUNT_SERVICE_URL;
 // const API_PURCHASE = process.env.PURCHASE_SERVICE_URL;
@@ -37,7 +37,7 @@ class BackendService {
     public credentialError: string | null = null;
     public backendError: string | null = null;
     public personalInfo: CustomerInformation | null = null;
-    public numberOfBooksToDisplay: number = 5;
+    public numberOfBooksToDisplay: number = NUMBER_OF_BOOKS_TO_DISPLAY;
 
     public static getInstance(): BackendService {
         if (!BackendService.instance) {
@@ -97,7 +97,6 @@ class BackendService {
 
     // Not working
     public deleteCart: any = async () => {
-
         try {
             const response = await axios.delete(`${API_CART}/removeCart`, {
                 data: { cart_id: this.cart_id },
@@ -294,6 +293,10 @@ class BackendService {
 
     public postPurchase: any = async () => {
         try {
+            if (this.personalInfo === null) {
+                return null;
+            }
+
             const response = await axios.post(
                 `${API_PURCHASE}/`,
                 {
@@ -305,13 +308,10 @@ class BackendService {
                             };
                         }),
                     },
-                    billing_address: this.personalInfo?.billing_address,
-                    //cc: this.personalInfo?.cc,
-                    //expiredate: this.personalInfo?.expiredate,
-                    //cvv: this.personalInfo?.cvv,
-                    cc: "1234567890123456",
-                    expiredate: "12/23",
-                    cvv: "123",
+                    billing_address: this.personalInfo.billing_address,
+                    cc: this.personalInfo.cc,
+                    expiredate: this.personalInfo.expiredate,
+                    cvv: this.personalInfo.cvv,
                 },
                 {
                     headers: {
@@ -344,6 +344,26 @@ class BackendService {
 
         return response.data;
     };
+
+    public getOrders: any = async () => {
+        try {
+            const response = await axios.get(`${API_PURCHASE}/orders`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization:
+                        "Bearer " + localStorage.getItem("token"),
+                },
+            });
+
+            return response.data;
+
+        } catch (error: any) {
+            console.error("Error:", error);
+            return null;
+        }
+    };
+
+
 }
 
 export const useBackend = (): BackendService => {
