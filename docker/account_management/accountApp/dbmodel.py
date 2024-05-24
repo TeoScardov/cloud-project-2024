@@ -52,7 +52,9 @@ class Customer(db.Model):
     library = db.Column(ARRAY(db.String(50)))
     phone_number = db.Column(db.String(50))
     billing_address = db.Column(db.String(255))
-    credit_card_info = db.Column(JSONB)
+    cc = db.Column(db.String(50))
+    expiredate = db.Column(db.String(50))
+    cvv = db.Column(db.String(50))
 
 
 

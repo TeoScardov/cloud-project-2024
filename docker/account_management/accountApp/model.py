@@ -65,7 +65,9 @@ def register_account(data, token=None):
                 library = [],
                 phone_number = None,
                 billing_address = None,
-                credit_card_info = None
+                cc = None,
+                expiredate = None,
+                cvv = None
             )
             db.session.add(new_customer)
             db.session.commit()
@@ -178,10 +180,10 @@ def update_info(token, data):
                     updating_customer.phone_number = data['phone_number']
                 if 'billing_address' in data:
                     updating_customer.billing_address = data['billing_address']
-                if 'credit_card_info' in data:
-                    if ('card_number' not in data['credit_card_info']) or ('expiry_date' not in data['credit_card_info']) or ('cvv' not in data['credit_card_info']):
-                        return {"message": "Invalid credit card information."}, 400
-                    updating_customer.credit_card_info = data['credit_card_info']
+                if ('cc' in data) and ('expiredate' in data) and ('cvv' in data):
+                    updating_customer.cc = data['cc']
+                    updating_customer.expiredate = data['expiredate']
+                    updating_customer.cvv = data['cvv']
             db.session.commit()
             return {"message": "Info successfully updated."}, 200
     except Exception as e:
@@ -262,7 +264,9 @@ def get_info(data, token):
             account_info['library'] = customer.library
             account_info['phone_number'] = customer.phone_number
             account_info['billing_address'] = customer.billing_address
-            account_info['credit_card_info'] = customer.credit_card_info
+            account_info['cc'] = customer.cc
+            account_info['expiredate'] = customer.expiredate
+            account_info['cvv'] = customer.cvv
     except Exception as e:
         print(e)
         return {"message": "There was a problem with the database querying."}, 500
