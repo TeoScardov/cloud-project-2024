@@ -17,40 +17,35 @@ import {
 } from "./components/ui/table";
 import { OrderTable } from "./TableOrderData";
 import { columns } from "./TableOrder";
+import { useBackend } from "./services/backendService";
+import { set } from "react-hook-form";
 
 function Orders() {
-    const [orders, setOrders] = useState([]);
+    const [orders, setOrders] = useState<[]>([]);
+    const [loaded, setLoaded] = useState<boolean>(false);
+    const backend = useBackend();
 
     useEffect(() => {
-        const fetchOrders = async () => {
-            const response = await fetch(
-                "http://127.0.0.1:4003/api/purchase/orders",
-                {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization:
-                            "Bearer " + localStorage.getItem("token"),
-                    },
-                }
-            );
-
-            const orders = await response.json();
-            setOrders(orders.purchase);
-        };
-
-        fetchOrders();
-        console.log(orders);
+        setLoaded(false);
+        backend.getOrders().then((data: any) => {
+            setOrders(data.purchase);
+            setLoaded(true);
+        });
     }, []);
 
     return (
-        <Card x-chunk="dashboard-05-chunk-3">
-            <CardHeader className="px-7">
+        <Card x-chunk="dashboard-04-chunk-1">
+            <CardHeader>
                 <CardTitle>Orders</CardTitle>
-                <CardDescription>Recent orders.</CardDescription>
             </CardHeader>
             <CardContent>
-                <OrderTable columns={columns} data={orders}/>
+                {orders.length === 0 && loaded ? (
+                    <div className="flex justify-center items-center h-64">
+                        <Badge variant="secondary">No Orders</Badge>
+                    </div>
+                ) : (
+                    <OrderTable columns={columns} data={orders} />
+                )}
             </CardContent>
         </Card>
     );
