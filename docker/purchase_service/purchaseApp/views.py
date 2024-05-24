@@ -39,7 +39,7 @@ def placeOrder():
     # check if user is authenticated and get user info
     auth_responce = isAuthenticated(request)
 
-    if auth_responce.status_code != 200: #type: ignore
+    if auth_responce.status_code != 200: # type: ignore
         return auth_responce
 
     # get account_id from auth_responce
@@ -52,14 +52,14 @@ def placeOrder():
     try:
 
         # create new purchase
-        purchase = createNewPurchase(purchase_data, account_id)
-        if purchase.status_code != 200: #type: ignore
-            return purchase
-    
+        [purchase_responce, purchase]  = createNewPurchase(purchase_data, account_id)
+        if purchase_responce.status_code != 200:
+            return purchase_responce
+
         # perform payment
-        payment = performPayment(purchase, auth)
-        if payment.status_code != 200: #type: ignore
-            return payment
+        [payment_responce, payment] = performPayment(purchase, purchase_data, auth)
+        if payment_responce.status_code != 200:
+            return payment_responce
 
         # associate books to purchase
         associate_books_to_purchase = associateBooksToPurchase(purchase, purchase_data)
@@ -72,21 +72,50 @@ def placeOrder():
             return associate_books_to_account
         
         # clear the cart
-        cart = clearCart(purchase_data['cart']['cart_id'], auth)
-        if cart.status_code != 200:
-            return cart
+        #cart = clearCart(purchase_data['cart']['cart_id'], auth)
+        #if cart.status_code != 200:
+        #    return cart
     
 
-        return jsonify({
+        return make_response(jsonify({
                 'status': 'success',
-            }), 200
+            }), 200)
     
     except Exception as e:
 
-        return jsonify({
+        return make_response(jsonify({
                 'status': 'error',
                 'message': 'Purchase process failed',
                 'error': e
-            }), 500
+            }), 500)
+    
+@blueprint.route('/orders', methods=['GET'])
+@jwt_required()
+def getPurchase():
+    """
+    This function is used to get a purchase by its id.
+    It first checks if the user is authenticated.
+    It gets the auth token.
+    It gets the purchase by its id.
+    If the purchase is found, it returns a JSON response with the purchase data and a status code of 200.
+    If the purchase is not found, it returns a JSON response with an error message and a status code of 404.
+    """
+
+    # check if user is authenticated
+    auth_responce = isAuthenticated(request)
+
+    if auth_responce.status_code != 200: # type: ignore
+        return auth_responce
+    
+    # get user id
+    account_id = auth_responce.json().get('account_id') # type: ignore
+
+    purchases = getPurchaseByAccountId(account_id)
+
+    return make_response(jsonify({
+        'purchase': [purchase.to_dict() for purchase in purchases]
+    }), 200)
+
+    
 
 

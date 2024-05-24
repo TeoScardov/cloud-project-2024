@@ -16,3 +16,4 @@
 *.bbl
 __pycache__/
 application/
+TODO.md
