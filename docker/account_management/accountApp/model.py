@@ -121,8 +121,12 @@ def update_info(token, data):
     try:
         updating_account = Account.query.filter_by(id=updating_account_id).first()
         if not updating_account:
-            # the account isn't in the DB
-            return {"message": "Account id not valid."}, 400
+            updating_account_username = data.get('username', None)
+            updating_account = Account.query.filter_by(username=updating_account_username).first()
+            if not updating_account:
+                # the account isn't in the DB
+                return {"message": "Account id not valid."}, 400
+        updating_account_id = updating_account.id
         # The request could be either made by the owner of the account or by an admin
         if (requesting_account_id == updating_account.id) or (requesting_role == "ADMIN"):
             # Account updates with low priviledges
@@ -145,7 +149,8 @@ def update_info(token, data):
                         new_library = []
                     if 'add' in data['library']:
                         for new_book in data['library']['add']:
-                            new_library.append(new_book)
+                            if new_book not in new_library:
+                                new_library.append(new_book)
                     if 'delete' in data['library']:
                         for book in data['library']['delete']:
                             if book in new_library:
@@ -156,6 +161,10 @@ def update_info(token, data):
                     updating_customer.phone_number = data['phone_number']
                 if 'billing_address' in data:
                     updating_customer.billing_address = data['billing_address']
+                if 'credit_card_info' in data:
+                    if ('card_number' not in data['credit_card_info']) or ('expiry_date' not in data['credit_card_info']) or ('cvv' not in data['credit_card_info']):
+                        return {"message": "Invalid credit card information."}, 400
+                    updating_customer.credit_card_info = data['credit_card_info']
             db.session.commit()
             return {"message": "Info successfully updated."}, 200
     except Exception as e:
@@ -196,11 +205,29 @@ def authenticate_token(token):
         return {"message": "There was a problem with the database querying."}, 500
     
 
-'''Return all the info of the account specified in the JWT token'''
-def get_info(token):
+'''Return all the info of the account specified in the JWT token or in the json if the request is made by an admin account'''
+def get_info(data, token):
     auth_msg, code = authenticate_token(token)
+    if code != 200:
+        return auth_msg, code   # The authentication was not successful
+    requesting_role = auth_msg['role']
+
+    info_account_id = auth_msg['account_id']
+    if requesting_role == "ADMIN":
+        if not data:
+            return {"message": 'Must specify an "account_id" or "username".'}, 500
+        info_account_id = data.get('account_id', None)
+        if not info_account_id:
+            username = data.get('username', None)
+            try:
+                acc = Account.query.filter_by(username=username).first()
+                info_account_id = acc.id
+            except Exception as e:
+                print(e)
+                return {"message": "There was a problem with the database querying."}, 500
+
     try:
-        account = Account.query.filter_by(id=auth_msg['account_id']).first()
+        account = Account.query.filter_by(id=info_account_id).first()
         account_info = {
         "id": account.id,
         "email_address": account.email_address,
@@ -211,11 +238,12 @@ def get_info(token):
         "suspended": account.suspended
         }
         if account.role.value == "USER":
-            customer = Customer.query.filter_by(account_id=auth_msg['account_id']).first()
+            customer = Customer.query.filter_by(account_id=info_account_id).first()
             account_info['library'] = customer.library
-            account_info['phone_numer'] = customer.phone_number
+            account_info['phone_number'] = customer.phone_number
             account_info['billing_address'] = customer.billing_address
+            account_info['credit_card_info'] = customer.credit_card_info
     except Exception as e:
         print(e)
-        return {"message": "Error."}, 400
+        return {"message": "There was a problem with the database querying."}, 500
     return account_info, 200

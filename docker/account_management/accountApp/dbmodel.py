@@ -1,4 +1,4 @@
-from sqlalchemy.dialects.postgresql import ARRAY, UUID
+from sqlalchemy.dialects.postgresql import ARRAY, UUID, JSONB
 from enum import Enum, unique
 import uuid
 from werkzeug.security import generate_password_hash
@@ -11,6 +11,7 @@ class Role(Enum):
     ADMIN = "ADMIN"
     EMPLOYEE = "EMPLOYEE"
     USER = "USER"
+
 
 
 class Account(db.Model):
@@ -42,17 +43,16 @@ class Account(db.Model):
         self.role = role_mapping.get(role_str, Role.USER)  # Default is USER
 
 
+
 class Customer(db.Model):
     __tablename__ = 'customers'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    account_id = db.Column(UUID(as_uuid=True), db.ForeignKey('accounts.id'), nullable=False)
+    account_id = db.Column(UUID(as_uuid=True), db.ForeignKey('accounts.id'), unique=True, nullable=False)
     library = db.Column(ARRAY(db.String(50)))
     phone_number = db.Column(db.String(50))
     billing_address = db.Column(db.String(255))
-
-    # Allows an easier access of the linked account attributes
-    account = db.relationship('Account', lazy='select')
+    credit_card_info = db.Column(JSONB)
 
 
 

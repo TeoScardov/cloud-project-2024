@@ -8,6 +8,7 @@ def index():
     return "Welcome to the account service API section."
 
 
+
 @account.route('/register', methods=['POST'])
 def register():
     # Parse JSON data sent with the request
@@ -22,6 +23,7 @@ def register():
     return jsonify(message), code
 
 
+
 @account.route('/login', methods=['POST'])
 def login():
     # Parse JSON data sent with the request
@@ -34,11 +36,13 @@ def login():
     return jsonify(message), code
 
 
+
 @account.route('/logout', methods=['POST'])
 @jwt_required(fresh=True)
 def logout():
     # To logout, discard the client-side token (to be implemented in the client-side app)
     return jsonify({"message": "Logged out."}), 200
+
 
 
 @account.route('/update', methods=['POST'])
@@ -56,6 +60,7 @@ def update():
     return jsonify(message), code
 
 
+
 @account.route('/authenticate', methods=['POST'])
 @jwt_required()
 def authenticate():
@@ -65,10 +70,15 @@ def authenticate():
     message, code = model.authenticate_token(token)
     return jsonify(message), code
 
+
+
 @account.route('/info', methods=['POST'])
+@jwt_required()
 def info():
-    # Retrieve the JWT token, if present
+    # Retrieve the json data, if present (otherwise it is set to None)
+    data = request.get_json(silent=True)
+    # Retrieve the JWT token
     token = request.headers.get('Authorization', None)
     # Register the new account in the database
-    message, code = model.get_info(token)
+    message, code = model.get_info(data, token)
     return jsonify(message), code
