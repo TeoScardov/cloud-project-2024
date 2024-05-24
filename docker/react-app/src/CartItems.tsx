@@ -51,27 +51,29 @@ export default function CartItems(props:{updateCartIdState: (arg0: boolean) => v
     return (
         <div>
             {!localStorage.getItem("cart_id") || dataBook === null ? (
-                <Card>
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            height: "60vh",
-                            fontSize: "1.5em",
-                            color: "#888",
-                        }}
-                    >
-                        Empty cart
-                    </div>
-                </Card>
-            ) : (
-                <DataTable
-                    columns={columns}
-                    data={dataBook}
-                    handleClickDelete={handleClickDelete}
-                />
-            )}
+    <Card>
+        <div
+            style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "60vh",
+                fontSize: "1.5em",
+                color: "#888",
+            }}
+        >
+            Empty cart
+        </div>
+    </Card>
+) : (
+        <div  className="overflow-auto max-h-[500px]" >
+        <DataTable
+            columns={columns}
+            data={dataBook}
+            handleClickDelete={handleClickDelete}
+        />
+    </div>
+)}
         </div>
     );
 }

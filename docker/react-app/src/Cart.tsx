@@ -10,6 +10,7 @@ import CartItems from "./CartItems";
 import { useNavigate } from "react-router-dom";
 import { useBackend } from "./services/backendService";
 import { useEffect, useState } from "react";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { set } from "react-hook-form";
 
 function Cart() {
@@ -20,11 +21,11 @@ function Cart() {
 
     const updateCartIdState = (value: boolean) => {
         setIsCartIdSet(value);
-    }
+    };
 
     const updateCartEmptyState = (value: boolean) => {
         setIsCartEmpty(value);
-    }
+    };
 
     const clearCart = async () => {
         backend.deleteCart();
@@ -38,7 +39,10 @@ function Cart() {
             <SheetHeader>
                 <SheetTitle>Cart</SheetTitle>
             </SheetHeader>
-            <CartItems updateCartIdState={updateCartIdState} updateCartEmptyState={updateCartEmptyState} />
+                <CartItems
+                    updateCartIdState={updateCartIdState}
+                    updateCartEmptyState={updateCartEmptyState}
+                />
             {isCartIdSet && !isCartEmpty ? (
                 <SheetFooter>
                     <SheetClose asChild>
