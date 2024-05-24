@@ -79,7 +79,7 @@ export function DataTable<TData, TValue>({
                                         variant="ghost"
                                         onClick={() =>
                                             // @ts-ignore
-                                            handleClickDelete(row.original.isbn) 
+                                            handleClickDelete(row.original.isbn)
                                         }
                                     >
                                         <Trash2 />
