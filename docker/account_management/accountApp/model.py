@@ -64,7 +64,8 @@ def register_account(data, token=None):
                 account_id = new_account.id,
                 library = [],
                 phone_number = None,
-                billing_address = None
+                billing_address = None,
+                credit_card_info = None
             )
             db.session.add(new_customer)
             db.session.commit()
@@ -116,7 +117,23 @@ def update_info(token, data):
     requesting_account_id = auth_msg['account_id']
     requesting_role = auth_msg['role']
 
-    updating_account_id = data.get('account_id', None)
+    updating_account_id = auth_msg['account_id']
+    if requesting_role == "ADMIN":
+        updating_account_id = data.get('account_id', None)
+        if not updating_account_id:
+            username = data.get('username', None)
+            if not username:
+                return {"message": 'Must specify an "account_id" or "username".'}, 500
+            try:
+                acc = Account.query.filter_by(username=username).first()
+                if not acc:
+                    # the account isn't in the DB
+                    return {"message": "Account id not valid."}, 400
+                updating_account_id = acc.id
+            except Exception as e:
+                print(e)
+                return {"message": "There was a problem with the database querying."}, 500
+
     # Modify the account
     try:
         updating_account = Account.query.filter_by(id=updating_account_id).first()
@@ -221,6 +238,9 @@ def get_info(data, token):
             username = data.get('username', None)
             try:
                 acc = Account.query.filter_by(username=username).first()
+                if not acc:
+                    # the account isn't in the DB
+                    return {"message": "Account id not valid."}, 400
                 info_account_id = acc.id
             except Exception as e:
                 print(e)
