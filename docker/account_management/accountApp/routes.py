@@ -73,7 +73,7 @@ def authenticate():
 
 
 @account.route('/info', methods=['POST'])
-@jwt_required()
+@jwt_required(fresh=True)
 def info():
     # Retrieve the json data, if present (otherwise it is set to None)
     data = request.get_json(silent=True)
