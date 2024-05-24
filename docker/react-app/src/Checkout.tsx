@@ -17,6 +17,7 @@ import {
     Truck,
 } from "lucide-react";
 import { HandCoins } from "lucide-react";
+import { Loader } from "lucide-react";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { set } from "react-hook-form";
@@ -27,6 +28,7 @@ import { Book } from "./TableCartBook";
 import { useBackend } from "./services/backendService";
 import AlertError from "./AlertError";
 import { useToast } from "./components/ui/use-toast";
+
 
 function Checkout() {
     const [books, setBooks] = useState<Book[]>([]);
@@ -49,7 +51,6 @@ function Checkout() {
     const backend = useBackend();
     const { toast } = useToast();
 
-
     useEffect(() => {
         if (localStorage.getItem("token") !== null) {
             backend.getAuth().then((response: any) => {
@@ -61,10 +62,10 @@ function Checkout() {
             backend.getCartItems().then((data: any) => {
                 setBooks(data.items);
                 setTotal(data.total);
-    
+
                 console.log(data);
             });
-    
+
             backend.getPersonalInfo().then((data: any) => {
                 setPersonalInfo(data);
                 setMissingInfo([]);
@@ -74,7 +75,6 @@ function Checkout() {
                     }
                 }
             });
-
         } else {
             toast({
                 title: "You need to log in first!",
@@ -82,23 +82,16 @@ function Checkout() {
             });
             navigate("/login");
         }
-
-
-
-
     }, []);
 
     const handleClick = async () => {
-
         setDisabledClick(true);
 
         backend.postPurchase().then((response: any) => {
-
             if (response.status !== 200) {
                 toast({
                     title: "Error!",
                 });
-
             } else {
                 toast({
                     title: "Purchase successful!",
@@ -107,9 +100,7 @@ function Checkout() {
                 backend.deleteCart().then(() => {
                     navigate("/profile");
                 });
-
             }
-
         });
     };
 
@@ -259,32 +250,11 @@ function Checkout() {
                     </div>
                 </CardContent>
                 <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3 justify-end">
-                    {/* {missingInfo.length > 0 ? (
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8 gap-1"
-                            disabled
-                        >
-                            <span className="lg:sr-only xl:not-sr-only xl:whitespace-nowrap">
-                                Pay
-                            </span>
-                            <HandCoins size={24} />
-                        </Button>
-                    ) : (
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8 gap-1"
-                            onClick={handleClick}
-                            disabled={missingInfo.length > 0 || disabledClick}
-                        >
-                            <span className="lg:sr-only xl:not-sr-only xl:whitespace-nowrap">
-                                Pay
-                            </span>
-                            <HandCoins size={24} />
-                        </Button>
-                    )} */}
+                {disabledClick ? (
+                    <span className="text-muted-foreground animate-spin-slow">
+                        <Loader />
+                    </span>
+                ) : null}
                     <Button
                         size="sm"
                         variant="outline"
