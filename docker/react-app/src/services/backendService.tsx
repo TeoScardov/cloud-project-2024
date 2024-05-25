@@ -105,10 +105,8 @@ class BackendService {
                 },
             });
 
-
             console.log("Cart cleared", response.data);
             return response;
-            
         } catch (error) {
             console.error("Error clearing cart", error);
         }
@@ -323,16 +321,15 @@ class BackendService {
         }
     };
 
-    public postPayment: (postPurchaseResponse: any) => Promise<any> = async (postPurchaseResponse) => {
+    public postPayment: any = async (postPurchaseResponse: any) => {
         try {
-
             if (this.personalInfo === null) {
                 return null;
             }
 
             const response = await axios.post(
                 `${API_PURCHASE}/payment`,
-                {   
+                {
                     purchase: postPurchaseResponse.purchase,
                     billing_address: this.personalInfo.billing_address,
                     cc: this.personalInfo.cc,
@@ -349,11 +346,12 @@ class BackendService {
             );
 
             return response;
+            
         } catch (error: any) {
             console.error("Error:", error);
             return null;
         }
-    }
+    };
 
     public postAddBookToPurchase: any = async (postPurchaseResponse: any) => {
         try {
@@ -379,7 +377,7 @@ class BackendService {
             console.error("Error:", error);
             return null;
         }
-    }
+    };
 
     public postAddBookToAccount: any = async (postPurchaseResponse: any) => {
         try {
@@ -405,9 +403,7 @@ class BackendService {
             console.error("Error:", error);
             return null;
         }
-    }
-
-    
+    };
 
     public getBookByIsbn: any = async (isbn: string) => {
         const response = await axios.post(
@@ -430,20 +426,16 @@ class BackendService {
             const response = await axios.get(`${API_PURCHASE}/orders`, {
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization:
-                        "Bearer " + localStorage.getItem("token"),
+                    Authorization: "Bearer " + localStorage.getItem("token"),
                 },
             });
 
             return response.data;
-
         } catch (error: any) {
             console.error("Error:", error);
             return null;
         }
     };
-
-
 }
 
 export const useBackend = (): BackendService => {
