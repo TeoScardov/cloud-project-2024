@@ -19,7 +19,7 @@ def pay():
 
     payment = perform_payment(request)
 
-    if payment is type(Exception):
+    if payment.status_code != 200:
         return make_response(jsonify({
             "message": "Payment failed",
             "status": "DECLINED",
@@ -30,4 +30,4 @@ def pay():
         return make_response(jsonify({
             "message": "Payment successful",
             "status": "APPROVED"
-        }), 200)
+        }), 200) 
