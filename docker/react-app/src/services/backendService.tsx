@@ -105,7 +105,10 @@ class BackendService {
                 },
             });
 
+
             console.log("Cart cleared", response.data);
+            return response;
+            
         } catch (error) {
             console.error("Error clearing cart", error);
         }
@@ -302,12 +305,35 @@ class BackendService {
                 {
                     cart: {
                         total: this.cart_total,
-                        items: this.cart_books?.map((book) => {
-                            return {
-                                isbn: book.isbn,
-                            };
-                        }),
                     },
+                },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization:
+                            "Bearer " + localStorage.getItem("token"),
+                    },
+                }
+            );
+
+            return response;
+        } catch (error: any) {
+            console.error("Error:", error);
+            return null;
+        }
+    };
+
+    public postPayment: (postPurchaseResponse: any) => Promise<any> = async (postPurchaseResponse) => {
+        try {
+
+            if (this.personalInfo === null) {
+                return null;
+            }
+
+            const response = await axios.post(
+                `${API_PURCHASE}/payment`,
+                {   
+                    purchase: postPurchaseResponse.purchase,
                     billing_address: this.personalInfo.billing_address,
                     cc: this.personalInfo.cc,
                     expiredate: this.personalInfo.expiredate,
@@ -327,7 +353,61 @@ class BackendService {
             console.error("Error:", error);
             return null;
         }
-    };
+    }
+
+    public postAddBookToPurchase: any = async (postPurchaseResponse: any) => {
+        try {
+            const response = await axios.post(
+                `${API_PURCHASE}/add-book-to-purchase`,
+                {
+                    cart: {
+                        items: this.cart_books,
+                    },
+                    purchase: postPurchaseResponse.purchase,
+                },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization:
+                            "Bearer " + localStorage.getItem("token"),
+                    },
+                }
+            );
+
+            return response;
+        } catch (error: any) {
+            console.error("Error:", error);
+            return null;
+        }
+    }
+
+    public postAddBookToAccount: any = async (postPurchaseResponse: any) => {
+        try {
+            const response = await axios.post(
+                `${API_PURCHASE}/add-book-to-account`,
+                {
+                    cart: {
+                        items: this.cart_books,
+                    },
+                    purchase: postPurchaseResponse.purchase,
+                },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization:
+                            "Bearer " + localStorage.getItem("token"),
+                    },
+                }
+            );
+
+            return response;
+        } catch (error: any) {
+            console.error("Error:", error);
+            return null;
+        }
+    }
+
+    
 
     public getBookByIsbn: any = async (isbn: string) => {
         const response = await axios.post(
