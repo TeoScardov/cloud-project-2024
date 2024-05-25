@@ -19,6 +19,8 @@ services:
       - "4002:4000"
     environment:
       - SECRET_KEY=nyquist
+      - DEBUG=True
+      - URL_PREFIX=/api/payment
       
   purchase_service:
     container_name: purchase_service
@@ -26,8 +28,15 @@ services:
     build: ./purchase_service
     ports:
       - "4003:4000"
+    # healthcheck:
+    #     test: ["CMD", "curl", "-f", "http://localhost:4000/api/purchase"]
+    #     interval: 5s
+    #     timeout: 5s
+    #     retries: 5
     environment:
       - SECRET_KEY=nyquist
+      - DEBUG=True
+      - URL_PREFIX=/api/purchase
       - SQLALCHEMY_DATABASE_URI=postgresql://onlineshop:cloud2024@db_purchase:5432/flask_db
       - PAYMENT_SERVICE_URL=http://payment_service:4000/api/payment
       - ACCOUNT_SERVICE_URL=http://account_service:4000/api/account
@@ -78,11 +87,17 @@ services:
     image: postgres:13
     ports:
       - "5433:5432"
+    # healthcheck:
+    #   test: ["CMD", "pg_isready"]
+    #   interval: 5s
+    #   timeout: 5s
+    #   retries: 5
+
     environment:
       - POSTGRES_DB=flask_db
       - POSTGRES_USER=onlineshop
       - POSTGRES_PASSWORD=cloud2024
-
+    
   db_product:
     container_name: db_product
     image: postgres:13
