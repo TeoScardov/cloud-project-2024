@@ -29,7 +29,6 @@ import { useBackend } from "./services/backendService";
 import AlertError from "./AlertError";
 import { useToast } from "./components/ui/use-toast";
 
-
 function Checkout() {
     const [books, setBooks] = useState<Book[]>([]);
     const [total, setTotal] = useState(0);
@@ -85,24 +84,124 @@ function Checkout() {
     }, []);
 
     const handleClick = async () => {
+
         setDisabledClick(true);
 
-        backend.postPurchase().then((response: any) => {
-            if (response.status !== 200) {
-                toast({
-                    title: "Error!",
-                });
-            } else {
-                toast({
-                    title: "Purchase successful!",
-                });
+        const postPurchaseResponse = await postPurchase();
 
-                backend.deleteCart().then(() => {
-                    navigate("/profile");
-                });
-            }
-        });
+        console.log("postPurchaseResponse",postPurchaseResponse);
+        
+        if (postPurchaseResponse) {
+
+            const purchase_data = postPurchaseResponse.data;
+
+            const postPaymentResponse = await postPayment(purchase_data);
+
+            console.log("postPaymentResponse", postPaymentResponse);
+
+            const postAddBookToPurchaseResponse = await postAddBookToPurchase(purchase_data);
+
+            console.log("postAddBookToPurchaseResponse",postAddBookToPurchaseResponse);
+                            
+            const postAddBookToAccountResponse = await postAddBookToAccount(purchase_data);
+
+            console.log("postAddBookToAccountResponse",postAddBookToAccountResponse);
+                    
+            const postDeleteCartResponse = await postDeleteCart();
+
+            console.log("postDeleteCartResponse",postDeleteCartResponse);
+
+            navigate("/profile");
+
+        } else {
+            setDisabledClick(false);
+        }
     };
+
+    const postPurchase = async () => {
+        const response = await backend.postPurchase();
+        if (response.status !== 200) {
+            toast({
+                title: "Error in creating the purchase!",
+            });
+            setDisabledClick(false);
+            return;
+        } else {
+            toast({
+                title: "Purchase created successful!",
+            });
+
+            return response;
+        }
+    }
+
+    const postPayment = async (postPurchaseResponse: any) => {
+        const response = await backend.postPayment(postPurchaseResponse);
+        if (response.status !== 200) {
+            toast({
+                title: "Error in creating the payment!",
+            });
+            setDisabledClick(false);
+            return;
+        } else {
+            toast({
+                title: "Payment created successful!",
+            });
+
+            return response;
+        }
+    }
+
+    const postAddBookToPurchase = async (postPurchaseResponse: any) => {
+        const response = await backend.postAddBookToPurchase(postPurchaseResponse);
+        if (response.status !== 200) {
+            toast({
+                title: "Error in adding the book to the purchase!",
+            });
+            setDisabledClick(false);
+            return;
+        } else {
+            toast({
+                title: "Book added to purchase!",
+            });
+
+            return response;
+        }
+    }
+
+    const postAddBookToAccount = async (postPurchaseResponse: any) => {
+        const response = await backend.postAddBookToAccount(postPurchaseResponse);
+        if (response.status !== 200) {
+            toast({
+                title: "Error in adding the book to the account!",
+            });
+            setDisabledClick(false);
+            return;
+        } else {
+            toast({
+                title: "Book added to account!",
+            });
+
+            return response;
+        }
+    }
+
+    const postDeleteCart = async () => {
+        const response = await backend.deleteCart();
+        if (response.status !== 200) {
+            toast({
+                title: "Error in deleting the cart!",
+            });
+            setDisabledClick(false);
+            return;
+        } else {
+            toast({
+                title: "Cart deleted successful!",
+            });
+
+            return response;
+        }
+    }
 
     return (
         <div
@@ -250,11 +349,11 @@ function Checkout() {
                     </div>
                 </CardContent>
                 <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3 justify-end">
-                {disabledClick ? (
-                    <span className="text-muted-foreground animate-spin-slow">
-                        <Loader />
-                    </span>
-                ) : null}
+                    {disabledClick ? (
+                        <span className="text-muted-foreground animate-spin-slow">
+                            <Loader />
+                        </span>
+                    ) : null}
                     <Button
                         size="sm"
                         variant="outline"
