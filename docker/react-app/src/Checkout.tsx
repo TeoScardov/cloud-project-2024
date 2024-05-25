@@ -96,19 +96,27 @@ function Checkout() {
             const purchase_data = postPurchaseResponse.data;
 
             const postPaymentResponse = await postPayment(purchase_data);
-
+            if (postPaymentResponse == null) {
+                return;
+            }
             console.log("postPaymentResponse", postPaymentResponse);
 
             const postAddBookToPurchaseResponse = await postAddBookToPurchase(purchase_data);
-
+            if (postAddBookToPurchaseResponse == null) {
+                return;
+            }
             console.log("postAddBookToPurchaseResponse",postAddBookToPurchaseResponse);
                             
             const postAddBookToAccountResponse = await postAddBookToAccount(purchase_data);
-
+            if (postAddBookToAccountResponse == null) {
+                return;
+            }
             console.log("postAddBookToAccountResponse",postAddBookToAccountResponse);
                     
             const postDeleteCartResponse = await postDeleteCart();
-
+            if (postDeleteCartResponse == null) {
+                return;
+            }
             console.log("postDeleteCartResponse",postDeleteCartResponse);
 
             navigate("/profile");
@@ -120,7 +128,7 @@ function Checkout() {
 
     const postPurchase = async () => {
         const response = await backend.postPurchase();
-        if (response.status !== 200) {
+        if (response === null) {
             toast({
                 title: "Error in creating the purchase!",
             });
@@ -137,7 +145,7 @@ function Checkout() {
 
     const postPayment = async (postPurchaseResponse: any) => {
         const response = await backend.postPayment(postPurchaseResponse);
-        if (response.status !== 200) {
+        if (response === null) {
             toast({
                 title: "Error in creating the payment!",
             });
@@ -154,7 +162,7 @@ function Checkout() {
 
     const postAddBookToPurchase = async (postPurchaseResponse: any) => {
         const response = await backend.postAddBookToPurchase(postPurchaseResponse);
-        if (response.status !== 200) {
+        if (response === null) {
             toast({
                 title: "Error in adding the book to the purchase!",
             });
@@ -171,7 +179,7 @@ function Checkout() {
 
     const postAddBookToAccount = async (postPurchaseResponse: any) => {
         const response = await backend.postAddBookToAccount(postPurchaseResponse);
-        if (response.status !== 200) {
+        if (response === null) {
             toast({
                 title: "Error in adding the book to the account!",
             });
@@ -188,7 +196,7 @@ function Checkout() {
 
     const postDeleteCart = async () => {
         const response = await backend.deleteCart();
-        if (response.status !== 200) {
+        if (response === null) {
             toast({
                 title: "Error in deleting the cart!",
             });
