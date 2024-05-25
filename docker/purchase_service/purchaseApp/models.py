@@ -1,5 +1,7 @@
+from ctypes import Array
+from re import L
 from purchaseApp import db
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, ARRAY
 import uuid
 import datetime
 
@@ -15,7 +17,7 @@ class PurchaseDao(db.Model):
         a unique identifier for the account
     order_date : datetime
         the date of the purchase
-    total_price : float
+    total: float
         the total price of the purchase
     status : str
         the status of the purchase
@@ -39,10 +41,10 @@ class PurchaseDao(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True)
     account_id = db.Column(UUID(as_uuid=True), nullable=False)
     order_date = db.Column(db.DateTime, nullable=False)
-    total_price = db.Column(db.Float, nullable=False)
+    total = db.Column(db.Float, nullable=False)
     status = db.Column(db.Enum('PENDING', 'APPROVED', 'REJECTED', name='status_enum'), nullable=False)
 
-    def __init__(self, account_id, total_price, status):
+    def __init__(self, account_id, total, status):
         """
         Parameters
         ----------
@@ -52,7 +54,7 @@ class PurchaseDao(db.Model):
             a unique identifier for the account
         order_date : datetime
             the date of the purchase
-        total_price : float
+        total : float
             the total price of the purchase
         status : str
             the status of the purchase
@@ -61,7 +63,7 @@ class PurchaseDao(db.Model):
         self.id = uuid.uuid4()
         self.account_id = account_id
         self.order_date = db.func.current_timestamp()
-        self.total_price = total_price
+        self.total = total
         self.status = status
 
     def __repr__(self):
@@ -72,7 +74,7 @@ class PurchaseDao(db.Model):
             'id': self.id,
             'account_id': self.account_id,
             'order_date': self.order_date,
-            'total_price': self.total_price,
+            'total': self.total,
             'status': self.status
         }
     
@@ -150,8 +152,8 @@ class PurchaseItemDao(db.Model):
     __tablename__ = 'order_items'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True)
-    order_id = db.Column(UUID(as_uuid=True), db.ForeignKey('orders.id'), nullable=False)
-    product_id = db.Column(db.String, nullable=False)
+    order_id = db.Column(UUID(as_uuid=True), db.ForeignKey('orders.id'), nullable=False, unique=True)
+    product_id = db.Column(ARRAY(db.String), nullable=False)
 
     def __init__(self, order_id, product_id):
         """
@@ -220,7 +222,7 @@ class PurchaseItemDao(db.Model):
         """
         Returns all purchase items with the given order id
         """
-        return PurchaseItemDao.query.filter_by(order_id=order_id).all()
+        return PurchaseItemDao.query.filter_by(order_id=order_id).one_or_none()
 
 class PaymentDao(db.Model):
     """
@@ -248,7 +250,7 @@ class PaymentDao(db.Model):
     __tablename__ = 'payment'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True)
-    purchase_id = db.Column(UUID(as_uuid=True), db.ForeignKey('orders.id'), nullable=False)
+    purchase_id = db.Column(UUID(as_uuid=True), db.ForeignKey('orders.id'), nullable=False, unique=True)
 
     def __init__(self, purchase_id):
         """
