@@ -29,6 +29,8 @@ services:
     environment:
       - SECRET_KEY=nyquist
       - SQLALCHEMY_DATABASE_URI=postgresql://onlineshop:cloud2024@db_purchase:5432/flask_db
+      - PAYMENT_SERVICE_URL=http://payment_service:4000/api/payment
+      - ACCOUNT_SERVICE_URL=http://account_service:4000/api/account
     depends_on:
       - db_purchase
 
