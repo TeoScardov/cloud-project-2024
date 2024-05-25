@@ -28,12 +28,14 @@ import { Book } from "./TableCartBook";
 import { useBackend } from "./services/backendService";
 import AlertError from "./AlertError";
 import { useToast } from "./components/ui/use-toast";
+import { Progress } from "./components/ui/progress";
 
 function Checkout() {
     const [books, setBooks] = useState<Book[]>([]);
     const [total, setTotal] = useState(0);
     const [disabledClick, setDisabledClick] = useState(false);
     const [missingInfo, setMissingInfo] = useState<string[]>([]);
+    const [progress, setProgress] = useState(0);
     const [personalInfo, setPersonalInfo] = useState<CustomerInformation>({
         name: "",
         surname: "",
@@ -84,43 +86,54 @@ function Checkout() {
     }, []);
 
     const handleClick = async () => {
-
         setDisabledClick(true);
 
         const postPurchaseResponse = await postPurchase();
+        setProgress(30);
+        //console.log("postPurchaseResponse", postPurchaseResponse);
 
-        console.log("postPurchaseResponse",postPurchaseResponse);
-        
         if (postPurchaseResponse) {
-
             const purchase_data = postPurchaseResponse.data;
 
             const postPaymentResponse = await postPayment(purchase_data);
             if (postPaymentResponse == null) {
                 return;
             }
-            console.log("postPaymentResponse", postPaymentResponse);
+            setProgress(60);
+            //console.log("postPaymentResponse", postPaymentResponse);
 
-            const postAddBookToPurchaseResponse = await postAddBookToPurchase(purchase_data);
+            const postAddBookToPurchaseResponse = await postAddBookToPurchase(
+                purchase_data
+            );
             if (postAddBookToPurchaseResponse == null) {
                 return;
             }
-            console.log("postAddBookToPurchaseResponse",postAddBookToPurchaseResponse);
-                            
-            const postAddBookToAccountResponse = await postAddBookToAccount(purchase_data);
+            setProgress(80);
+            // console.log(
+            //     "postAddBookToPurchaseResponse",
+            //     postAddBookToPurchaseResponse
+            // );
+
+            const postAddBookToAccountResponse = await postAddBookToAccount(
+                purchase_data
+            );
             if (postAddBookToAccountResponse == null) {
                 return;
             }
-            console.log("postAddBookToAccountResponse",postAddBookToAccountResponse);
-                    
+            setProgress(90);
+            // console.log(
+            //     "postAddBookToAccountResponse",
+            //     postAddBookToAccountResponse
+            // );
+
             const postDeleteCartResponse = await postDeleteCart();
             if (postDeleteCartResponse == null) {
                 return;
             }
-            console.log("postDeleteCartResponse",postDeleteCartResponse);
+            setProgress(100);
+            //console.log("postDeleteCartResponse", postDeleteCartResponse);
 
             navigate("/profile");
-
         } else {
             setDisabledClick(false);
         }
@@ -141,7 +154,7 @@ function Checkout() {
 
             return response;
         }
-    }
+    };
 
     const postPayment = async (postPurchaseResponse: any) => {
         const response = await backend.postPayment(postPurchaseResponse);
@@ -158,10 +171,12 @@ function Checkout() {
 
             return response;
         }
-    }
+    };
 
     const postAddBookToPurchase = async (postPurchaseResponse: any) => {
-        const response = await backend.postAddBookToPurchase(postPurchaseResponse);
+        const response = await backend.postAddBookToPurchase(
+            postPurchaseResponse
+        );
         if (response === null) {
             toast({
                 title: "Error in adding the book to the purchase!",
@@ -175,10 +190,12 @@ function Checkout() {
 
             return response;
         }
-    }
+    };
 
     const postAddBookToAccount = async (postPurchaseResponse: any) => {
-        const response = await backend.postAddBookToAccount(postPurchaseResponse);
+        const response = await backend.postAddBookToAccount(
+            postPurchaseResponse
+        );
         if (response === null) {
             toast({
                 title: "Error in adding the book to the account!",
@@ -192,7 +209,7 @@ function Checkout() {
 
             return response;
         }
-    }
+    };
 
     const postDeleteCart = async () => {
         const response = await backend.deleteCart();
@@ -209,7 +226,7 @@ function Checkout() {
 
             return response;
         }
-    }
+    };
 
     return (
         <div
@@ -358,10 +375,12 @@ function Checkout() {
                 </CardContent>
                 <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3 justify-end">
                     {disabledClick ? (
-                        <span className="text-muted-foreground animate-spin-slow">
-                            <Loader />
-                        </span>
+                            <Progress
+                                value={progress}
+                                className="w-[100%] h-2 justify-start"
+                            />
                     ) : null}
+                    <div className="w-full" />
                     <Button
                         size="sm"
                         variant="outline"
