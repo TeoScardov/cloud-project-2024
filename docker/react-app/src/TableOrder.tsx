@@ -4,7 +4,7 @@ export type Order = {
     id: string;
     order_date: string;
     status: string;
-    total_price: number;
+    total: number;
 };
 
 export const columns: ColumnDef<Order>[] = [
@@ -24,8 +24,8 @@ export const columns: ColumnDef<Order>[] = [
         header: "Status",
     },
     {
-        id: "total_price",
-        accessorKey: "total_price",
+        id: "total",
+        accessorKey: "total",
         header: "Total Price",
     },
 ];
