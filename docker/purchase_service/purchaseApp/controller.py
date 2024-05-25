@@ -173,6 +173,7 @@ def performPayment(purchase_data, auth_token, account_id)-> Response:
                 }), 404)
 
         else:
+            
             payment = PaymentDao(purchase_id=purchase.id)
             
             if payment is None:
@@ -283,6 +284,12 @@ def associateBooksToPurchase(purchase_data, account_id) -> Response:
             return make_response(jsonify({
                 'status': 'error',
                 'message': 'No books to associate',
+            }), 400)
+            
+        if purchase.status != "APPROVED":
+            return make_response(jsonify({
+                'status': 'error',
+                'message': 'Purchase not approved',
             }), 400)
 
     except Exception as e:
