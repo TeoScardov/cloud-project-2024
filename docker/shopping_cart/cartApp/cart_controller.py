@@ -87,9 +87,9 @@ def add_product():
         else:
             cart_id = database.insert_cart(0, user_id)
             try:
-                current_cart = database.add_item(cart_id, product, user_id)
+                current_cart = database.add_item(str(cart_id), product, user_id)
             except Exception as e:
-                return utility.create_response(cart_id, {"message": str(e)}, 404)
+                return utility.create_response(str(cart_id), {"message": str(e)}, 404)
 
     else:
         if cart_id:
@@ -123,7 +123,7 @@ def add_product():
                                    {"message": "product added to cart",
                                     "cart_id": str(current_cart.id),
                                     "total": current_cart.total,
-                                    "product": {"name": product["name"], "isbn": product["isbn"],
+                                    "product": {"title": product["title"], "isbn": product["isbn"],
                                                 "price": product["price"]}}, 200)
 
 
@@ -209,7 +209,7 @@ def remove_product():
                                    {"message": "product removed from cart",
                                     "cart_id": str(current_cart.id),
                                     "total": current_cart.total,
-                                    "product": {"name": product["name"], "isbn": product["isbn"],
+                                    "product": {"title": product["title"], "isbn": product["isbn"],
                                                 "price": product["price"]}}, 200)
 
 
@@ -282,21 +282,20 @@ def remove_cart():
 
     if not user_cart_id:
         if cart_id:
-            database.delete_cart(cart_id, user_id)
+            database.delete_cart(cart_id)
         else:
             return utility.create_response(cart_id, {"message": "cart ID not provided "}, 404)
     else:
         if cart_id:
             if cart_id == str(user_cart_id):
-                database.delete_cart(str(user_cart_id), user_id)
+                database.delete_cart(str(user_cart_id))
             else:
                 return utility.create_response(cart_id, {"message": "cart ID mismatch", "cart_id": cart_id,
                                                          "user_cart_id": str(user_cart_id)}, 404)
-
         else:
-            database.delete_cart(str(user_cart_id), user_id)
+            database.delete_cart(str(user_cart_id))
 
-    return utility.create_response(str(user_cart_id), {"message": "cart deleted successfully"}, 200)
+    return utility.create_response(str(cart_id), {"message": "cart deleted successfully"}, 200)
 
 
 @cart.route("/link-cart", methods=["PUT"])

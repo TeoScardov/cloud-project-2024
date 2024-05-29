@@ -23,7 +23,7 @@ def get_product_from_external_service(isbn):
             book_details = response.json()["book"]
             return {
                 'isbn': book_details["isbn"],
-                'name': book_details["title"],
+                'title': book_details["title"],
                 'price': book_details["price"]
             }
         else:

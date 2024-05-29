@@ -10,8 +10,8 @@ def insert_cart(total, user_id):
     return new_cart.id
 
 
-def insert_item(cart_id, isbn, name, quantity, price):
-    new_item = CartItem(cart_id=cart_id, isbn=isbn, name=name, quantity=quantity, price=price)
+def insert_item(cart_id, isbn, title, quantity, price):
+    new_item = CartItem(cart_id=cart_id, isbn=isbn, title=title, quantity=quantity, price=price)
     # Add the new_cart to the session and commit to the database
     db.session.add(new_item)
     db.session.commit()
@@ -31,7 +31,7 @@ def add_item(cart_id, item, user_id):
         raise Exception('Item already exists in cart, you cannot add each item more than once')
     else:
         # add new item
-        insert_item(cart_id, item_id, item['name'], 1, item['price'])
+        insert_item(cart_id, item_id, item['title'], 1, item['price'])
 
     return update_total_price(cart_id, user_id)
 
@@ -90,7 +90,7 @@ def get_cart_items_by_cart_id(cart_id):
         cart_items_list = [{
             'isbn': item.isbn,
             'quantity': item.quantity,
-            'name': item.name,
+            'title': item.title,
             'price': item.price,
         } for item in cart_items]
 
@@ -101,7 +101,7 @@ def delete_old_carts(user_id, req_cart_id):
     existing_carts = Cart.query.filter_by(user_id=user_id).all()
     # Delete all other carts
     for cart in existing_carts:
-        if cart.id != req_cart_id:
+        if str(cart.id) != req_cart_id:
             db.session.delete(cart)
 
     # Commit the changes to the database
@@ -121,12 +121,11 @@ def check_for_user_cart(user_id, req_cart_id):
         return None
 
 
-def delete_cart(cart_id, user_id):
-    cart_to_delete = Cart.query.filter_by(id=cart_id, user_id=user_id).first()
+def delete_cart(cart_id):
+    cart_to_delete = Cart.query.get(cart_id)
     if cart_to_delete:
         db.session.delete(cart_to_delete)
         db.session.commit()
-    return None
 
 
 def link_cart(cart_id, user_id):
