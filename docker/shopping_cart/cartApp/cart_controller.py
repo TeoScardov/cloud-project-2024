@@ -82,7 +82,7 @@ def add_product():
                     return utility.create_response(cart_id, {"message": str(e)}, 404)
 
             else:
-                return utility.create_response(cart_id, {"message": "Invalid cart ID"}, 404)
+                return utility.create_response(cart_id, {"message": "Invalid/Not existing cart ID"}, 404)
 
         else:
             cart_id = database.insert_cart(0, user_id)
@@ -106,9 +106,8 @@ def add_product():
                     database.add_item(cart_id, product, user_id)
                 except Exception as e:
                     return utility.create_response(cart_id, {"message": str(e)}, 404)
-                current_cart = database.merge_carts(user_id, cart_id)
+                current_cart = database.delete_old_carts(user_id, cart_id)
             else:
-
                 return utility.create_response(cart_id,
                                                {"message": "cart ID mismatch", "cart_id": cart_id,
                                                 "user_cart_id": str(user_cart_id)}, 404)
@@ -197,7 +196,7 @@ def remove_product():
             elif database.check_cart_id(cart_id):
                 database.renew_cart_expiry(cart_id, user_id)
                 database.delete_item(cart_id, product, user_id)
-                current_cart = database.merge_carts(user_id, cart_id)
+                current_cart = database.delete_old_carts(user_id, cart_id)
             else:
                 return utility.create_response(cart_id,
                                                {"message": "cart ID mismatch", "cart_id": cart_id,
@@ -255,7 +254,7 @@ def remove_cart():
             in: path
             type: string
             required: true
-            description: The ID of the shopping cart to be shown.
+            description: The ID of the shopping cart to be removed.
        responses:
          200:
            description: successful operation
@@ -298,3 +297,57 @@ def remove_cart():
             database.delete_cart(str(user_cart_id), user_id)
 
     return utility.create_response(str(user_cart_id), {"message": "cart deleted successfully"}, 200)
+
+
+@cart.route("/link-cart", methods=["PUT"])
+def link_cart():
+    """
+       This is an endpoint that links the cart to the user after login
+       ---
+       parameters:
+          - name: cart_id
+            in: path
+            type: string
+            required: true
+            description: The ID of the shopping cart to be linked.
+       responses:
+         200:
+           description: successful operation
+         404:
+            description: any error occurred with additional information.
+       """
+    try:
+        request_payload = request.json
+    except (ValueError, TypeError) as e:
+        return utility.create_response(None, {"message": "No Request payload"}, 400)
+
+    cart_id = request_payload["cart_id"]
+    user_id = None
+
+    if 'Authorization' in request.headers:
+        try:
+            user_id = call_service.authenticate_user_with_jwt(request.headers['Authorization'])
+        except Exception as e:
+            return utility.create_response(cart_id,
+                                           {"message": "Invalid Authorization\n Error body:" + str(e)}, 404)
+    else:
+        return utility.create_response(cart_id,
+                                       {
+                                           "message": "Invalid Request; No Authorization. This can only be called by "
+                                                      "an authorized entity"},
+                                       400)
+    if not cart_id:
+        return utility.create_response(cart_id, {"message": "cart ID not provided "}, 400)
+
+    if not user_id:
+        return utility.create_response(cart_id,
+                                       {
+                                           "message": "user ID does not exist"},
+                                       404)
+
+    try:
+        database.link_cart(cart_id, user_id)
+    except Exception as e:
+        return utility.create_response(cart_id, {"message": str(e)}, 404)
+
+    return utility.create_response(str(cart_id), {"message": "cart linked successfully"}, 200)
