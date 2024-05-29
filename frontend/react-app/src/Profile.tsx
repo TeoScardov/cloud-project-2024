@@ -14,53 +14,45 @@ import { Input } from "./components/ui/input";
 import { useState } from "react";
 import Library from "./Library";
 import EditInformation from "./EditInformation";
-import Information, { PersonInformation } from "./Information";
 import axios from "axios";
 import { Book } from "./TableCartBook";
-
-// const personalInformation: PersonInformation = {
-//     name: "John",
-//     surname: "Doe",
-//     username: "johndoe",
-//     email: "hohn.doe@ymail.com",
-//     phone: "343663738",
-//     address: "1234 Main St",
-//     cc: "1234 5678 9012 3456",
-//     expiredate: "12/27",
-//     cvv: "123"
-// };
+import { useBackend } from "./services/backendService";
+import { useNavigate } from "react-router-dom";
+import Information from "./Information";
+import { PersonInformation } from "./EditInformationForm";
+import { set } from "react-hook-form";
+import Orders from "./Orders";
 
 function Profile() {
     const [showLibrary, setShowLibrary] = useState<Boolean>(false);
+    const [showOrders, setShowOrders] = useState<Boolean>(false);
     const [personalInformation, setPersonalInformation] =useState<PersonInformation>();
-    const [library, setLibrary] = useState<Array<Book>>([]);
+    const [library, setLibrary] = useState<Array<Book["isbn"]>>([]);
+
+    const backend = useBackend();
+    const navigate = useNavigate();
 
     useEffect(() => {
-        if (!localStorage.getItem("token")) {
-            window.location.href = "/login";
+        
+        if (localStorage.getItem("token") !== null) {
+            backend.getAuth().then((response: any) => {
+                if (response.status !== 200) {
+                    navigate("/login");
+                }
+            });
         }
 
-        const token = localStorage.getItem("token");
+        backend.getPersonalInfo().then((response: any) => {
 
-        axios
-            .post(
-                "http://127.0.0.1:4001/api/account/info",
-                {},
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            )
-            .then((response) => {
-                setPersonalInformation(response.data);
-                setLibrary(response.data.library);
-                console.log(response.data);
-                console.log(response.data.library);
-            })
-            .catch((error) => {
-                console.error("Error:", error);
-            });
+            if (response === null) {
+                window.location.href = "/login";
+            }
+            console.log(response);
+            setPersonalInformation(response);
+            setLibrary(response.library);
+        });
+
+        
     }, []);
 
     return (
@@ -76,83 +68,47 @@ function Profile() {
                         x-chunk="dashboard-04-chunk-0"
                     >
                         <ul className="flex flex-col gap-2">
-                            <Link onClick={() => setShowLibrary(false)} to="#">
+                            <Link onClick={() => {setShowLibrary(false), setShowOrders(false)}} to="#">
                                 {" "}
                                 Information{" "}
                             </Link>
                         </ul>
                         <ul className="flex flex-col gap-2">
-                            <Link onClick={() => setShowLibrary(true)} to="#">
+                            <Link onClick={() => {setShowLibrary(true), setShowOrders(false)}} to="#">
                                 {" "}
                                 Library{" "}
+                            </Link>
+                        </ul>
+                        <ul className="flex flex-col gap-2">
+                            <Link onClick={() => {setShowOrders(true), setShowLibrary(false)}} to="#">
+                                {" "}
+                                Orders{" "}
                             </Link>
                         </ul>
                     </nav>
                     <div className="grid gap-6">
                         {showLibrary ? (
                             <Card x-chunk="dashboard-04-chunk-1">
-                                <Library library={library} />
+                                <Library library={library}/>
                             </Card>
                         ) : (
+
+                            showOrders ? (
+                                <Orders />
+                            ) : (
+
                             <Card x-chunk="dashboard-04-chunk-2">
                                 <CardHeader>
                                     <CardTitle>Personal Information</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <Information
-                                        name={personalInformation?.name ?? ""}
-                                        surname={
-                                            personalInformation?.surname ?? ""
-                                        }
-                                        username={
-                                            personalInformation?.username ?? ""
-                                        }
-                                        email_address={
-                                            personalInformation?.email_address ??
-                                            ""
-                                        }
-                                        phone_number={personalInformation?.phone_number ?? ""}
-                                        billing_address={
-                                            personalInformation?.billing_address ??
-                                            ""
-                                        }
-                                        cc={personalInformation?.cc ?? ""}
-                                        expiredate={
-                                            personalInformation?.expiredate ??
-                                            ""
-                                        }
-                                        cvv={personalInformation?.cvv ?? ""}
-                                        password={personalInformation?.password ?? ""}
-                                        account_id={personalInformation?.account_id ?? ""}
-
-                                    />
+                                    <Information/>
                                 </CardContent>
                                 <CardFooter className="border-t px-6 py-4">
-                                    <EditInformation
-                                        name={personalInformation?.name ?? ""}
-                                        surname={
-                                            personalInformation?.surname ?? ""
-                                        }
-                                        username={
-                                            personalInformation?.username ?? ""
-                                        }
-                                        email_address={personalInformation?.email_address ?? ""}
-                                        phone_number={personalInformation?.phone_number ?? ""}
-                                        billing_address={
-                                            personalInformation?.billing_address ?? ""
-                                        }
-                                        cc={personalInformation?.cc ?? ""}
-                                        expiredate={
-                                            personalInformation?.expiredate ??
-                                            ""
-                                        }
-                                        cvv={personalInformation?.cvv ?? ""}
-                                        password={personalInformation?.password ?? ""}
-                                        account_id={personalInformation?.account_id ?? ""}
-                                    />
+                                    <EditInformation/>
                                 </CardFooter>
                             </Card>
-                        )}
+                        ))}
                     </div>
                 </div>
             </main>

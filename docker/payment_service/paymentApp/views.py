@@ -1,6 +1,6 @@
 from flask import Blueprint
 from flask import request
-from flask import jsonify
+from flask import jsonify, make_response
 from flask_jwt_extended import jwt_required
 
 from paymentApp.controller import perform_payment
@@ -19,15 +19,15 @@ def pay():
 
     payment = perform_payment(request)
 
-    if payment is None:
-        return jsonify({
-            'status': 'error',
-            'message': 'Payment failed'
-        }), 500
+    if payment.status_code != 200:
+        return make_response(jsonify({
+            "message": "Payment failed",
+            "status": "DECLINED",
+            "error": str(payment)
+        }), 500)
     
     else:
-        return jsonify({
+        return make_response(jsonify({
             "message": "Payment successful",
-            "status": payment,
-
-        }), 200
+            "status": "APPROVED"
+        }), 200) 

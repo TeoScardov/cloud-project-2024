@@ -11,79 +11,87 @@ import {
 import { Label } from "./components/ui/label";
 import { useToast } from "./components/ui/use-toast";
 import { Book } from "./TableCartBook";
-import { Cookies } from "react-cookie";
+import { useBackend } from "./services/backendService";
+import { useEffect, useState } from "react";
+import Cart from "./Cart";
+import { set } from "react-hook-form";
 
 function BookCard(props: Book) {
     const { toast } = useToast();
-    const cookies = new Cookies();
+    const backend = useBackend();
+    const [bookInCart, setBookInCart] = useState(false);
+    const [bookInLibrary, setBookInLibrary] = useState(false);
 
-    const handleClickAdd = async () => {
-        let cart_id: string | null = null;
-
-        if (cookies.get("cart_id")) {
-            cart_id = cookies.get("cart_id");
+    useEffect(() => {
+        if (!localStorage.getItem("token")) {
+            return;
+        } else {
+        backend.getCartItems().then((data: any) => {
+            if (!data.items) {
+                return;
+            } else if (data.items.length === 0) {
+                return;
+            } else {
+                data.items.forEach((item: any) => {
+                    if (item.isbn === props.isbn) {
+                        setBookInCart(true);
+                    }
+                });
+            }
+        });
         }
 
-        console.log(cart_id);
-
-        try {
-            let response = await fetch(
-                "http://0.0.0.0:4005/api/cart/addProduct",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        product_id: props.isbn,
-                        cart_id: cart_id,
-                    }),
+        if (!localStorage.getItem("token")) {
+            return;
+        } else {
+            backend.getPersonalInfo().then((response: any) => {
+                if (response != null) {
+                    response.library.forEach((item: any) => {
+                        if (item === props.isbn) {
+                            setBookInLibrary(true);
+                        }
+                    });
                 }
-            );
+            });
+        }
 
-            //console.log(response)
-            //const cookie = response.headers.get('Set-Cookie')
-            //console.log(cookie)
-            //cookies.set("cart_id", cookie., { path: '/' });
-            //console.log(cookies.get('myCat')); // Pacman
+        return () => {
+            setBookInCart(false);
+        };
+    }, []);
 
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            console.log(data);
-
-            const body = JSON.parse(data.body);
-
-            cookies.set("cart_id", body.cart_id, { path: "/" });
+    const handleClickAdd = async () => {
+        try {
+            await backend.postAddProduct(props.isbn);
 
             toast({
                 title: props.title + " added to cart!",
                 //description: "You can view your cart by clicking the cart icon in the top right corner.",
             });
 
-            console.log("Button clicked!");
-            // You can add any other logic you need here
+            setBookInCart(true);
         } catch (error) {
             console.error("Error:", error);
         }
     };
 
     return (
-        <Card className="w-full h-full overflow-hidden">
+        <Card
+            className="w-full h-full overflow-hidden shadow-lg rounded-lg"
+            style={{ maxWidth: "250px", maxHeight: "600px" }}
+        >
             <CardHeader>
-                <img src="https://placehold.co/150x150/png" alt="Book cover" />
+                <img
+                    src={props.image_url}
+                    alt="Book cover"
+                    className="w-full h-64 object-cover"
+                />
             </CardHeader>
-            <CardContent className="h-32 overflow-auto">
+            <CardContent className="h-32 overflow-auto p-4">
                 <div>
-                    <CardTitle className="text-xl line-clamp-2 overflow-hidden">
+                    <CardTitle className="text-xl line-clamp-2 overflow-hidden font-semibold">
                         {props.title}
                     </CardTitle>
-                    {/* <CardDescription>
-                        {props.description}
-                    </CardDescription> */}
                 </div>
 
                 <div className="justify-end mr-10">
@@ -99,13 +107,23 @@ function BookCard(props: Book) {
                 </div>
             </CardContent>
 
-            <CardFooter className="flex justify-between">
+            <CardFooter className="flex justify-between p-4 bg-gray-100 rounded-b-lg">
                 <Button className="card_button" variant="outline">
                     Details
                 </Button>
-                <Button className="card_button" onClick={handleClickAdd}>
-                    Add to Cart
-                </Button>
+                {bookInCart ? (
+                    <Button className="card_button" variant="outline" disabled>
+                        In Cart
+                    </Button>
+                ) : bookInLibrary ? (
+                    <Button className="card_button" variant="outline" disabled>
+                        In Library
+                    </Button>
+                ) : (
+                    <Button className="card_button" onClick={handleClickAdd}>
+                        Add to Cart
+                    </Button>
+                )}
             </CardFooter>
         </Card>
     );

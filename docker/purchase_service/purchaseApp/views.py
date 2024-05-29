@@ -1,3 +1,4 @@
+import re
 from flask import Blueprint
 from flask import request
 from flask import jsonify, render_template
@@ -13,9 +14,7 @@ def health():
     It returns a message indicating that the service is up and running.
     """
 
-    return "Purchase service is up and running &#128640;"
-
-
+    return "Purchase service is up and running &#128640;", 200
 
 @blueprint.route('/', methods=['POST'])
 @jwt_required()
@@ -36,57 +35,182 @@ def placeOrder():
     If the purchase process fails, it returns a JSON response with an error message and a status code of 500.
     """
 
-    # check if user is authenticated and get user info
-    auth_responce = isAuthenticated(request)
-
-    if auth_responce.status_code != 200: #type: ignore
-        return auth_responce
-
-    # get account_id from auth_responce
-    account_id = auth_responce.json()['account_id'] #type: ignore
-    # get auth token 
-    auth = request.headers['Authorization']
-    # get purchase data from request
-    purchase_data = request.get_json()
-
     try:
-
-        # create new purchase
-        purchase = createNewPurchase(purchase_data, account_id)
-        if purchase.status_code != 200: #type: ignore
-            return purchase
-    
-        # perform payment
-        payment = performPayment(purchase, auth)
-        if payment.status_code != 200: #type: ignore
-            return payment
-
-        # associate books to purchase
-        associate_books_to_purchase = associateBooksToPurchase(purchase, purchase_data)
-        if associate_books_to_purchase.status_code != 200: #type: ignore
-            return associate_books_to_purchase
-
-        # associate books to account
-        associate_books_to_account = associateBooksToAccount(account_id, purchase_data, auth)
-        if associate_books_to_account.status_code != 200: #type: ignore
-            return associate_books_to_account
         
-        # clear the cart
-        cart = clearCart(purchase_data['cart']['cart_id'], auth)
-        if cart.status_code != 200:
-            return cart
-    
+        # check if user is authenticated and get user info
+        auth_responce = isAuthenticated(request)
 
-        return jsonify({
-                'status': 'success',
-            }), 200
+        if auth_responce.status_code != 200:
+            return auth_responce
+
+        # get account_id from auth_responce
+        account_id = auth_responce.get_json().get('account_id')
+        # get auth token 
+        auth = request.headers['Authorization']
+        # get purchase data from request
+        purchase_data = request.get_json()
     
     except Exception as e:
-
-        return jsonify({
+        return make_response(jsonify({
                 'status': 'error',
-                'message': 'Purchase process failed',
+                'message': 'Failed to get data from request, check for missing fields',
                 'error': e
-            }), 500
+            }), 500)
+
+    # create new purchase
+    return createNewPurchase(purchase_data, account_id)
+
+    
+@blueprint.route('/payment', methods=['POST'])
+@jwt_required()
+def payPurchase():
+    """
+    This function is used to pay for a purchase.
+    It first checks if the user is authenticated.
+    It gets the auth token.
+    It gets the purchase by its id.
+    It performs payment.
+    If the payment is successful, it returns a JSON response with a success message and a status code of 200.
+    If the payment fails, it returns a JSON response with an error message and a status code of 500.
+    """
+
+    try:
+        # check if user is authenticated
+        auth_responce = isAuthenticated(request)
+
+        if auth_responce.status_code != 200:
+            return auth_responce
+        
+        # get user id
+        account_id = auth_responce.get_json().get('account_id')
+
+        # get auth token
+        auth_token = request.headers['Authorization']
+
+        # get purchase data from request
+        purchase_data = request.get_json()
+    
+    except Exception as e:
+        return make_response(jsonify({
+                'status': 'error',
+                'message': 'Failed to get data from request, check for missing fields',
+                'error': e
+            }), 500)
+
+    # perform payment
+    return performPayment(purchase_data, auth_token, account_id)
+    
+
+@blueprint.route('/add-book-to-purchase', methods=['POST'])
+@jwt_required()
+def addBookToPurchase():
+    """
+    This function is used to add a book to a purchase.
+    It first checks if the user is authenticated.
+    It gets the auth token.
+    It gets the purchase by its id.
+    It gets the book by its id.
+    It adds the book to the purchase.
+    If the book is added to the purchase successfully, it returns a JSON response with a success message and a status code of 200.
+    If the book is not added to the purchase successfully, it returns a JSON response with an error message and a status code of 500.
+    """
+
+    try:
+        # check if user is authenticated
+        auth_responce = isAuthenticated(request)
+
+        if auth_responce.status_code != 200:
+            return auth_responce
+        
+        # get user id
+        account_id = auth_responce.get_json().get('account_id')
+        
+        # get auth token
+        auth_token = request.headers['Authorization']
+        
+        # get purchase data from request
+        purchase_data = request.get_json()
+    
+    except Exception as e:
+        return make_response(jsonify({
+                'status': 'error',
+                'message': 'Failed to get data from request, check for missing fields',
+                'error': e
+            }), 500)
+    
+    # add book to purchase
+    return associateBooksToPurchase(purchase_data, account_id)
+    
+
+@blueprint.route('/add-book-to-account', methods=['POST'])
+@jwt_required()
+def addBookToAccount():
+    """
+    This function is used to add a book to an account.
+    It first checks if the user is authenticated.
+    It gets the auth token.
+    It gets the book by its id.
+    It adds the book to the account.
+    If the book is added to the account successfully, it returns a JSON response with a success message and a status code of 200.
+    If the book is not added to the account successfully, it returns a JSON response with an error message and a status code of 500.
+    """
+
+    try:
+        # check if user is authenticated
+        auth_responce = isAuthenticated(request)
+
+        if auth_responce.status_code != 200:
+            return auth_responce
+        
+        # get user id
+        account_id = auth_responce.get_json().get('account_id')
+        
+        # get auth token
+        auth_token = request.headers['Authorization']
+        
+        # get purchase data from request
+        purchase_data = request.get_json()
+    
+    except Exception as e:
+        return make_response(jsonify({
+                'status': 'error',
+                'message': 'Failed to get data from request, check for missing fields',
+                'error': e
+            }), 500)
+    
+    # add book to account
+    return associateBooksToAccount(account_id, purchase_data, auth_token)
+
+    
+@blueprint.route('/orders', methods=['GET'])
+@jwt_required()
+def getPurchase():
+    """
+    This function is used to get a purchase by its id.
+    It first checks if the user is authenticated.
+    It gets the auth token.
+    It gets the purchase by its id.
+    If the purchase is found, it returns a JSON response with the purchase data and a status code of 200.
+    If the purchase is not found, it returns a JSON response with an error message and a status code of 404.
+    """
+
+    try:
+        # check if user is authenticated
+        auth_responce = isAuthenticated(request)
+
+        if auth_responce.status_code != 200: # type: ignore
+            return auth_responce
+        
+        # get user id
+        account_id = auth_responce.get_json().get('account_id')
+    
+    except Exception as e:
+        return make_response(jsonify({
+                'status': 'error',
+                'message': 'Failed to get data from request, check for missing fields',
+                'error': e
+            }), 500)
+
+    return getPurchaseByAccountId(account_id)
 
 

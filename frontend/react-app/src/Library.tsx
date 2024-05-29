@@ -1,12 +1,12 @@
-import BookCard from "./BookCard"; // Assumendo che BookCard sia un componente esistente
-import { ScrollArea, ScrollBar } from "./components/ui/scroll-area";
+import { Scroll } from "lucide-react";
+import LibraryCard from "./LibraryCard";
 import { Book } from "./TableCartBook";
-interface LibraryProps {
-    library: Array<Book>;
-}
+import { ScrollArea } from "@radix-ui/react-scroll-area";
 
-function Library(props: LibraryProps) {
-    return props.library.length === 0 ? (
+function Library(props: { library: Array<Book["isbn"]> }) {
+    const library = props.library;
+
+    return library.length === 0 ? (
         <div
             style={{
                 display: "flex",
@@ -17,22 +17,28 @@ function Library(props: LibraryProps) {
                 color: "#888",
             }}
         >
-            No books available
+            e No books available
         </div>
     ) : (
-        <ScrollArea className="h-[60vh] w-[100%]">
-            <ScrollBar>
-                {props.library.map((book) => (
-                    <BookCard
-                        title={book.title}
-                        description={book.description}
-                        price={book.price}
-                        isbn={book.isbn}
-                        product_id={book.isbn}
-                    />
+        <div style={{ overflowY: "auto", maxHeight: "500px" }}>
+            <ScrollArea>
+            <div
+                style={{
+                    display: "grid",
+                    gridTemplateColumns:
+                        "repeat(auto-fill, minmax(200px, 1fr))",
+                    gap: "1rem",
+                }}
+            >
+                {library.map((data, index) => (
+                    <div key={index}>
+                        <LibraryCard isbn={data} />
+                    </div>
                 ))}
-            </ScrollBar>
-        </ScrollArea>
+            </div>
+            </ScrollArea>
+        </div>
+
     );
 }
 
