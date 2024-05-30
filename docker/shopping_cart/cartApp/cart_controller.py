@@ -60,14 +60,14 @@ def add_product():
     try:
         product = call_service.get_product_from_external_service(isbn)
     except Exception as e:
-        return utility.create_response(cart_id
-                                       , {"message": "Invalid ISBN\n error body: " + str(e)}, 404)
+        return utility.create_response(cart_id if cart_id is not None else "None"
+                                       , {"message": "Invalid ISBN"}, 404)
 
     if 'Authorization' in request.headers:
         try:
             user_id = call_service.authenticate_user_with_jwt(request.headers['Authorization'])
         except Exception as e:
-            return utility.create_response(cart_id, {"message": "Invalid JWT\n error body:" + str(e)}, 404)
+            return utility.create_response(cart_id if cart_id is not None else "None", {"message": "Invalid JWT\n error body:" + str(e)}, 404)
 
     if user_id:
         user_cart_id = database.check_for_user_cart(user_id, cart_id)
@@ -110,14 +110,14 @@ def add_product():
             else:
                 return utility.create_response(cart_id,
                                                {"message": "cart ID mismatch", "cart_id": cart_id,
-                                                "user_cart_id": str(user_cart_id)}, 404)
+                                                "user_cart_id": str(user_cart_id)}, 400)
 
         else:
-            database.renew_cart_expiry(user_cart_id, user_id)
+            database.renew_cart_expiry(str(user_cart_id), user_id)
             try:
-                current_cart = database.add_item(user_cart_id, product, user_id)
+                current_cart = database.add_item(str(user_cart_id), product, user_id)
             except Exception as e:
-                return utility.create_response(cart_id, {"message": str(e)}, 400)
+                return utility.create_response(str(user_cart_id), {"message": str(e)}, 400)
 
     return utility.create_response(str(current_cart.id),
                                    {"message": "product added to cart",
@@ -149,13 +149,13 @@ def remove_product():
        responses:
          200:
             description: successful operation
-         404:
+         400:
             description: any error occurred with additional information.
     """
     try:
         request_payload = request.json
     except (ValueError, TypeError) as e:
-        return utility.create_response(None, {"message": "No Request payload"}, 400)
+        return utility.create_response("None", {"message": "No Request payload"}, 400)
 
     isbn = request_payload["isbn"]
     cart_id = request_payload["cart_id"]
@@ -164,13 +164,13 @@ def remove_product():
     try:
         product = call_service.get_product_from_external_service(isbn)
     except Exception as e:
-        return utility.create_response(cart_id, {"message": "Invalid ISBN \n error body:" + str(e)}, 404)
+        return utility.create_response(cart_id if cart_id is not None else "None", {"message": "Invalid ISBN"}, 400)
 
     if 'Authorization' in request.headers:
         try:
             user_id = call_service.authenticate_user_with_jwt(request.headers['Authorization'])
         except Exception as e:
-            return utility.create_response(cart_id,
+            return utility.create_response(cart_id if cart_id is not None else "None",
                                            {"message": "Invalid JWT\n error body:" + str(e)}, 404)
     if user_id:
         user_cart_id = database.check_for_user_cart(user_id, cart_id)
@@ -187,10 +187,10 @@ def remove_product():
             else:
                 return utility.create_response(cart_id,
                                                {"message": "cart ID mismatch", "cart_id": cart_id,
-                                                "user_cart_id": str(user_cart_id)}, 404)
+                                                "user_cart_id": str(user_cart_id)}, 400)
 
         else:
-            return utility.create_response(cart_id, {"message": "cart ID not provided "}, 404)
+            return utility.create_response("None", {"message": "cart ID not provided "}, 400)
 
     else:
         if cart_id:
@@ -210,10 +210,10 @@ def remove_product():
             else:
                 return utility.create_response(cart_id,
                                                {"message": "cart ID mismatch", "cart_id": cart_id,
-                                                "user_cart_id": str(user_cart_id)}, 404)
+                                                "user_cart_id": str(user_cart_id)}, 400)
 
         else:
-            return utility.create_response(cart_id, {"message": "cart ID not provided "}, 404)
+            return utility.create_response("None", {"message": "cart ID not provided "}, 400)
 
     return utility.create_response(str(current_cart.id),
                                    {"message": "product removed from cart",
@@ -237,7 +237,7 @@ def show_cart():
        responses:
          200:
            description: successful operation
-         404:
+         400:
             description: any error occurred with additional information.
        """
     cart_id = request.args.get('cart_id')
@@ -251,7 +251,7 @@ def show_cart():
         else:
             return utility.create_response(cart_id, {"message": "cart ID does not exist "}, 404)
     else:
-        return utility.create_response(cart_id, {"message": "cart ID not provided "}, 404)
+        return utility.create_response("None", {"message": "cart ID not provided "}, 400)
 
 
 @cart.route("/removeCart", methods=["DELETE"])
@@ -268,7 +268,7 @@ def remove_cart():
        responses:
          200:
            description: successful operation
-         404:
+         400:
             description: any error occurred with additional information.
        """
     try:
@@ -284,7 +284,7 @@ def remove_cart():
         try:
             user_id = call_service.authenticate_user_with_jwt(request.headers['Authorization'])
         except Exception as e:
-            return utility.create_response(cart_id,
+            return utility.create_response(cart_id if cart_id is not None else "None",
                                            {"message": "Invalid Authorization\n Error body:" + str(e)}, 404)
 
     if user_id:
@@ -294,14 +294,14 @@ def remove_cart():
         if cart_id:
             database.delete_cart(cart_id)
         else:
-            return utility.create_response(cart_id, {"message": "cart ID not provided "}, 404)
+            return utility.create_response("None", {"message": "cart ID not provided "}, 400)
     else:
         if cart_id:
             if cart_id == str(user_cart_id):
                 database.delete_cart(str(user_cart_id))
             else:
                 return utility.create_response(cart_id, {"message": "cart ID mismatch", "cart_id": cart_id,
-                                                         "user_cart_id": str(user_cart_id)}, 404)
+                                                         "user_cart_id": str(user_cart_id)}, 400)
         else:
             database.delete_cart(str(user_cart_id))
 
@@ -322,7 +322,7 @@ def link_cart():
        responses:
          200:
            description: successful operation
-         404:
+         400:
             description: any error occurred with additional information.
        """
     try:
@@ -337,16 +337,16 @@ def link_cart():
         try:
             user_id = call_service.authenticate_user_with_jwt(request.headers['Authorization'])
         except Exception as e:
-            return utility.create_response(cart_id,
+            return utility.create_response(cart_id if cart_id is not None else "None",
                                            {"message": "Invalid Authorization\n Error body:" + str(e)}, 404)
     else:
-        return utility.create_response(cart_id,
+        return utility.create_response(cart_id if cart_id is not None else "None",
                                        {
                                            "message": "Invalid Request; No Authorization. This can only be called by "
                                                       "an authorized entity"},
                                        400)
     if not cart_id:
-        return utility.create_response(cart_id, {"message": "cart ID not provided "}, 400)
+        return utility.create_response("None", {"message": "cart ID not provided "}, 400)
 
     if not user_id:
         return utility.create_response(cart_id,
@@ -357,6 +357,6 @@ def link_cart():
     try:
         database.link_cart(cart_id, user_id)
     except Exception as e:
-        return utility.create_response(cart_id, {"message": str(e)}, 404)
+        return utility.create_response(cart_id, {"message": str(e)}, 400)
 
     return utility.create_response(str(cart_id), {"message": "cart linked successfully"}, 200)
