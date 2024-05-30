@@ -10,7 +10,6 @@ import CartItems from "./CartItems";
 import { useNavigate } from "react-router-dom";
 import { useBackend } from "./services/backendService";
 import { useEffect, useState } from "react";
-import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { set } from "react-hook-form";
 
 function Cart() {
@@ -18,6 +17,7 @@ function Cart() {
     const backend = useBackend();
     const [isCartIdSet, setIsCartIdSet] = useState(false);
     const [isCartEmpty, setIsCartEmpty] = useState(true);
+    const isAuth = backend.token !== null;
 
     const updateCartIdState = (value: boolean) => {
         setIsCartIdSet(value);
@@ -32,32 +32,37 @@ function Cart() {
         backend.getCartItems();
     };
 
-    //console.log(isCartIdSet, !isCartEmpty);
+    const onClickCheckout = () => {
+        navigate("/checkout");
+    }
+
 
     return (
         <SheetContent>
             <SheetHeader>
                 <SheetTitle>Cart</SheetTitle>
             </SheetHeader>
-                <CartItems
-                    updateCartIdState={updateCartIdState}
-                    updateCartEmptyState={updateCartEmptyState}
-                />
+            <CartItems
+                updateCartIdState={updateCartIdState}
+                updateCartEmptyState={updateCartEmptyState}
+            />
             {isCartIdSet && !isCartEmpty ? (
                 <SheetFooter>
-                    <SheetClose asChild>
-                        <Button
-                            variant="outline_destructive"
-                            onClick={clearCart}
-                        >
-                            Clear Cart
-                        </Button>
-                    </SheetClose>
+                    {isAuth ? (
+                        <SheetClose asChild>
+                            <Button
+                                variant="outline_destructive"
+                                onClick={clearCart}
+                            >
+                                Clear Cart
+                            </Button>
+                        </SheetClose>
+                    ) : null}
                     <div className="flex-grow" />
                     <SheetClose asChild>
                         <Button
                             type="submit"
-                            onClick={() => navigate("/checkout")}
+                            onClick={onClickCheckout}
                         >
                             Checkout
                         </Button>
@@ -65,20 +70,22 @@ function Cart() {
                 </SheetFooter>
             ) : (
                 <SheetFooter>
-                    <SheetClose asChild>
-                        <Button
-                            variant="outline_destructive"
-                            onClick={clearCart}
-                            disabled
-                        >
-                            Clear Cart
-                        </Button>
-                    </SheetClose>
+                    {isAuth ? (
+                        <SheetClose asChild>
+                            <Button
+                                variant="outline_destructive"
+                                onClick={clearCart}
+                                disabled
+                            >
+                                Clear Cart
+                            </Button>
+                        </SheetClose>
+                    ) : null}
                     <div className="flex-grow" />
                     <SheetClose asChild>
                         <Button
                             type="submit"
-                            onClick={() => navigate("/checkout")}
+                            onClick={onClickCheckout}
                             disabled
                         >
                             Checkout
