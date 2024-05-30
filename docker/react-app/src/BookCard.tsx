@@ -13,8 +13,6 @@ import { useToast } from "./components/ui/use-toast";
 import { Book } from "./TableCartBook";
 import { useBackend } from "./services/backendService";
 import { useEffect, useState } from "react";
-import Cart from "./Cart";
-import { set } from "react-hook-form";
 
 function BookCard(props: Book) {
     const { toast } = useToast();
@@ -26,19 +24,17 @@ function BookCard(props: Book) {
         if (!localStorage.getItem("token")) {
             return;
         } else {
-        backend.getCartItems().then((data: any) => {
-            if (!data.items) {
-                return;
-            } else if (data.items.length === 0) {
-                return;
-            } else {
-                data.items.forEach((item: any) => {
-                    if (item.isbn === props.isbn) {
-                        setBookInCart(true);
-                    }
-                });
-            }
-        });
+            backend.getCartItems().then((data: any) => {
+                if (data.items === null) {
+                    return;
+                } else {
+                    data.items.forEach((item: any) => {
+                        if (item.isbn === props.isbn) {
+                            setBookInCart(true);
+                        }
+                    });
+                }
+            });
         }
 
         if (!localStorage.getItem("token")) {
