@@ -23,7 +23,7 @@ def health():
 @cart.route("/addProduct", methods=["POST"])
 def add_product():
     """
-       This is an endpoint that Add the provided quantity of a product to a cart.
+       This is an endpoint that Add the provide product to a cart.
        Where an item already exists in the cart, the quantities will be summed.
        it does not depend on user being logged in or not however in the database there is a user_id field that will
         be set as the user logs in and if a cart has a user_id it won't get deleted after expiry.
@@ -79,7 +79,7 @@ def add_product():
                 try:
                     current_cart = database.add_item(cart_id, product, user_id)
                 except Exception as e:
-                    return utility.create_response(cart_id, {"message": str(e)}, 404)
+                    return utility.create_response(cart_id, {"message": str(e)}, 400)
 
             else:
                 return utility.create_response(cart_id, {"message": "Invalid/Not existing cart ID"}, 404)
@@ -89,7 +89,7 @@ def add_product():
             try:
                 current_cart = database.add_item(str(cart_id), product, user_id)
             except Exception as e:
-                return utility.create_response(str(cart_id), {"message": str(e)}, 404)
+                return utility.create_response(str(cart_id), {"message": str(e)}, 400)
 
     else:
         if cart_id:
@@ -98,14 +98,14 @@ def add_product():
                 try:
                     current_cart = database.add_item(str(user_cart_id), product, user_id)
                 except Exception as e:
-                    return utility.create_response(cart_id, {"message": str(e)}, 404)
+                    return utility.create_response(cart_id, {"message": str(e)}, 400)
 
             elif database.check_cart_id(cart_id):
                 database.renew_cart_expiry(cart_id, user_id)
                 try:
                     database.add_item(cart_id, product, user_id)
                 except Exception as e:
-                    return utility.create_response(cart_id, {"message": str(e)}, 404)
+                    return utility.create_response(cart_id, {"message": str(e)}, 400)
                 current_cart = database.delete_old_carts(user_id, cart_id)
             else:
                 return utility.create_response(cart_id,
@@ -117,7 +117,7 @@ def add_product():
             try:
                 current_cart = database.add_item(user_cart_id, product, user_id)
             except Exception as e:
-                return utility.create_response(cart_id, {"message": str(e)}, 404)
+                return utility.create_response(cart_id, {"message": str(e)}, 400)
 
     return utility.create_response(str(current_cart.id),
                                    {"message": "product added to cart",
@@ -179,7 +179,11 @@ def remove_product():
         if cart_id:
             if database.check_cart_id(cart_id):
                 database.renew_cart_expiry(cart_id, user_id)
-                current_cart = database.delete_item(cart_id, product, user_id)
+                try:
+                    current_cart = database.delete_item(cart_id, product, user_id)
+                except Exception as e:
+                    return utility.create_response(cart_id, {"message": str(e)}, 404)
+
             else:
                 return utility.create_response(cart_id,
                                                {"message": "cart ID mismatch", "cart_id": cart_id,
@@ -192,10 +196,16 @@ def remove_product():
         if cart_id:
             if cart_id == str(user_cart_id):
                 database.renew_cart_expiry(str(user_cart_id), user_id)
-                current_cart = database.delete_item(str(user_cart_id), product, user_id)
+                try:
+                    current_cart = database.delete_item(cart_id, product, user_id)
+                except Exception as e:
+                    return utility.create_response(cart_id, {"message": str(e)}, 404)
             elif database.check_cart_id(cart_id):
                 database.renew_cart_expiry(cart_id, user_id)
-                database.delete_item(cart_id, product, user_id)
+                try:
+                    database.delete_item(cart_id, product, user_id)
+                except Exception as e:
+                    return utility.create_response(cart_id, {"message": str(e)}, 404)
                 current_cart = database.delete_old_carts(user_id, cart_id)
             else:
                 return utility.create_response(cart_id,

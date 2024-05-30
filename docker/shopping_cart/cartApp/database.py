@@ -10,8 +10,8 @@ def insert_cart(total, user_id):
     return new_cart.id
 
 
-def insert_item(cart_id, isbn, title, quantity, price):
-    new_item = CartItem(cart_id=cart_id, isbn=isbn, title=title, quantity=quantity, price=price)
+def insert_item(cart_id, isbn, title, price):
+    new_item = CartItem(cart_id=cart_id, isbn=isbn, title=title,  price=price)
     # Add the new_cart to the session and commit to the database
     db.session.add(new_item)
     db.session.commit()
@@ -31,7 +31,7 @@ def add_item(cart_id, item, user_id):
         raise Exception('Item already exists in cart, you cannot add each item more than once')
     else:
         # add new item
-        insert_item(cart_id, item_id, item['title'], 1, item['price'])
+        insert_item(cart_id, item_id, item['title'], item['price'])
 
     return update_total_price(cart_id, user_id)
 
@@ -40,31 +40,25 @@ def delete_item(cart_id, item, user_id):
     item_id = item['isbn']
     cart_item_to_modify = CartItem.query.filter_by(cart_id=cart_id, isbn=item_id).first()
     if cart_item_to_modify:
-        if cart_item_to_modify.quantity == 1:
-            # delete the item
-            db.session.delete(cart_item_to_modify)
-            db.session.commit()
-        elif cart_item_to_modify.quantity > 1:
-            # change the quantity
-            cart_item_to_modify.quantity = cart_item_to_modify.quantity - 1
-            db.session.commit()
-
-    return update_total_price(cart_id, user_id)
+        db.session.delete(cart_item_to_modify)
+        db.session.commit()
+        return update_total_price(cart_id, user_id)
+    else:
+        raise Exception('Item not found')
 
 
 def update_total_price(cart_id, user_id):
-    # Retrieve new cart items price and quantity
+    # Retrieve new cart items price
     selected_items = CartItem.query.filter_by(cart_id=cart_id).with_entities(
         CartItem.isbn,
         CartItem.price,
-        CartItem.quantity
     ).all()
 
     # Calculate the updated_total
     updated_total = 0
     for item in selected_items:
-        isbn, price, quantity = item
-        updated_total += price * quantity
+        isbn, price = item
+        updated_total += price
     # Update the total in the cart
     if user_id is not None:
         Cart.query.filter_by(id=cart_id).update({'total': updated_total, 'user_id': user_id})
@@ -89,7 +83,6 @@ def get_cart_items_by_cart_id(cart_id):
         # Convert the list of cart items to a list of dictionaries
         cart_items_list = [{
             'isbn': item.isbn,
-            'quantity': item.quantity,
             'title': item.title,
             'price': item.price,
         } for item in cart_items]
