@@ -436,6 +436,28 @@ class BackendService {
             return null;
         }
     };
+
+    public putLinkCart = async () => {
+        try {
+            const response = await axios.put(
+                `${API_CART}/link-cart`,
+                {
+                    cart_id: this.cart_id,
+                },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: "Bearer " + localStorage.getItem("token"),
+                    },
+                }
+            );
+
+            return response.data;
+        } catch (error: any) {
+            console.error("Error:", error);
+            return null;
+        }
+    }
 }
 
 export const useBackend = (): BackendService => {
