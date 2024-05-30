@@ -35,7 +35,7 @@ const PersonalInformation = () => {
                 maxWidth: "600px",
             }}
         >
-            <h1>Personal Information</h1>
+            {/* <h1>Personal Information</h1> */}
             <p>
                 <strong>Name:</strong> {personalInformation.name}
             </p>
