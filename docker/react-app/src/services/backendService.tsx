@@ -95,8 +95,12 @@ class BackendService {
         }
     };
 
-    // Not working
     public deleteCart: any = async () => {
+
+        if (this.cart_id === null) {
+            return;
+        }
+
         try {
             const response = await axios.delete(`${API_CART}/removeCart`, {
                 data: { cart_id: this.cart_id },
@@ -106,6 +110,12 @@ class BackendService {
             });
 
             console.log("Cart cleared", response.data);
+
+            localStorage.removeItem("cart_id");
+            this.cart_id = null;
+            this.cart_books = null;
+            this.cart_total = null;
+
             return response;
         } catch (error) {
             console.error("Error clearing cart", error);
@@ -180,6 +190,17 @@ class BackendService {
 
     public logOut: any = async () => {
         localStorage.removeItem("token");
+
+        this.cart_books = null;
+        this.cart_total = null;
+        this.token = null;
+        this.cart_id = null;
+        this.user_id = null;
+        this.credentialError = null;
+        this.backendError = null;
+        this.personalInfo = null;
+
+
     };
 
     public getPersonalInfo: any = async () => {
@@ -221,6 +242,7 @@ class BackendService {
 
             if (response.status === 200) {
                 this.user_id = response.data.user_id;
+                this.token = localStorage.getItem("token");
             }
 
             return response;
