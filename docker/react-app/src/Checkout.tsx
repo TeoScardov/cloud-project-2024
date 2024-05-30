@@ -61,6 +61,7 @@ function Checkout() {
             });
 
             backend.getCartItems().then((data: any) => {
+
                 setBooks(data.items);
                 setTotal(data.total);
 
@@ -258,7 +259,7 @@ function Checkout() {
                                     className="flex items-center justify-between"
                                 >
                                     <span className="text-muted-foreground">
-                                        {book.name}
+                                        {book.title}
                                     </span>
                                     <span>${book.price.toFixed(2)}</span>
                                 </li>
