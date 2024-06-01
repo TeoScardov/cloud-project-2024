@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
+from flasgger import Swagger
 from os import environ
 
 try:
@@ -16,10 +17,18 @@ except Exception as e:
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
+app.config['SWAGGER'] = {
+    'title': 'Purchase Service API',
+    'uiversion': 3,
+    'specs_route': '/api/docs/',
+    'version': '1.0',
+    'description': 'API for Purchase Service',
+}
 
 jwt = JWTManager(app)
 db = SQLAlchemy(app)
 CORS(app)
+Swagger(app)
 
 from purchaseApp.views import blueprint
 app.register_blueprint(blueprint, url_prefix=URL_PREFIX)

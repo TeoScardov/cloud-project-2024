@@ -4,3 +4,4 @@ flask_jwt_extended
 flask_sqlalchemy
 requests
 flask_cors
+flasgger
