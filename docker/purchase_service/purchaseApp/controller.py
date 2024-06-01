@@ -439,42 +439,6 @@ def associateBooksToAccount(account_id, purchase_data, auth_token) -> Response:
             'message': 'Associate books to account failed',
             'error': e
         }), 500)
-    
-
-# def clearCart(cart_id, auth_tocken):
-#     """
-#     This function is used to clear the cart after a successful purchase.
-#     It sends a POST request to the cart service with the cart_id.
-#     If the cart is cleared successfully, it returns the response from the cart service.
-#     If the cart clearing fails, it returns a JSON response with an error message and a status code of 500.
-
-#     :param
-#     cart_id: str The unique identifier of the cart to be cleared.
-
-#     Returns:
-#     The response from the cart service.
-#     or
-#     A JSON response with an error message and a status code of 500.
-#     """
-
-#     SERVICE = 'http://localhost:5000/api/cart/removeCart'
-
-#     try:
-
-#         response = requests.delete(SERVICE, json={"cart_id": cart_id}, headers={'Authorization': auth_tocken})
-        
-#         return response 
-    
-#     except Exception as e:
-
-#         response = make_response(jsonify({
-#             'status': 'error',
-#             'message': 'Clear cart failed',
-#             'error': e
-#             }), 500)
-        
-#         return response
-    
 
 def getPurchaseByAccountId(account_id):
     """
