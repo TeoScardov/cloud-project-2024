@@ -9,12 +9,15 @@ cart = Blueprint('cart', __name__)
 @cart.route("/health")
 def health():
     """
-        This is an endpoint that checks for health of the service and returns 'up'
-        ---
-        responses:
-          200:
-            description: A simple string response "UP"
-        """
+    Health Check Endpoint
+    ---
+    responses:
+      200:
+        description: A simple string response "UP"
+        schema:
+          type: string
+          example: UP
+    """
     return jsonify(
         status="UP"
     )
@@ -23,30 +26,29 @@ def health():
 @cart.route("/addProduct", methods=["POST"])
 def add_product():
     """
-       This is an endpoint that Add the provide product to a cart.
-       Where an item already exists in the cart, the quantities will be summed.
-       it does not depend on user being logged in or not however in the database there is a user_id field that will
-        be set as the user logs in and if a cart has a user_id it won't get deleted after expiry.
-       ---
-       parameters:
-            in: body
-            name: body
-            required: true
-            schema:
-              type: object
-              properties:
-                cart_id:
-                  type: string
-                isbn:
-                  type: string
-            description: JSON object containing id of the product to be added to the cart.
-            if the cart_id is null a new cart will be created else it will be added to the existing cart.
-
-       responses:
-         200:
-            description: successful operation
-         404:
-            description: any error occurred with additional information.
+    Add Product to Cart Endpoint
+    This is an endpoint that Add the provide product to a cart.
+    Where an item already exists in the cart, the quantities will be summed.
+    it does not depend on user being logged in or not however in the database there is a user_id field that will
+    be set as the user logs in and if a cart has a user_id it won't get deleted after expiry.
+    ---
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            cart_id:
+              type: string
+            isbn:
+              type: string
+        description: JSON object containing id of the product to be added to the cart. If the cart_id is null, a new cart will be created; else, it will be added to the existing cart.
+    responses:
+      200:
+        description: Successful operation
+      404:
+        description: Any error occurred with additional information.
     """
     try:
         request_payload = request.json
@@ -131,27 +133,26 @@ def add_product():
 @cart.route("/removeProduct", methods=["DELETE"])
 def remove_product():
     """
-       This is an endpoint that removes a product from a cart.
-       ---
-       parameters:
-            in: body
-            name: body
-            required: true
-            schema:
-              type: object
-              properties:
-                cart_id:
-                  type: string
-                isbn:
-                  type: string
-            description: JSON object containing id of the product to be deleted from the cart.
-            if the cart_id is null ,or it doesn't match user_id there will be error.
-
-       responses:
-         200:
-            description: successful operation
-         400:
-            description: any error occurred with additional information.
+    Remove Product from Cart Endpoint
+    ---
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            cart_id:
+              type: string
+            isbn:
+              type: string
+        description: JSON object containing id of the product to be deleted from the cart. If the cart_id is null,
+         or it doesn't match user_id there will be an error.
+    responses:
+      200:
+        description: Successful operation
+      400:
+        description: Any error occurred with additional information.
     """
     try:
         request_payload = request.json
@@ -227,20 +228,20 @@ def remove_product():
 @cart.route("/show_cart", methods=["GET"])
 def show_cart():
     """
-       This is an endpoint that shows the cart content
-       ---
-       parameters:
-          - name: cart_id
-            in: path
-            type: string
-            required: true
-            description: The ID of the shopping cart to be shown.
-       responses:
-         200:
-           description: successful operation
-         400:
-            description: any error occurred with additional information.
-       """
+    Show Cart Content Endpoint
+    ---
+    parameters:
+      - name: cart_id
+        in: path
+        type: string
+        required: true
+        description: The ID of the shopping cart to be shown.
+    responses:
+      200:
+        description: Successful operation
+      400:
+        description: Any error occurred with additional information.
+    """
     cart_id = request.args.get('cart_id')
     if cart_id:
         if database.check_cart_id(cart_id):
@@ -258,20 +259,20 @@ def show_cart():
 @cart.route("/removeCart", methods=["DELETE"])
 def remove_cart():
     """
-       This is an endpoint that removes the cart entirely
-       ---
-       parameters:
-          - name: cart_id
-            in: path
-            type: string
-            required: true
-            description: The ID of the shopping cart to be removed.
-       responses:
-         200:
-           description: successful operation
-         400:
-            description: any error occurred with additional information.
-       """
+    Remove Cart Endpoint
+    ---
+    parameters:
+      - name: cart_id
+        in: path
+        type: string
+        required: true
+        description: The ID of the shopping cart to be removed.
+    responses:
+      200:
+        description: Successful operation
+      400:
+        description: Any error occurred with additional information.
+    """
     try:
         request_payload = request.json
     except (ValueError, TypeError) as e:
@@ -312,20 +313,20 @@ def remove_cart():
 @cart.route("/link-cart", methods=["PUT"])
 def link_cart():
     """
-       This is an endpoint that links the cart to the user after login
-       ---
-       parameters:
-          - name: cart_id
-            in: path
-            type: string
-            required: true
-            description: The ID of the shopping cart to be linked.
-       responses:
-         200:
-           description: successful operation
-         400:
-            description: any error occurred with additional information.
-       """
+    Link Cart to User Endpoint
+    ---
+    parameters:
+      - name: cart_id
+        in: path
+        type: string
+        required: true
+        description: The ID of the shopping cart to be linked.
+    responses:
+      200:
+        description: Successful operation
+      400:
+        description: Any error occurred with additional information.
+    """
     try:
         request_payload = request.json
     except (ValueError, TypeError) as e:
@@ -366,15 +367,14 @@ def link_cart():
 @cart.route("/get_cart", methods=["GET"])
 def get_cart():
     """
-       This is an endpoint that returns the user cart content
-       ---
-       responses:
-         200:
-           description: successful operation
-         400:
-            description: any error occurred with additional information.
-       """
-
+    User Cart Content Endpoint
+    ---
+    responses:
+      200:
+        description: Successful operation
+      400:
+        description: Any error occurred with additional information.
+    """
     if 'Authorization' in request.headers:
         try:
             user_id = call_service.authenticate_user_with_jwt(request.headers['Authorization'])
