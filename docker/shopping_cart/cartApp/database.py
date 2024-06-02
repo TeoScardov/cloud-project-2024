@@ -134,3 +134,11 @@ def link_cart(cart_id, user_id):
         return cart_to_link
     else:
         raise Exception("No cart with this id exists or something went wrong")
+
+
+def get_user_cart(user_id):
+    user_cart = Cart.query.filter_by(user_id=user_id).first()
+    if not user_cart:
+        user_cart_id = insert_cart(0, user_id)
+        user_cart = Cart.query.get(user_cart_id)
+    return user_cart

@@ -67,7 +67,8 @@ def add_product():
         try:
             user_id = call_service.authenticate_user_with_jwt(request.headers['Authorization'])
         except Exception as e:
-            return utility.create_response(cart_id if cart_id is not None else "None", {"message": "Invalid JWT\n error body:" + str(e)}, 404)
+            return utility.create_response(cart_id if cart_id is not None else "None",
+                                           {"message": "Invalid JWT\n error body:" + str(e)}, 404)
 
     if user_id:
         user_cart_id = database.check_for_user_cart(user_id, cart_id)
@@ -360,3 +361,40 @@ def link_cart():
         return utility.create_response(cart_id, {"message": str(e)}, 400)
 
     return utility.create_response(str(cart_id), {"message": "cart linked successfully"}, 200)
+
+
+@cart.route("/get_cart", methods=["GET"])
+def get_cart():
+    """
+       This is an endpoint that returns the user cart content
+       ---
+       responses:
+         200:
+           description: successful operation
+         400:
+            description: any error occurred with additional information.
+       """
+
+    if 'Authorization' in request.headers:
+        try:
+            user_id = call_service.authenticate_user_with_jwt(request.headers['Authorization'])
+        except Exception as e:
+            return utility.create_response("None",
+                                           {"message": "Invalid Authorization\n Error body:" + str(e)}, 404)
+    else:
+        return utility.create_response("None",
+                                       {
+                                           "message": "Invalid Request; No Authorization. This can only be called by "
+                                                      "an authorized entity"},
+                                       400)
+
+    if not user_id:
+        return utility.create_response("None",
+                                       {
+                                           "message": "user ID does not exist"},
+                                       404)
+    user_cart = database.get_user_cart(user_id)
+    cart_items = database.get_cart_items_by_cart_id(user_cart.id)
+    return utility.create_response(str(user_cart.id),
+                                   {"cart_id": str(user_cart.id), "total": user_cart.total,
+                                    "items": cart_items}, 200)
