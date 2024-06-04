@@ -15,7 +15,14 @@ function App() {
 
     useEffect(() => {
         if (localStorage.getItem("token") !== null) {
-            backend.getAuth();
+            backend.getAuth().then(() => {
+
+                if (localStorage.getItem("cart_id") === null) {
+                    backend.getCart();
+                } else {
+                    backend.putLinkCart();
+                }
+            });
         }
     }, []);
 
