@@ -21,7 +21,7 @@ function BookCard(props: Book) {
     const [bookInLibrary, setBookInLibrary] = useState(false);
 
     useEffect(() => {
-        if (!localStorage.getItem("token")) {
+        if (!localStorage.getItem("cart_id")) {
             return;
         } else {
             backend.getCartItems().then((data: any) => {
