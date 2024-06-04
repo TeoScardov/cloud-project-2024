@@ -480,6 +480,36 @@ class BackendService {
             return null;
         }
     }
+
+    public getCart = async () => {
+
+        try {
+            const response = await axios.get(`${API_CART}/get_cart`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + localStorage.getItem("token"), 
+                },
+            });
+
+            console.log("Cart response", response.data);
+
+            if (response.data.cart_id === null) {
+
+                return null;
+
+            } else {
+
+                this.cart_id = response.data.cart_id;
+                localStorage.setItem("cart_id", this.cart_id!);
+            }
+
+            return response.data;
+        }
+        catch (error: any) {
+            console.error("Error:", error);
+            return null;
+        }
+    }
 }
 
 export const useBackend = (): BackendService => {
