@@ -64,6 +64,14 @@ const LoginForm: React.FC<any> = () => {
                     if (token) {
                         localStorage.setItem("token", token);
                         navigate("/");
+
+                                        
+                    if (localStorage.getItem("cart_id") === null) {
+                        backend.getCart();
+                    } else {
+                        backend.putLinkCart();
+                    }
+
                     } else {
                         // Imposta l'errore delle credenziali se le credenziali non sono corrette
                         setCredentialError(message);
