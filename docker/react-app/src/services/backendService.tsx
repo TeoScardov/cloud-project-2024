@@ -109,8 +109,6 @@ class BackendService {
                 },
             });
 
-            console.log("Cart cleared", response.data);
-
             localStorage.removeItem("cart_id");
             this.cart_id = null;
             this.cart_books = null;
@@ -190,6 +188,7 @@ class BackendService {
 
     public logOut: any = async () => {
         localStorage.removeItem("token");
+        localStorage.removeItem("cart_id");
 
         this.cart_books = null;
         this.cart_total = null;
