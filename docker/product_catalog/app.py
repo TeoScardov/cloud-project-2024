@@ -4,7 +4,7 @@ from os import environ
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql.expression import func
 import logging
-from flask_cors import CORS
+from sqlalchemy.orm import Session
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -18,9 +18,6 @@ if not db_url:
     raise RuntimeError("DB_URL environment variable not set")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url  # Set the database URI for SQLAlchemy
-
-# Initialize Cors app
-CORS(app)
 
 # Initialize SQLAlchemy
 db = SQLAlchemy(app)
@@ -117,7 +114,9 @@ def get_book_by_isbn():
         if not isbn:
             return make_response(jsonify({'message': 'ISBN not provided in request body'}), 400)
 
-        book = Book.query.get(isbn)  # Query the book by ISBN
+        with Session(db.engine) as session:
+            book = session.get(Book, isbn)  # Query the book by ISBN using Session.get()
+
         if book:
             return make_response(jsonify({'book': book.json()}), 200)
         return make_response(jsonify({'message': 'book not found'}), 404)
@@ -129,27 +128,28 @@ def get_book_by_isbn():
 @app.route('/api/product/update-book/<string:isbn>', methods=['PUT'])
 def update_book(isbn):
     try:
-        book = Book.query.get(isbn)  # Query the book by ISBN
-        if not book:
-            return make_response(jsonify({'message': 'Book not found'}), 404)
+        with Session(db.engine) as session:
+            book = session.get(Book, isbn)  # Use Session.get()
+            if not book:
+                return make_response(jsonify({'message': 'Book not found'}), 404)
 
-        data = request.get_json()
+            data = request.get_json()
 
-        # Validate field lengths
-        if len(data.get('title', '')) > 80 or len(data.get('author', '')) > 80 or len(data.get('publisher', '')) > 80 or len(data.get('description', '')) > 120:
-            return make_response(jsonify({'message': 'Maximum length exceeded for one or more fields'}), 400)
+            # Validate field lengths
+            if len(data.get('title', '')) > 80 or len(data.get('author', '')) > 80 or len(data.get('publisher', '')) > 80 or len(data.get('description', '')) > 120:
+                return make_response(jsonify({'message': 'Maximum length exceeded for one or more fields'}), 400)
 
-        # Check if a book with the new title already exists
-        if 'title' in data and data['title'] != book.title:
-            existing_book = Book.query.filter_by(title=data['title']).first()
-            if existing_book:
-                return make_response(jsonify({'message': 'A book with this title already exists'}), 400)
+            # Check if a book with the new title already exists
+            if 'title' in data and data['title'] != book.title:
+                existing_book = session.query(Book).filter_by(title=data['title']).first()
+                if existing_book:
+                    return make_response(jsonify({'message': 'A book with this title already exists'}), 400)
 
-        # Update book attributes
-        for key, value in data.items():
-            setattr(book, key, value)
+            # Update book attributes
+            for key, value in data.items():
+                setattr(book, key, value)
 
-        db.session.commit()  # Commit the session to save the changes
+            session.commit()  # Commit the session to save the changes
         return make_response(jsonify({'message': 'Book updated'}), 200)
     except Exception as e:
         logger.error(f"Error updating book: {e}")
@@ -159,21 +159,22 @@ def update_book(isbn):
 @app.route('/api/product/delete-book/<string:isbn>', methods=['DELETE'])
 def delete_book(isbn):
     try:
-        book = Book.query.get(isbn)  # Query the book by ISBN
-        if book:
-            db.session.delete(book)  # Delete the book
-            db.session.commit()  # Commit the session to save the changes
-            return make_response(jsonify({'message': 'book deleted'}), 200)
-        return make_response(jsonify({'message': 'book not found'}), 404)
+        with Session(db.engine) as session:
+            book = session.get(Book, isbn)  # Use Session.get()
+            if book:
+                session.delete(book)  # Delete the book
+                session.commit()  # Commit the session to save the changes
+                return make_response(jsonify({'message': 'book deleted'}), 200)
+            return make_response(jsonify({'message': 'book not found'}), 404)
     except Exception as e:
         logger.error(f"Error deleting book: {e}")
         return make_response(jsonify({'message': f'error deleting book: {str(e)}'}), 500)
 
 # Route to get random books
-@app.route('/api/product/get-random-books', methods=['GET'])
-def get_random_books():
+@app.route('/api/product/get-random-books/<int:number>', methods=['GET'])
+def get_random_books(number):
     try:
-        random_books = Book.query.order_by(func.random()).limit(5).all()  # Query 5 random books
+        random_books = Book.query.order_by(func.random()).limit(number).all()  # Query 5 random books
         return make_response(jsonify([book.json() for book in random_books]), 200)
     except Exception as e:
         logger.error(f"Error getting random books: {e}")
