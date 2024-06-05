@@ -5,8 +5,9 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql.expression import func
 import logging
 from sqlalchemy.orm import Session
+from flask_cors import CORS
 
-# Setup logging
+# Setup loggingg
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -18,6 +19,9 @@ if not db_url:
     raise RuntimeError("DB_URL environment variable not set")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url  # Set the database URI for SQLAlchemy
+
+#initialize CORS app
+CORS(app)
 
 # Initialize SQLAlchemy
 db = SQLAlchemy(app)
