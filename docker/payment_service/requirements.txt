@@ -1,3 +1,5 @@
 flask
 psycopg2-binary
 flask_jwt_extended
+flask_cors
+flasgger

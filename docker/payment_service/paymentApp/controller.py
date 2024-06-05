@@ -1,14 +1,35 @@
+from flask import make_response, jsonify
+
+
 def perform_payment(request):
 
-    try:
-        amount = request.get_json()['amount']
-        card = request.get_json()['card']
-        cvv = request.get_json()['cvv']
-        expiration = request.get_json()['expiration']
-        billing_address = request.get_json()['billing_address']
-        status = "APPROVED"
+    print(request.get_json(), flush=True)
 
-        return status
+    try:
+        total = request.get_json().get('total')
+        card = request.get_json().get('cc')
+        cvv = request.get_json().get('cvv')
+        expiration = request.get_json().get('expiredate')
+        billing_address = request.get_json().get('billing_address')
+        status = "APPROVED"
+        
+        payment_data = {
+            "total": total,
+            "card": card,
+            "cvv": cvv,
+            "expiration": expiration,
+            "billing_address": billing_address,
+            "status": status
+        }
+
+        return make_response(jsonify({
+            "message": "Payment successful",
+            "status": "APPROVED"
+        }), 200)
     
-    except:
-        return None
+    except Exception as e:
+        return make_response(jsonify({
+            "message": "Payment failed",
+            "status": "REJECTED",
+            "error": str(e)
+        }), 500)

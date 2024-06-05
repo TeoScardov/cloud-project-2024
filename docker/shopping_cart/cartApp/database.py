@@ -1,4 +1,3 @@
-
 from .models import db, Cart, CartItem
 from .utility import generate_ttl
 
@@ -11,8 +10,8 @@ def insert_cart(total, user_id):
     return new_cart.id
 
 
-def insert_item(cart_id, product_id, name, quantity, price):
-    new_item = CartItem(cart_id=cart_id, product_id=product_id, name=name, quantity=quantity, price=price)
+def insert_item(cart_id, isbn, title, price):
+    new_item = CartItem(cart_id=cart_id, isbn=isbn, title=title,  price=price)
     # Add the new_cart to the session and commit to the database
     db.session.add(new_item)
     db.session.commit()
@@ -25,50 +24,41 @@ def check_cart_id(cart_id):
 
 def add_item(cart_id, item, user_id):
     # Retrieve existing cart items and total
-    existing_items = CartItem.query.filter_by(cart_id=cart_id).with_entities(CartItem.product_id).all()
-    item_id = item['product_id']
-    existing_product_ids = [existing_item[0] for existing_item in existing_items]
-    if item_id in existing_product_ids:
-        # update existing item
-        cart_item_to_update = CartItem.query.filter_by(cart_id=cart_id, product_id=item_id).first()
-        cart_item_to_update.quantity += 1
-        db.session.commit()
+    existing_items = CartItem.query.filter_by(cart_id=cart_id).with_entities(CartItem.isbn).all()
+    item_id = item['isbn']
+    existing_ids = [existing_item[0] for existing_item in existing_items]
+    if item_id in existing_ids:
+        raise Exception('Item already exists in cart, you cannot add each item more than once')
     else:
         # add new item
-        insert_item(cart_id, item_id, item['name'], 1, item['price'])
+        insert_item(cart_id, item_id, item['title'], item['price'])
 
     return update_total_price(cart_id, user_id)
 
 
 def delete_item(cart_id, item, user_id):
-    item_id = item['product_id']
-    cart_item_to_modify = CartItem.query.filter_by(cart_id=cart_id, product_id=item_id).first()
+    item_id = item['isbn']
+    cart_item_to_modify = CartItem.query.filter_by(cart_id=cart_id, isbn=item_id).first()
     if cart_item_to_modify:
-        if cart_item_to_modify.quantity == 1:
-            # delete the item
-            db.session.delete(cart_item_to_modify)
-            db.session.commit()
-        elif cart_item_to_modify.quantity > 1:
-            # change the quantity
-            cart_item_to_modify.quantity = cart_item_to_modify.quantity - 1
-            db.session.commit()
-
-    return update_total_price(cart_id, user_id)
+        db.session.delete(cart_item_to_modify)
+        db.session.commit()
+        return update_total_price(cart_id, user_id)
+    else:
+        raise Exception('Item not found')
 
 
 def update_total_price(cart_id, user_id):
-    # Retrieve new cart items price and quantity
+    # Retrieve new cart items price
     selected_items = CartItem.query.filter_by(cart_id=cart_id).with_entities(
-        CartItem.product_id,
+        CartItem.isbn,
         CartItem.price,
-        CartItem.quantity
     ).all()
 
     # Calculate the updated_total
     updated_total = 0
     for item in selected_items:
-        product_id, price, quantity = item
-        updated_total += price * quantity
+        isbn, price = item
+        updated_total += price
     # Update the total in the cart
     if user_id is not None:
         Cart.query.filter_by(id=cart_id).update({'total': updated_total, 'user_id': user_id})
@@ -92,74 +82,63 @@ def get_cart_items_by_cart_id(cart_id):
     if cart_items:
         # Convert the list of cart items to a list of dictionaries
         cart_items_list = [{
-            'product_id': item.product_id,
-            'quantity': item.quantity,
-            'name': item.name,
+            'isbn': item.isbn,
+            'title': item.title,
             'price': item.price,
-            # Include other fields as needed
         } for item in cart_items]
 
         return cart_items_list
 
 
-def merge_carts(user_id, req_cart_id):
-    existing_carts_id = Cart.query.filter_by(user_id=user_id).with_entities(Cart.id).all()
-    # Extract cart IDs from the result
-    cart_ids = [str(cart_id[0]) for cart_id in existing_carts_id]
-    if req_cart_id not in cart_ids:
-        new_cart_id = insert_cart(0, user_id)
-    else:
-        new_cart_id = req_cart_id
-        cart_ids.remove(req_cart_id)
+def delete_old_carts(user_id, req_cart_id):
+    existing_carts = Cart.query.filter_by(user_id=user_id).all()
+    # Delete all other carts
+    for cart in existing_carts:
+        if str(cart.id) != req_cart_id:
+            db.session.delete(cart)
 
-    for cart_id in cart_ids:
-        records = CartItem.query.filter_by(cart_id=cart_id).all()
-        # Update the cart_id for all retrieved records
-        for record in records:
-            item = CartItem.query.filter_by(product_id=record.product_id, cart_id=new_cart_id).first()
-            if item:
-                item.quantity += 1
-                db.session.delete(record)
-            else:
-                record.cart_id = new_cart_id
-        # Commit the changes
-        db.session.commit()
-        Cart.query.filter_by(user_id=user_id, id=cart_id).delete()
+    # Commit the changes to the database
     db.session.commit()
 
-    # Retrieve new cart items price and quantity
-    selected_items = CartItem.query.filter_by(cart_id=new_cart_id).with_entities(
-        CartItem.price,
-        CartItem.quantity
-    ).all()
-
-    # Calculate the updated_total
-    updated_total = 0
-    for item in selected_items:
-        price, quantity = item
-        updated_total += price * quantity
-
-    # Update the total in the cart
-    Cart.query.filter_by(id=new_cart_id).update({'total': updated_total})
-
-    db.session.commit()
-    return Cart.query.get(new_cart_id)
+    return Cart.query.filter_by(user_id=user_id).first()
 
 
 def check_for_user_cart(user_id, req_cart_id):
     existing_carts = Cart.query.filter_by(user_id=user_id).all()
     if len(existing_carts) > 1:
-        return merge_carts(user_id, req_cart_id).id
+        result = delete_old_carts(user_id, req_cart_id)
+        return result.id if result else None
     elif len(existing_carts) == 1:
         return existing_carts[0].id
     else:
         return None
 
 
-def delete_cart(cart_id, user_id):
-    cart_to_delete = Cart.query.filter_by(id=cart_id, user_id=user_id).first()
+def delete_cart(cart_id):
+    cart_to_delete = Cart.query.get(cart_id)
     if cart_to_delete:
         db.session.delete(cart_to_delete)
         db.session.commit()
-    return None
 
+
+def link_cart(cart_id, user_id):
+    delete_old_carts(user_id, cart_id)
+    cart_to_link = Cart.query.filter_by(id=cart_id).first()
+    if cart_to_link and cart_to_link.user_id == user_id:
+        return cart_to_link
+    elif cart_to_link and cart_to_link.user_id is not None and cart_to_link.user_id != user_id:
+        raise Exception("You can't link cart to another user")
+    elif cart_to_link and cart_to_link.user_id is None:
+        Cart.query.filter_by(id=cart_id).update({'user_id': user_id})
+        db.session.commit()
+        return cart_to_link
+    else:
+        raise Exception("No cart with this id exists or something went wrong")
+
+
+def get_user_cart(user_id):
+    user_cart = Cart.query.filter_by(user_id=user_id).first()
+    if not user_cart:
+        user_cart_id = insert_cart(0, user_id)
+        user_cart = Cart.query.get(user_cart_id)
+    return user_cart

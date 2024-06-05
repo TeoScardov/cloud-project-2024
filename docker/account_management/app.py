@@ -1,5 +1,7 @@
 from flask import Flask
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS
+from flasgger import Swagger
 from accountApp.config import Config
 from accountApp.database import db
 from accountApp.routes import account
@@ -9,6 +11,8 @@ app.register_blueprint(account, url_prefix='/api/account')
 app.config.from_object(Config)
 
 jwt = JWTManager(app)
+CORS(app)
+swagger = Swagger(app)
 
 db.init_app(app)
 # Create the tables

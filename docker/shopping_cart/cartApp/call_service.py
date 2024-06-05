@@ -3,7 +3,7 @@ from .config import USER_SERVICE_URL
 from .config import PRODUCT_SERVICE_URL
 
 
-def get_product_from_external_service(product_id):
+def get_product_from_external_service(isbn):
     """
     # Call product API to retrieve product details
     # """
@@ -11,7 +11,7 @@ def get_product_from_external_service(product_id):
 
     # Assuming headers you want to include in the request
     json_data = {
-        "isbn": product_id
+        "isbn": isbn
     }
 
     try:
@@ -22,8 +22,8 @@ def get_product_from_external_service(product_id):
         if response.status_code == 200:
             book_details = response.json()["book"]
             return {
-                'product_id': book_details["isbn"],
-                'name': book_details["title"],
+                'isbn': book_details["isbn"],
+                'title': book_details["title"],
                 'price': book_details["price"]
             }
         else:
