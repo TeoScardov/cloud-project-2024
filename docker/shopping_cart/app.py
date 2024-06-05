@@ -11,6 +11,9 @@ app.config.from_pyfile('cartApp/config.py')
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///identifier.sqlite'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://onlineshop:cloud2024@localhost/flask_db'
 app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('DB_URL')
+if app.config.get('TESTING'):
+    app.config['SQLALCHEMY_DATABASE_URI'] =  'postgresql://onlineshop:cloud2024@localhost/flask_db'
+
 db.init_app(app)
 CORS(app)
 swagger = Swagger(app)
@@ -21,3 +24,9 @@ with app.app_context():
 if __name__ == '__main__':
     app.run(debug=True)
     # app.run(port=5002, debug=True)
+
+
+# Define a function to drop test tables
+def drop_test_tables():
+    with app.app_context():
+        db.drop_all()

@@ -12,3 +12,5 @@ SWAGGER = {
     'openapi': '3.0.2',
     'description': 'API for Cart Service',
 }
+# TESTING = False
+TESTING = True
