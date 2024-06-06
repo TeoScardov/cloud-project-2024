@@ -188,9 +188,7 @@ def remove_product():
 
             else:
                 return utility.create_response(cart_id,
-                                               {"message": "cart ID mismatch", "cart_id": cart_id,
-                                                "user_cart_id": str(user_cart_id)}, 400)
-
+                                               {"message": "cart does not exist", "cart_id": cart_id}, 400)
         else:
             return utility.create_response("None", {"message": "cart ID not provided "}, 400)
 
