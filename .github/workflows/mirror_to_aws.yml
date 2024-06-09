@@ -18,10 +18,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: dev
-          fetch-depth: 0
-          sparse-checkout: ./docker #aws
+          #fetch-depth: 0
+          #ref: dev
           sparse-checkout-cone-mode: false
+          sparse-checkout: docker/ #aws
+
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
