@@ -22,7 +22,7 @@ jobs:
           path: docker #aws
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1.0.3
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           role-to-assume: arn:aws:iam::637883934877:user/repo-sync
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
