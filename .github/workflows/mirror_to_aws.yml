@@ -18,12 +18,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          ref: dev
           fetch-depth: 1
-          sparse-checkout: |
-            docker 
-            README.md
-            LICENSE
-          #aws
+          sparse-checkout: docker #aws
           sparse-checkout-cone-mode: false
 
       - name: Configure AWS Credentials
