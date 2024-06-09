@@ -21,7 +21,7 @@ jobs:
           fetch-depth: 0
           #ref: dev
           #sparse-checkout-cone-mode: true
-          sparse-checkout: docker/* #aws
+          sparse-checkout: docker #aws
 
 
       - name: Configure AWS Credentials
