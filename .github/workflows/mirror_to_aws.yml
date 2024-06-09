@@ -19,12 +19,15 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          path: docker/ #aws
+          sparse-checkout: |
+            docker 
+            README.md
+            LICENSE
+          #aws
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          #role-to-assume: arn:aws:iam::637883934877:user/repo-sync
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-south-1
