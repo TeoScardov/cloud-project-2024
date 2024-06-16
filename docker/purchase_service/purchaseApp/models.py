@@ -1,6 +1,6 @@
 from ctypes import Array
 from re import L
-from purchaseApp import db
+from purchaseApp.database import db
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
 import uuid
 import datetime
