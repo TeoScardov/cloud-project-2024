@@ -17,7 +17,7 @@ def register_account(data, token=None):
         if acc:
             return {"message": "E-mail address already in use."}, 400
     except Exception as e:
-        logging.getLogger().error(f"Error: {e}")
+        logging.getLogger().error(e)
         return {"message": "There was a problem with the database querying."}, 500
 
     new_account_role = "USER"   # The default role for a new account
@@ -28,10 +28,11 @@ def register_account(data, token=None):
             if code != 200:
                 return auth_msg, code   # The authentication was not successful
             # Check the role
-            if auth_msg['role'] == "ADMIN": 
-                new_account_role = data['role']
+            if auth_msg['role'] != "ADMIN": 
+                return {"message": "The JWT token is not associated to an admin account."}, 400
+            new_account_role = data['role']
     except Exception as e:
-        logging.getLogger().error(f"Error: {e}")
+        logging.getLogger().error(e)
         return {"message": "There was an error related to the authorization token."}, 400
 
     # Create the new account
@@ -45,7 +46,7 @@ def register_account(data, token=None):
             role = new_account_role
         )
     except Exception as e:
-        logging.getLogger().error(f"Error: {e}")
+        logging.getLogger().error(e)
         return {"message": "There was an error while parsing the data."}, 400
     
     # Add the account to the database
@@ -53,7 +54,7 @@ def register_account(data, token=None):
         db.session.add(new_account)
         db.session.commit()
     except Exception as e:
-        logging.getLogger().error(f"Error: {e}")
+        logging.getLogger().error(e)
         db.session.rollback()
         return {"message": "There was an error in the database registration process for the account."}, 500
     
@@ -72,10 +73,11 @@ def register_account(data, token=None):
             db.session.add(new_customer)
             db.session.commit()
         except Exception as e:
-            logging.getLogger().error(f"Error: {e}")
+            logging.getLogger().error(e)
             db.session.rollback()
             return {"message": "There was an error in the database registration process for the customer."}, 500
     return {"message": "The registration was succesful."}, 200
+
 
 
 '''Check login credentials given username (or email) and password'''
@@ -90,7 +92,7 @@ def check_login_info(data):
         if not acc:
             acc = Account.query.filter_by(email_address=email).first()
     except Exception as e:
-        logging.getLogger().error(f"Error: {e}")
+        logging.getLogger().error(e)
         return {"message": "There was a problem with the database querying."}, 500
     # Check the query result
     if not acc:
@@ -110,6 +112,7 @@ def check_login_info(data):
     return {"message": "The password is not correct."}, 400
 
 
+
 '''Update the information of the account specified in the json. This could be either requested by a user to update their own account, or by an admin to update any account'''
 def update_info(token, data): 
     # Provided a JWT token, get the id and role of the account that is requesting the modification
@@ -125,15 +128,15 @@ def update_info(token, data):
         if not updating_account_id:
             username = data.get('username', None)
             if not username:
-                return {"message": 'Must specify an "account_id" or "username".'}, 500
+                return {"message": 'Must specify an "account_id" or "username".'}, 400
             try:
                 acc = Account.query.filter_by(username=username).first()
                 if not acc:
                     # the account isn't in the DB
-                    return {"message": "Account id not valid."}, 400
+                    return {"message": "Username not valid."}, 400
                 updating_account_id = acc.id
             except Exception as e:
-                logging.getLogger().error(f"Error: {e}")
+                logging.getLogger().error(e)
                 return {"message": "There was a problem with the database querying."}, 500
 
     # Modify the account
@@ -187,9 +190,10 @@ def update_info(token, data):
             db.session.commit()
             return {"message": "Info successfully updated."}, 200
     except Exception as e:
-        logging.getLogger().error(f"Error: {e}")
+        logging.getLogger().error(e)
         db.session.rollback()
         return {"message": "The info could not be updated."}, 500
+
 
 
 '''Check if the token corresponds to an account in the database and return its information'''
@@ -199,7 +203,7 @@ def authenticate_token(token):
         token = token.split(' ')[1]     # The token is in the form "Bearer <token_string>"
         account_id = decode_token(token)['sub']
     except Exception as e:
-        logging.getLogger().error(f"Error: {e}")
+        logging.getLogger().error(e)
         return {"message": "Token not valid"}, 400
     
     # Query the database to obtain the information about the requesting account
@@ -220,8 +224,9 @@ def authenticate_token(token):
                 "suspended": account.suspended
                 }, 200
     except Exception as e:
-        logging.getLogger().error(f"Error: {e}")
+        logging.getLogger().error(e)
         return {"message": "There was a problem with the database querying."}, 500
+    
     
 
 '''Return all the info of the account specified in the JWT token or in the json if the request is made by an admin account'''
@@ -234,7 +239,7 @@ def get_info(data, token):
     info_account_id = auth_msg['account_id']
     if requesting_role == "ADMIN":
         if not data:
-            return {"message": 'Must specify an "account_id" or "username".'}, 500
+            return {"message": 'Must specify an "account_id" or "username".'}, 400
         info_account_id = data.get('account_id', None)
         if not info_account_id:
             username = data.get('username', None)
@@ -242,14 +247,17 @@ def get_info(data, token):
                 acc = Account.query.filter_by(username=username).first()
                 if not acc:
                     # the account isn't in the DB
-                    return {"message": "Account id not valid."}, 400
+                    return {"message": "Username not valid."}, 400
                 info_account_id = acc.id
             except Exception as e:
-                logging.getLogger().error(f"Error: {e}")
+                logging.getLogger().error(e)
                 return {"message": "There was a problem with the database querying."}, 500
 
     try:
         account = Account.query.filter_by(id=info_account_id).first()
+        if not account:
+            # the account isn't in the DB
+            return {"message": "Account id not valid."}, 400
         account_info = {
         "id": account.id,
         "email_address": account.email_address,
@@ -268,6 +276,6 @@ def get_info(data, token):
             account_info['expiredate'] = customer.expiredate
             account_info['cvv'] = customer.cvv
     except Exception as e:
-        logging.getLogger().error(f"Error: {e}")
+        logging.getLogger().error(e)
         return {"message": "There was a problem with the database querying."}, 500
     return account_info, 200

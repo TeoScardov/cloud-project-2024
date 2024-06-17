@@ -9,8 +9,9 @@ def app():
     db.init_app(app)
     with app.app_context():
         db.create_all()
-    yield app
-    with app.app_context():
+        from accountApp.dbmodel import create_admin_account
+        create_admin_account()
+        yield app
         db.drop_all() 
 
 @pytest.fixture()

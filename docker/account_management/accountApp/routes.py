@@ -110,6 +110,14 @@ def login():
     responses:
         200:
             description: Login successful.
+            schema:
+                type: object
+                properties:
+                    message:
+                        type: string
+                        example: "Login successful."
+                    access_token:
+                        type: string
         400:
             description: Invalid username or password, or the account was suspended, or the password was wrong.
         500:

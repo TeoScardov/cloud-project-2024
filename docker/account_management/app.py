@@ -8,7 +8,8 @@ from accountApp.database import db
 from accountApp.routes import account
 
 def create_app(config_class="production"):
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+    if config_class != "production":
+        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
     app = Flask(__name__)
     app.config.from_object(get_config_map(config_class))
     
