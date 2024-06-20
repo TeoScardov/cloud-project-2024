@@ -1,9 +1,6 @@
-from ctypes import Array
-from re import L
-from purchaseApp.database import db
-from sqlalchemy.dialects.postgresql import UUID, ARRAY
 import uuid
-import datetime
+from purchaseApp.database import db
+from sqlalchemy.dialects.postgresql import UUID
 
 class PurchaseDao(db.Model):
     """
@@ -153,7 +150,7 @@ class PurchaseItemDao(db.Model):
 
     id = db.Column(UUID(as_uuid=True), primary_key=True)
     order_id = db.Column(UUID(as_uuid=True), db.ForeignKey('orders.id'), nullable=False, unique=True)
-    product_id = db.Column(ARRAY(db.String), nullable=False)
+    product_id = db.Column(db.JSON, nullable=False)
 
     def __init__(self, order_id, product_id):
         """
