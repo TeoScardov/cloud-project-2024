@@ -15,7 +15,6 @@ class Config(object):
         'description': 'API for Purchase Service',
     }
         
-
 class DevelopmentConfig(Config):
     DEBUG = True
 

@@ -1,7 +1,6 @@
-import re
 from flask import Blueprint
 from flask import request
-from flask import jsonify, render_template
+from flask import jsonify
 from flask_jwt_extended import jwt_required
 from purchaseApp.controller import *
 

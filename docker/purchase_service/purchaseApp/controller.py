@@ -1,12 +1,11 @@
-import requests
 import os
+import requests
 from flask import jsonify, make_response, Response
 from purchaseApp.models import PaymentDao, PurchaseDao, PurchaseItemDao
 
 SERVICES = {
     "ACCOUNT_SERVICE": os.getenv('ACCOUNT_SERVICE_URL'),
     "PAYMENT_SERVICE": os.getenv('PAYMENT_SERVICE_URL'),
-    #"CART_SERVICE": os.getenv('CART_SERVICE_URL')
 }
 
 def isAuthenticated(request)-> Response:

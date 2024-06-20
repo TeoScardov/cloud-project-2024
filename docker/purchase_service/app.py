@@ -1,6 +1,5 @@
 import logging
-from flask import Flask, config
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from flasgger import Swagger
