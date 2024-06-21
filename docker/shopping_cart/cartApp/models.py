@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+import datetime
 
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -12,7 +12,7 @@ class Cart(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True)
     total = db.Column(db.REAL, nullable=True)
     user_id = db.Column(db.String(255), nullable=True)
-    exp_date = db.Column(db.DateTime, default=datetime.utcnow, nullable=True)
+    exp_date = db.Column(db.DateTime, default=datetime.datetime.now(datetime.UTC), nullable=True)
     items = db.relationship('CartItem', backref='cart', lazy=True, cascade='all, delete-orphan')
 
     def __init__(self, total=None, user_id=None, items=[], exp_date=None):
