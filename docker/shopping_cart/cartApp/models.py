@@ -9,10 +9,10 @@ from .db import db
 class Cart(db.Model):
     __tablename__ = 'cart'
 
-    id = db.Column(UUID(as_uuid=True), primary_key=True)
+    id = db.Column(db.String(36), primary_key=True)
     total = db.Column(db.REAL, nullable=True)
     user_id = db.Column(db.String(255), nullable=True)
-    exp_date = db.Column(db.DateTime, default=datetime.datetime.now(datetime.UTC), nullable=True)
+    exp_date = db.Column(db.DateTime, default=datetime.datetime.now(datetime.timezone.utc), nullable=True)
     items = db.relationship('CartItem', backref='cart', lazy=True, cascade='all, delete-orphan')
 
     def __init__(self, total=None, user_id=None, items=[], exp_date=None):
@@ -27,7 +27,7 @@ class Cart(db.Model):
 class CartItem(db.Model):
     __tablename__ = 'cart_item'
 
-    cart_id = db.Column(UUID(as_uuid=True), db.ForeignKey('cart.id'), primary_key=True)
+    cart_id = db.Column(db.String(36), db.ForeignKey('cart.id'), primary_key=True)
     isbn = db.Column(db.String(20), primary_key=True)
     title = db.Column(db.String(255), nullable=False, default="")
     price = db.Column(db.REAL, nullable=False, default=0.0)
