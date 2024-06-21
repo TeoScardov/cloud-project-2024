@@ -192,17 +192,6 @@ def test_delete_nonexistent_book(test_client):
     assert response.status_code == 404
     assert response.json['message'] == 'book not found'
 
-# test getting random books
-@pytest.fixture
-def test_client():
-    with app.test_client() as client:
-        with app.app_context():
-            # Create all tables
-            db.create_all()
-            yield client
-            # Drop all tables
-            db.drop_all()
-
 def add_books_to_db():
     books = [
         Book(isbn="1111111111111", title="Book One", author="Author One", publisher="Publisher One", description="Description One", price=10.99, image_url="http://example.com/book1.jpg"),
