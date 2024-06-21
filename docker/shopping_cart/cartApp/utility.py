@@ -15,7 +15,7 @@ def generate_ttl(days=1):
     """
     Generate epoch timestamp for number days in future
     """
-    future = datetime.datetime.utcnow() + datetime.timedelta(days=days)
+    future = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=days)
     return future
 
 
