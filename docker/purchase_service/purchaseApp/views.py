@@ -106,7 +106,7 @@ def placeOrder():
         auth_responce = isAuthenticated(request)
 
         if auth_responce.status_code != 200:
-            return auth_responce
+            return make_response(auth_responce.get_json(), auth_responce.status_code)
 
         # get account_id from auth_responce
         account_id = auth_responce.get_json().get('account_id')
@@ -261,7 +261,7 @@ def payPurchase():
         auth_responce = isAuthenticated(request)
 
         if auth_responce.status_code != 200:
-            return auth_responce
+            return make_response(auth_responce.get_json(), auth_responce.status_code)
         
         # get user id
         account_id = auth_responce.get_json().get('account_id')
@@ -401,7 +401,7 @@ def addBookToPurchase():
         auth_responce = isAuthenticated(request)
 
         if auth_responce.status_code != 200:
-            return auth_responce
+            return make_response(auth_responce.get_json(), auth_responce.status_code)
         
         # get user id
         account_id = auth_responce.get_json().get('account_id')
@@ -535,7 +535,7 @@ def addBookToAccount():
         auth_responce = isAuthenticated(request)
 
         if auth_responce.status_code != 200:
-            return auth_responce
+            return make_response(auth_responce.get_json(), auth_responce.status_code)
         
         # get user id
         account_id = auth_responce.get_json().get('account_id')
@@ -624,7 +624,7 @@ def getPurchase():
         auth_responce = isAuthenticated(request)
 
         if auth_responce.status_code != 200:
-            return auth_responce
+            return make_response(auth_responce.get_json(), auth_responce.status_code)
         
         # get user id
         account_id = auth_responce.get_json().get('account_id')
