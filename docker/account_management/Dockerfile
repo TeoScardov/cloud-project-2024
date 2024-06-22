@@ -1,5 +1,4 @@
-# For the shopping cart service
-FROM python:3.9
+FROM python:3.9-slim-buster
 
 WORKDIR /app
 
@@ -11,4 +10,4 @@ COPY . .
 
 EXPOSE 4000
 
-CMD ["flask", "run", "--host=0.0.0.0", "--port=4000"]
+CMD ["waitress-serve", "--port=4000", "app:create_app"]
