@@ -1,29 +1,10 @@
 import pytest
 import json
-import os
-
-# Set the DB_URL environment variable before importing the app
-os.environ['DB_URL'] = 'sqlite:///:memory:'
-
-# Import the Flask app and database from the code above
-from app import app, db, Book
-
-# allows to make requests to application as you were an external client without actually running the server
-@pytest.fixture(scope='module')
-def test_client():
-    app.config['TESTING'] = True
-    #configures the app to use an in-memory SQLite db. This ensures that the test runs in isolation
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-
-    with app.test_client() as testing_client:
-        with app.app_context(): #push an application context
-            db.create_all() #create db tables
-            yield testing_client #testing happening
-            db.drop_all() #drop tables
-
+from catalogApp.models import Book
+from catalogApp.database import db
 
 # test creation of a book
-def test_create_book_success(test_client):
+def test_create_book_success(client):
     new_book_data = {
         "isbn": "1234567890123",
         "title": "Test Book",
@@ -34,12 +15,12 @@ def test_create_book_success(test_client):
         "image_url": "http://example.com/testbook.jpg"
     }
 
-    response = test_client.post('/api/product/create-book', data=json.dumps(new_book_data), content_type='application/json')
+    response = client.post('/api/product/create-book', data=json.dumps(new_book_data), content_type='application/json')
     assert response.status_code == 201
     assert response.json['message'] == 'book created'
 
 # test missing fields during creation
-def test_create_book_missing_fields(test_client):
+def test_create_book_missing_fields(client):
     incomplete_book_data = {
         "isbn": "1234567890123",
         "title": "Test Book",
@@ -48,12 +29,12 @@ def test_create_book_missing_fields(test_client):
         "description": "This is a test book"
     }
 
-    response = test_client.post('/api/product/create-book', data=json.dumps(incomplete_book_data), content_type='application/json')
+    response = client.post('/api/product/create-book', data=json.dumps(incomplete_book_data), content_type='application/json')
     assert response.status_code == 400
     assert response.json['message'] == 'All fields are required'
 
 # test duplicate titles
-def test_create_book_duplicate_title(test_client):
+def test_create_book_duplicate_title(client):
     book_data_1 = {
         "isbn": "1234567890123",
         "title": "Test Book",
@@ -74,13 +55,13 @@ def test_create_book_duplicate_title(test_client):
         "image_url": "http://example.com/anothertestbook.jpg"
     }
 
-    test_client.post('/api/product/create-book', data=json.dumps(book_data_1), content_type='application/json')
-    response = test_client.post('/api/product/create-book', data=json.dumps(book_data_2), content_type='application/json')
+    client.post('/api/product/create-book', data=json.dumps(book_data_1), content_type='application/json')
+    response = client.post('/api/product/create-book', data=json.dumps(book_data_2), content_type='application/json')
     assert response.status_code == 400
     assert response.json['message'] == 'A book with this title already exists'
 
 # test long fields
-def test_create_book_long_fields(test_client):
+def test_create_book_long_fields(client):
     long_fields_data = {
         "isbn": "123456789012345678901",
         "title": "T" * 81,
@@ -91,19 +72,19 @@ def test_create_book_long_fields(test_client):
         "image_url": "http://example.com/testbook.jpg"
     }
 
-    response = test_client.post('/api/product/create-book', data=json.dumps(long_fields_data), content_type='application/json')
+    response = client.post('/api/product/create-book', data=json.dumps(long_fields_data), content_type='application/json')
     assert response.status_code == 400
     assert response.json['message'] == 'Maximum length exceeded for one or more fields'
 
 # Test getting all books
-def test_get_books(test_client):
-    response = test_client.get('/api/product/get-books')
+def test_get_books(client):
+    response = client.get('/api/product/get-books')
     assert response.status_code == 200
     assert isinstance(response.json, list)
 
 
 # Test getting book details by ISBN
-def test_get_book_by_isbn(test_client):
+def test_get_book_by_isbn(client):
     # First, create a book to fetch
     new_book_data = {
         "isbn": "9876543210984",
@@ -115,22 +96,22 @@ def test_get_book_by_isbn(test_client):
         "image_url": "http://example.com/fetchtestbook.jpg"
     }
 
-    test_client.post('/api/product/create-book', data=json.dumps(new_book_data), content_type='application/json')
+    client.post('/api/product/create-book', data=json.dumps(new_book_data), content_type='application/json')
 
     # Fetch the created book by ISBN
-    response = test_client.post('/api/product/get-book-details', data=json.dumps({"isbn": "9876543210984"}), content_type='application/json')
+    response = client.post('/api/product/get-book-details', data=json.dumps({"isbn": "9876543210984"}), content_type='application/json')
     assert response.status_code == 200
     assert response.json['book']['title'] == 'Fetch Test Book'
 
 # Test getting book details with missing ISBN
-def test_get_book_by_isbn_missing(test_client):
-    response = test_client.post('/api/product/get-book-details', data=json.dumps({}), content_type='application/json')
+def test_get_book_by_isbn_missing(client):
+    response = client.post('/api/product/get-book-details', data=json.dumps({}), content_type='application/json')
     assert response.status_code == 400
     assert response.json['message'] == 'ISBN not provided in request body'
 
 
 # Test updating a book
-def test_update_book(test_client):
+def test_update_book(client):
     # First, create a book to update
     new_book_data = {
         "isbn": "1234567890123",
@@ -142,7 +123,7 @@ def test_update_book(test_client):
         "image_url": "http://example.com/updatetestbook.jpg"
     }
 
-    test_client.post('/api/product/create-book', data=json.dumps(new_book_data), content_type='application/json')
+    client.post('/api/product/create-book', data=json.dumps(new_book_data), content_type='application/json')
 
     # Update the book
     update_data = {
@@ -150,24 +131,24 @@ def test_update_book(test_client):
         "author": "Updated Test Author"
     }
 
-    response = test_client.put('/api/product/update-book/1234567890123', data=json.dumps(update_data), content_type='application/json')
+    response = client.put('/api/product/update-book/1234567890123', data=json.dumps(update_data), content_type='application/json')
     assert response.status_code == 200
     assert response.json['message'] == 'Book updated'
 
 
 # Test updating a non-existent book
-def test_update_nonexistent_book(test_client):
+def test_update_nonexistent_book(client):
     update_data = {
         "title": "Nonexistent Book",
         "author": "Nonexistent Author"
     }
 
-    response = test_client.put('/api/product/update-book/0000000000000', data=json.dumps(update_data), content_type='application/json')
+    response = client.put('/api/product/update-book/0000000000000', data=json.dumps(update_data), content_type='application/json')
     assert response.status_code == 404
     assert response.json['message'] == 'Book not found'
 
 # Test deleting a book
-def test_delete_book(test_client):
+def test_delete_book(client):
     # First, create a book to delete
     new_book_data = {
         "isbn": "1234567890123",
@@ -179,16 +160,16 @@ def test_delete_book(test_client):
         "image_url": "http://example.com/deletetestbook.jpg"
     }
 
-    test_client.post('/api/product/create-book', data=json.dumps(new_book_data), content_type='application/json')
+    client.post('/api/product/create-book', data=json.dumps(new_book_data), content_type='application/json')
 
     # Delete the book
-    response = test_client.delete('/api/product/delete-book/1234567890123')
+    response = client.delete('/api/product/delete-book/1234567890123')
     assert response.status_code == 200
     assert response.json['message'] == 'book deleted'
 
 # Test deleting a non-existent book
-def test_delete_nonexistent_book(test_client):
-    response = test_client.delete('/api/product/delete-book/0000000000000')
+def test_delete_nonexistent_book(client):
+    response = client.delete('/api/product/delete-book/0000000000000')
     assert response.status_code == 404
     assert response.json['message'] == 'book not found'
 
@@ -204,18 +185,18 @@ def add_books_to_db():
         db.session.add(book)
     db.session.commit()
 
-def test_get_random_books(test_client):
-    with app.app_context():
-        add_books_to_db()
+def test_get_random_books(client):
+    
+    add_books_to_db()
 
-    response = test_client.get('/api/product/get-random-books/3')
+    response = client.get('/api/product/get-random-books/3')
     assert response.status_code == 200
     data = response.get_json()
     assert len(data) == 3  # Check if 3 books are returned
     assert all('isbn' in book for book in data)  # Check if 'isbn' is present in all returned books
 
     # Repeat to check for randomness
-    response2 = test_client.get('/api/product/get-random-books/3')
+    response2 = client.get('/api/product/get-random-books/3')
     data2 = response2.get_json()
     assert len(data2) == 3
     assert data != data2  # There should be some difference between the two sets of random books
