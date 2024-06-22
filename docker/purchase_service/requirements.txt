@@ -5,3 +5,4 @@ flask_sqlalchemy
 requests
 flask_cors
 flasgger
+waitress

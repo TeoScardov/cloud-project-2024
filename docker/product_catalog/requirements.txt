@@ -1,7 +1,10 @@
 flask
 psycopg2-binary
+flask_jwt_extended
 Flask-SQLAlchemy
+flasgger
 flask_cors
+waitress
 
 
 

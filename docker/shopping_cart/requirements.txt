@@ -5,3 +5,4 @@ flask_jwt_extended
 requests
 flask_cors
 flasgger
+waitress

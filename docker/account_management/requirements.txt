@@ -4,3 +4,4 @@ Flask-SQLAlchemy
 psycopg2-binary
 flask_cors
 flasgger
+waitress
