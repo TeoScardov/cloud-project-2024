@@ -10,4 +10,4 @@ COPY . .
 
 EXPOSE 4000
 
-CMD ["waitress-serve", "--port=4000", "app:create_app"]
+CMD ["python", "run_waitress.py"]
