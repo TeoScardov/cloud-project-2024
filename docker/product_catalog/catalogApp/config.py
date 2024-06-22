@@ -6,7 +6,7 @@ class Config(object):
     TESTING = False
     URL_PREFIX = environ.get("URL_PREFIX", '/api/product')
     SECRET_KEY = environ.get("SECRET_KEY", "supersecretkey")
-    SQLALCHEMY_DATABASE_URI = environ.get("SQLALCHEMY_DATABASE_URI")
+    SQLALCHEMY_DATABASE_URI = environ.get("DB_URL")
     SWAGGER = {
         'title': 'Purchase Service API',
         'uiversion': 3,
