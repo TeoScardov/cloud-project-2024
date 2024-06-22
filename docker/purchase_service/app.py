@@ -3,6 +3,7 @@ from flask import Flask
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from flasgger import Swagger
+from sqlalchemy import true
 from purchaseApp.database import db
 from purchaseApp.config import *
 
@@ -28,5 +29,5 @@ def create_app(config_class="production"):
     return app
 
 if __name__ == '__main__':
-    app = create_app()
-    app.run(debug=Config.DEBUG)
+    app = create_app(config_class="development")
+    app.run(debug=True)

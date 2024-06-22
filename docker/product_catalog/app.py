@@ -28,8 +28,8 @@ def create_app(config_class="production"):
     return app
 
 if __name__ == '__main__':
-    app = create_app()
-    app.run(debug=Config.DEBUG)
+    app = create_app(config_class="development")
+    app.run(debug=True)
 
 
 

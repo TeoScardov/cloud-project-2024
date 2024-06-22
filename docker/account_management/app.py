@@ -34,5 +34,5 @@ def create_app(config_class="production"):
 
 
 if __name__ == '__main__':
-    app = create_app() 
+    app = create_app(config_class="development")
     app.run(debug=True)
