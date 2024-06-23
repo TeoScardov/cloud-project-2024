@@ -112,6 +112,19 @@ def placeOrder():
         account_id = auth_responce.get_json().get('account_id')
         # get auth token 
         auth = request.headers['Authorization']
+        
+        if request.headers.get('content-type') != 'application/json':
+            return make_response(jsonify({
+                'status': 'error',
+                'message': 'Content type must be application/json'
+            }), 400)
+            
+        if not request.get_json():
+            return make_response(jsonify({
+                'status': 'error',
+                'message': 'Missing data'
+            }), 400)
+        
         # get purchase data from request
         purchase_data = request.get_json()
     
@@ -268,6 +281,18 @@ def payPurchase():
 
         # get auth token
         auth_token = request.headers['Authorization']
+        
+        if request.headers.get('content-type') != 'application/json':
+            return make_response(jsonify({
+                'status': 'error',
+                'message': 'Content type must be application/json'
+            }), 400)
+            
+        if not request.get_json():
+            return make_response(jsonify({
+                'status': 'error',
+                'message': 'Missing data'
+            }), 400)
 
         # get payment data from request
         payment_data = request.get_json()
@@ -409,6 +434,18 @@ def addBookToPurchase():
         # get auth token
         auth_token = request.headers['Authorization']
         
+        if request.headers.get('content-type') != 'application/json':
+            return make_response(jsonify({
+                'status': 'error',
+                'message': 'Content type must be application/json'
+            }), 400)
+            
+        if not request.get_json():
+            return make_response(jsonify({
+                'status': 'error',
+                'message': 'Missing data'
+            }), 400)
+        
         # get purchase data from request
         book_data = request.get_json()
     
@@ -542,6 +579,18 @@ def addBookToAccount():
         
         # get auth token
         auth_token = request.headers['Authorization']
+        
+        if request.headers.get('content-type') != 'application/json':
+            return make_response(jsonify({
+                'status': 'error',
+                'message': 'Content type must be application/json'
+            }), 400)
+            
+        if not request.get_json():
+            return make_response(jsonify({
+                'status': 'error',
+                'message': 'Missing data'
+            }), 400)
         
         # get purchase data from request
         purchase_data = request.get_json()
