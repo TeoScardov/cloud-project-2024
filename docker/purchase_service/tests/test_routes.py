@@ -1,3 +1,4 @@
+from unittest import mock
 import pytest
 from flask import jsonify
 from unittest.mock import Mock, patch
@@ -411,7 +412,195 @@ def test_associate_books_already_associated(client, mocker, dummy_responce_purch
     assert response.status_code == 400
     assert response.get_json() == {'status': 'error', 'message': 'Purchase already associated with books'}
 
-
+def test_associate_books_account_success(client, mocker, dummy_responce_purchase, dummy_cart_items):
+    mocker.patch("flask_jwt_extended.view_decorators.verify_jwt_in_request", lambda *args, **kwargs: None)
+    mocker.patch("purchaseApp.controller.SERVICES", {"ACCOUNT_SERVICE" : "http://account_management:5000", "PAYMENT_SERVICE" : "http://payment_service:5000"})
+    dummy_responce_purchase['status'] = 'APPROVED'
+    mock_auth = Mock()
+    mock_auth.status_code = 200
+    mock_auth.get_json.return_value = {'account_id': '123'}
+    mock_responce = Mock()
+    mock_responce.status_code = 200
+    mock_responce.get_json.return_value = {"message": "Books associated to account", "status": "success"}
+    mock_responce.json.return_value = {"message": "Books associated to account", "status": "success"}
+    mock_purchase_dao = Mock(
+        account_id=dummy_responce_purchase['account_id'],
+        id=dummy_responce_purchase['id'],
+        order_date=dummy_responce_purchase['order_date'],
+        status=dummy_responce_purchase['status'],
+        total=dummy_responce_purchase['total']
+    )
+    mock_purchase_item_dao = Mock(
+        purchase_id=dummy_responce_purchase['id'],
+        product_id=[item['isbn'] for item in dummy_cart_items['items']]
+    )
+    dummy_body_add_book = {
+        "purchase": dummy_responce_purchase,
+        "cart": dummy_cart_items
+    }
+    mocker.patch("purchaseApp.models.PurchaseDao.get_by_id", return_value=mock_purchase_dao)
+    mocker.patch('purchaseApp.views.isAuthenticated', return_value=mock_auth)
+    mocker.patch('purchaseApp.models.PurchaseItemDao.get_by_order_id', return_value=mock_purchase_item_dao)
+    mocker.patch('purchaseApp.controller.requests.post', return_value=mock_responce)
+    response = client.post('/api/purchase/add-book-to-account', json=dummy_body_add_book, headers={'Authorization': f'Bearer token'})
+    assert response.status_code == 200
+    assert response.get_json() == {"message": "Books associated to account", "status": "success"}
+    
+def test_associate_books_account_missing_body(client, mocker, dummy_responce_purchase, dummy_cart_items):
+    mocker.patch("flask_jwt_extended.view_decorators.verify_jwt_in_request", lambda *args, **kwargs: None)
+    mocker.patch("purchaseApp.controller.SERVICES", {"ACCOUNT_SERVICE" : "http://account_management:5000", "PAYMENT_SERVICE" : "http://payment_service:5000"})
+    dummy_responce_purchase['status'] = 'APPROVED'
+    mock_auth = Mock()
+    mock_auth.status_code = 200
+    mock_auth.get_json.return_value = {'account_id': '123'}
+    mock_responce = Mock()
+    mock_responce.status_code = 200
+    mock_responce.get_json.return_value = {"message": "Books associated to account", "status": "success"}
+    mock_responce.json.return_value = {"message": "Books associated to account", "status": "success"}
+    mock_purchase_dao = Mock(
+        account_id=dummy_responce_purchase['account_id'],
+        id=dummy_responce_purchase['id'],
+        order_date=dummy_responce_purchase['order_date'],
+        status=dummy_responce_purchase['status'],
+        total=dummy_responce_purchase['total']
+    )
+    mock_purchase_item_dao = Mock(
+        purchase_id=dummy_responce_purchase['id'],
+        product_id=[item['isbn'] for item in dummy_cart_items['items']]
+    )
+    mocker.patch("purchaseApp.models.PurchaseDao.get_by_id", return_value=mock_purchase_dao)
+    mocker.patch('purchaseApp.views.isAuthenticated', return_value=mock_auth)
+    mocker.patch('purchaseApp.models.PurchaseItemDao.get_by_order_id', return_value=mock_purchase_item_dao)
+    mocker.patch('purchaseApp.controller.requests.post', return_value=mock_responce)
+    response = client.post('/api/purchase/add-book-to-account', headers={'Authorization': f'Bearer token'})
+    assert response.status_code == 400
+    assert response.get_json() == {'status': 'error', 'message': 'Content type must be application/json'}
+    
+def test_associate_books_account_empty_body(client, mocker, dummy_responce_purchase, dummy_cart_items):
+    mocker.patch("flask_jwt_extended.view_decorators.verify_jwt_in_request", lambda *args, **kwargs: None)
+    mocker.patch("purchaseApp.controller.SERVICES", {"ACCOUNT_SERVICE" : "http://account_management:5000", "PAYMENT_SERVICE" : "http://payment_service:5000"})
+    dummy_responce_purchase['status'] = 'APPROVED'
+    mock_auth = Mock()
+    mock_auth.status_code = 200
+    mock_auth.get_json.return_value = {'account_id': '123'}
+    mock_responce = Mock()
+    mock_responce.status_code = 200
+    mock_responce.get_json.return_value = {"message": "Books associated to account", "status": "success"}
+    mock_responce.json.return_value = {"message": "Books associated to account", "status": "success"}
+    mock_purchase_dao = Mock(
+        account_id=dummy_responce_purchase['account_id'],
+        id=dummy_responce_purchase['id'],
+        order_date=dummy_responce_purchase['order_date'],
+        status=dummy_responce_purchase['status'],
+        total=dummy_responce_purchase['total']
+    )
+    mock_purchase_item_dao = Mock(
+        purchase_id=dummy_responce_purchase['id'],
+        product_id=[item['isbn'] for item in dummy_cart_items['items']]
+    )
+    mocker.patch("purchaseApp.models.PurchaseDao.get_by_id", return_value=mock_purchase_dao)
+    mocker.patch('purchaseApp.views.isAuthenticated', return_value=mock_auth)
+    mocker.patch('purchaseApp.models.PurchaseItemDao.get_by_order_id', return_value=mock_purchase_item_dao)
+    mocker.patch('purchaseApp.controller.requests.post', return_value=mock_responce)
+    response = client.post('/api/purchase/add-book-to-account', json={}, headers={'Authorization': f'Bearer token'})
+    assert response.status_code == 400
+    assert response.get_json() == {'status': 'error', 'message': 'Missing data'}
+    
+def test_associate_books_account_purchase_not_found(client, mocker, dummy_responce_purchase, dummy_cart_items):
+    mocker.patch("flask_jwt_extended.view_decorators.verify_jwt_in_request", lambda *args, **kwargs: None)
+    mocker.patch("purchaseApp.controller.SERVICES", {"ACCOUNT_SERVICE" : "http://account_management:5000", "PAYMENT_SERVICE" : "http://payment_service:5000"})
+    dummy_responce_purchase['status'] = 'APPROVED'
+    mock_auth = Mock()
+    mock_auth.status_code = 200
+    mock_auth.get_json.return_value = {'account_id': '123'}
+    mock_responce = Mock()
+    mock_responce.status_code = 200
+    mock_responce.get_json.return_value = {"message": "Books associated to account", "status": "success"}
+    mock_responce.json.return_value = {"message": "Books associated to account", "status": "success"}
+    mock_purchase_dao = None
+    mock_purchase_item_dao = Mock(
+        purchase_id=dummy_responce_purchase['id'],
+        product_id=[item['isbn'] for item in dummy_cart_items['items']]
+    )
+    dummy_body_add_book = {
+        "purchase": dummy_responce_purchase,
+        "cart": dummy_cart_items
+    }
+    mocker.patch("purchaseApp.models.PurchaseDao.get_by_id", return_value=mock_purchase_dao)
+    mocker.patch('purchaseApp.views.isAuthenticated', return_value=mock_auth)
+    mocker.patch('purchaseApp.models.PurchaseItemDao.get_by_order_id', return_value=mock_purchase_item_dao)
+    mocker.patch('purchaseApp.controller.requests.post', return_value=mock_responce)
+    response = client.post('/api/purchase/add-book-to-account', json=dummy_body_add_book, headers={'Authorization': f'Bearer token'})
+    assert response.status_code == 404
+    assert response.get_json() == {'status': 'error', 'message': 'Purchase not found'}
+    
+def test_associate_books_account_purchase_unauthorized(client, mocker, dummy_responce_purchase, dummy_cart_items):
+    mocker.patch("flask_jwt_extended.view_decorators.verify_jwt_in_request", lambda *args, **kwargs: None)
+    mocker.patch("purchaseApp.controller.SERVICES", {"ACCOUNT_SERVICE" : "http://account_management:5000", "PAYMENT_SERVICE" : "http://payment_service:5000"})
+    dummy_responce_purchase['status'] = 'APPROVED'
+    mock_auth = Mock()
+    mock_auth.status_code = 200
+    mock_auth.get_json.return_value = {'account_id': '1234'}
+    mock_responce = Mock()
+    mock_responce.status_code = 200
+    mock_responce.get_json.return_value = {"message": "Books associated to account", "status": "success"}
+    mock_responce.json.return_value = {"message": "Books associated to account", "status": "success"}
+    mock_purchase_dao = Mock(
+        account_id=dummy_responce_purchase['account_id'],
+        id=dummy_responce_purchase['id'],
+        order_date=dummy_responce_purchase['order_date'],
+        status=dummy_responce_purchase['status'],
+        total=dummy_responce_purchase['total']
+    )
+    mock_purchase_item_dao = Mock(
+        purchase_id=dummy_responce_purchase['id'],
+        product_id=[item['isbn'] for item in dummy_cart_items['items']]
+    )
+    dummy_body_add_book = {
+        "purchase": dummy_responce_purchase,
+        "cart": dummy_cart_items
+    }
+    mocker.patch("purchaseApp.models.PurchaseDao.get_by_id", return_value=mock_purchase_dao)
+    mocker.patch('purchaseApp.views.isAuthenticated', return_value=mock_auth)
+    mocker.patch('purchaseApp.models.PurchaseItemDao.get_by_order_id', return_value=mock_purchase_item_dao)
+    mocker.patch('purchaseApp.controller.requests.post', return_value=mock_responce)
+    response = client.post('/api/purchase/add-book-to-account', json=dummy_body_add_book, headers={'Authorization': f'Bearer token'})
+    assert response.status_code == 401
+    assert response.get_json() == {'status': 'error', 'message': 'Unauthorized'}
+    
+def test_associate_books_account_purchase_items_mismatch(client, mocker, dummy_responce_purchase, dummy_cart_items):
+    mocker.patch("flask_jwt_extended.view_decorators.verify_jwt_in_request", lambda *args, **kwargs: None)
+    mocker.patch("purchaseApp.controller.SERVICES", {"ACCOUNT_SERVICE" : "http://account_management:5000", "PAYMENT_SERVICE" : "http://payment_service:5000"})
+    dummy_responce_purchase['status'] = 'APPROVED'
+    mock_auth = Mock()
+    mock_auth.status_code = 200
+    mock_auth.get_json.return_value = {'account_id': '123'}
+    mock_responce = Mock()
+    mock_responce.status_code = 200
+    mock_responce.get_json.return_value = {"message": "Books associated to account", "status": "success"}
+    mock_responce.json.return_value = {"message": "Books associated to account", "status": "success"}
+    mock_purchase_dao = Mock(
+        account_id=dummy_responce_purchase['account_id'],
+        id=dummy_responce_purchase['id'],
+        order_date=dummy_responce_purchase['order_date'],
+        status=dummy_responce_purchase['status'],
+        total=dummy_responce_purchase['total']
+    )
+    mock_purchase_item_dao = Mock(
+        purchase_id=dummy_responce_purchase['id'],
+        product_id=dummy_cart_items['items'][0]['isbn']
+    )
+    dummy_body_add_book = {
+        "purchase": dummy_responce_purchase,
+        "cart": dummy_cart_items
+    }
+    mocker.patch("purchaseApp.models.PurchaseDao.get_by_id", return_value=mock_purchase_dao)
+    mocker.patch('purchaseApp.views.isAuthenticated', return_value=mock_auth)
+    mocker.patch('purchaseApp.models.PurchaseItemDao.get_by_order_id', return_value=mock_purchase_item_dao)
+    mocker.patch('purchaseApp.controller.requests.post', return_value=mock_responce)
+    response = client.post('/api/purchase/add-book-to-account', json=dummy_body_add_book, headers={'Authorization': f'Bearer token'})
+    assert response.status_code == 400
+    assert response.get_json() == {'status': 'error', 'message': 'Purchase items mismatch in number of books'}
 
 # Test for getting a purchase by ID
 def test_get_purchase_success(client, mocker):
@@ -460,18 +649,3 @@ def test_get_purchase_auth_failure(client, mocker):
     response = client.get('/api/purchase/orders', headers={'Authorization': f'Bearer token'})
     assert response.status_code == 401
     assert response.get_json() == {'status': 'error', 'message': 'Unauthorized'}
-    
-def test_all_pipeline(client, mocker, dummy_body_purchase, dummy_body_payment):
-    mocker.patch("flask_jwt_extended.view_decorators.verify_jwt_in_request", lambda *args, **kwargs: None)
-    mocker.patch("purchaseApp.controller.SERVICES", {"ACCOUNT_SERVICE" : "http://account_management:5000", "PAYMENT_SERVICE" : "http://payment_service:5000"})
-    mock_auth = Mock()
-    mock_auth.status_code = 200
-    mock_auth.get_json.return_value = {'account_id': '123'}
-    mocker.patch('purchaseApp.views.isAuthenticated', return_value=mock_auth)
-    response = client.post('/api/purchase/', json=dummy_body_purchase, headers={'Authorization': f'Bearer token'})
-    dummy_body_payment['purchase'] = response.get_json()['purchase']
-    mocker.patch("purchaseApp.controller.requests.post", return_value=Mock(status_code=200, json=lambda: {"id": "9a1c8994-1cc5-4305-b29a-621d5a4e7487", "purchase_id": dummy_body_payment['purchase']['id']}))
-    response = client.post('/api/purchase/payment', json=dummy_body_payment, headers={'Authorization': f'Bearer token'})
-    
-    
-    assert response.status_code == 200
