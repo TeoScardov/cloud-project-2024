@@ -54,7 +54,7 @@ jobs:
           job-summary: true
           custom-arguments: 'docker/${{ matrix.service }}/tests/test_routes.py'
           click-to-expand: true
-          report-title: 'Test Report'
+          report-title: '${{ matrix.service }} Test Report'
 
 # GitHub Actions to build and push Docker images ---------------------------------------------------          
   # build-docker-images:
