@@ -1,13 +1,8 @@
-import { useEffect, useState } from "react";
 import { Book } from "../TableCartBook";
 import { createContext, useContext, ReactNode } from "react";
-import { UserProfileToken } from "../auth/models";
 import axios from "axios";
 import {
     CustomerInformation,
-    ModifyInformation,
-    ModifyInformationFormProps,
-    PersonInformation,
 } from "../EditInformationForm";
 
 // const API_ACCOUNT = "http://account_management:4000/api/account";
@@ -15,16 +10,17 @@ import {
 // const API_PRODUCT = "http://product_catalog:4000/api/product";
 // const API_CART = "http://shopping_cart:4000/api/cart";
 
-const API_ACCOUNT = "http://localhost:4001/api/account";
-const API_PURCHASE = "http://localhost:4003/api/purchase";
-const API_PRODUCT = "http://localhost:4004/api/product";
-const API_CART = "http://localhost:4005/api/cart";
-const NUMBER_OF_BOOKS_TO_DISPLAY = 10;
+// const API_ACCOUNT = "http://localhost:4001/api/account";
+// const API_PURCHASE = "http://localhost:4003/api/purchase";
+// const API_PRODUCT = "http://localhost:4004/api/product";
+// const API_CART = "http://localhost:4005/api/cart";
+// const NUMBER_OF_BOOKS_TO_DISPLAY = 10;
 
-// const API_ACCOUNT = process.env.ACCOUNT_SERVICE_URL;
-// const API_PURCHASE = process.env.PURCHASE_SERVICE_URL;
-// const API_PRODUCT = process.env.PRODUCT_CATALOG_URL;
-// const API_CART = process.env.SHOPPING_CART_URL;
+const API_ACCOUNT = process.env.ACCOUNT_SERVICE_URL;
+const API_PURCHASE = process.env.PURCHASE_SERVICE_URL;
+const API_PRODUCT = process.env.PRODUCT_CATALOG_URL;
+const API_CART = process.env.SHOPPING_CART_URL;
+const NUMBER_OF_BOOKS_TO_DISPLAY = process.env.NUMBER_OF_BOOKS_TO_DISPLAY as unknown as number;
 
 class BackendService {
     private static instance: BackendService | null = null;

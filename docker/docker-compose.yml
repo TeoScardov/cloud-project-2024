@@ -75,6 +75,12 @@ services:
     build: ./react-app
     ports:
       - "8000:8000"
+    environment:
+      - ACCOUNT_SERVICE_URL=http://localhost:4001/api/account
+      - PRODUCT_CATALOG_URL=http://localhost:4004/api/product
+      - SHOPPING_CART_URL=http://localhost:4005/api/cart
+      - PURCHASE_SERVICE_URL=http://localhost:4003/api/purchase
+      - NUMBER_OF_BOOKS_TO_DISPLAY=10
 
   db_account:
     container_name: db_account
