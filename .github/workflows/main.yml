@@ -18,8 +18,7 @@ jobs:
         service: [account_management, product_catalog, purchase_service, shopping_cart]
     runs-on: ubuntu-latest
     steps:
-      - name: dummy
-        run: echo "dummy"
+
       - name: Set timezone
         uses: szenius/set-timezone@v2.0
         with:
