@@ -72,7 +72,7 @@ def pay():
                         description: Payment failed
                     status:
                         type: string
-                        description: DECLINED
+                        description: REJECTED
                     error:
                         type: string
                         description: Error message   
@@ -83,7 +83,7 @@ def pay():
     if payment.status_code != 200:
         return make_response(jsonify({
             "message": "Payment failed",
-            "status": "DECLINED",
+            "status": "REJECTED",
             "error": str(payment)
         }), 500)
     
