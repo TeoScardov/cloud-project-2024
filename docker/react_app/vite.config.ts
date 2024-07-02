@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
       'process.env.PRODUCT_CATALOG_URL': JSON.stringify(env.PRODUCT_CATALOG_URL),
       'process.env.SHOPPING_CART_URL': JSON.stringify(env.SHOPPING_CART_URL),
       'process.env.NUMBER_OF_BOOKS_TO_DISPLAY': JSON.stringify(env.NUMBER_OF_BOOKS_TO_DISPLAY),
-      'process.env.PROXY_ALB_URL': JSON.stringify(env.PROXY_ALB_URL),
+      //'process.env.PROXY_ALB_URL': JSON.stringify(env.PROXY_ALB_URL),
     },
     plugins: [react()],
     resolve: {
@@ -22,14 +22,33 @@ export default defineConfig(({ mode }) => {
     server: {
       host: true,
       port: 8080,
-      // proxy: {
-      //   '/api': {
-      //     target: process.env.PROXY_ALB_URL,
-      //     changeOrigin: true,
-      //     secure: false,
-      //     rewrite: (path) => path.replace(/^\/api/, '')
-      //   }
-      // }
+      proxy: {
+        '/api/account': {
+          target: env.ACCOUNT_SERVICE_URL , //process.env.ACCOUNT_SERVICE_URL,
+          changeOrigin: true,
+          secure: false,
+          rewrite: (path) => path.replace(/^\/api\/account/, '/api/account')
+        },
+        '/api/product': {
+          target: env.PRODUCT_CATALOG_URL ,//process.env.PRODUCT_SERVICE_URL,
+          changeOrigin: true,
+          secure: false,
+          rewrite: (path) => path.replace(/^\/api\/product/, '/api/product')
+        },
+        '/api/cart': {
+          target: env.SHOPPING_CART_URL ,//process.env.CART_SERVICE_URL,
+          changeOrigin: true,
+          secure: false,
+          rewrite: (path) => path.replace(/^\/api\/cart/, '/api/cart')
+        },
+        '/api/purchase': {
+          target: env.PURCHASE_SERVICE_URL,//process.env.PURCHASE_SERVICE_URL,
+          changeOrigin: true,
+          secure: false,
+          rewrite: (path) => path.replace(/^\/api\/purchase/, '/api/purchase')
+        }
+
+      }
       // https: true,
     },
   }

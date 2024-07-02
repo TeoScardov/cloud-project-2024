@@ -26,6 +26,10 @@ function App() {
         }
     }, []);
 
+    if (location.pathname === "/health") {
+        return <h3>Hey There!!! The App is Healthy 🚀</h3>;
+    }
+
     return (
         <BrowserRouter>
             <ThemeProvider>
