@@ -8,6 +8,6 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-EXPOSE 4000
+EXPOSE 4005
 
 CMD ["python", "run_waitress.py"]

@@ -19,7 +19,7 @@ services:
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - DATABASE_URL=postgresql://${POSTGRES_ACCOUNT_USER}:${POSTGRES_ACCOUNT_PASSWORD}@db_account:5432/${POSTGRES_ACCOUNT_DB}
     ports:
-      - "4001:4000"
+      - "4001:4001"
     depends_on:
       db_account:
         condition: service_healthy
@@ -31,7 +31,7 @@ services:
     image: payment_service:1.0.0
     build: ./payment_service
     ports:
-      - "4002:4000"
+      - "4002:4002"
     environment:
       - SECRET_KEY=${JWT_SECRET_KEY}
       - URL_PREFIX=/api/payment
@@ -41,12 +41,12 @@ services:
     image: purchase-service:1.0.0
     build: ./purchase_service
     ports:
-      - "4003:4000"
+      - "4004:4004"
     environment:
       - SECRET_KEY=${JWT_SECRET_KEY}
       - SQLALCHEMY_DATABASE_URI=postgresql://${POSTGRES_PURCHASE_USER}:${POSTGRES_PURCHASE_PASSWORD}@db_purchase:5432/${POSTGRES_PURCHASE_DB}
-      - PAYMENT_SERVICE_URL=http://payment_service:4000/api/payment
-      - ACCOUNT_SERVICE_URL=http://account_service:4000/api/account
+      - PAYMENT_SERVICE_URL=http://payment_service:4002/api/payment
+      - ACCOUNT_SERVICE_URL=http://account_service:4001/api/account
     depends_on:
       db_purchase:
         condition: service_healthy
@@ -58,7 +58,7 @@ services:
     image: product_catalog:1.0.0
     build: ./product_catalog
     ports:
-      - "4004:4000"
+      - "4003:4003"
     environment:
       - DB_URL=postgresql://${POSTGRES_PRODUCT_USER}:${POSTGRES_PRODUCT_PASSWORD}@db_product:5432/${POSTGRES_PRODUCT_DB}
     depends_on:
@@ -72,7 +72,7 @@ services:
     image: shopping_cart:1.0.0
     build: ./shopping_cart
     ports:
-      - "4005:4000"
+      - "4005:4005"
     environment:
       - DB_URL=postgresql://${POSTGRES_CART_USER}:${POSTGRES_CART_PASSWORD}@db_cart:5432/${POSTGRES_CART_DB}
     depends_on:
