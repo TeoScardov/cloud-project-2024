@@ -8,6 +8,13 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     JWT_TOKEN_TTL = int(os.getenv('JWT_TOKEN_TTL', '3600'))
     ADMIN_PASSWORD = "cloud2024"
+    SWAGGER = {
+        'title': 'Account Management Service API',
+        'uiversion': 3,
+        'specs_route': '/api/docs/',
+        'version': '1.0',
+        'description': 'API for Account Service',
+    }
 
 
 class DevelopmentConfig(Config):

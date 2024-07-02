@@ -75,6 +75,8 @@ services:
       - "4005:4005"
     environment:
       - DB_URL=postgresql://${POSTGRES_CART_USER}:${POSTGRES_CART_PASSWORD}@db_cart:5432/${POSTGRES_CART_DB}
+      - PRODUCT_SERVICE_URL=http://product_catalog:4000/api/product
+      - USER_SERVICE_URL=http://account_management:4000/api/account
     depends_on:
       db_cart:
         condition: service_healthy

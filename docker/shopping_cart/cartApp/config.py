@@ -1,7 +1,7 @@
 from os import environ
 
-PRODUCT_SERVICE_URL = 'http://product_catalog:4000/api/product'
-USER_SERVICE_URL = 'http://account_management:4000/api/account'
+PRODUCT_SERVICE_URL = environ.get("PRODUCT_SERVICE_URL", 'http://product_catalog:4000/api/product') 
+USER_SERVICE_URL = environ.get("USER_SERVICE_URL", 'http://account_management:4000/api/account') 
 class Config(object):
     """Base config."""
     DEBUG = False
