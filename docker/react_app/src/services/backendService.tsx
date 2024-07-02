@@ -5,10 +5,10 @@ import {
     CustomerInformation,
 } from "../EditInformationForm";
 
-const API_ACCOUNT = process.env.ACCOUNT_SERVICE_URL;
-const API_PURCHASE = process.env.PURCHASE_SERVICE_URL;
-const API_PRODUCT = process.env.PRODUCT_CATALOG_URL;
-const API_CART = process.env.SHOPPING_CART_URL;
+const API_ACCOUNT = "/api/account" //process.env.ACCOUNT_SERVICE_URL;
+const API_PURCHASE = "/api/purchase" //process.env.PURCHASE_SERVICE_URL;
+const API_PRODUCT = "/api/product" //process.env.PRODUCT_CATALOG_URL;
+const API_CART = "/api/cart"//process.env.SHOPPING_CART_URL;
 const NUMBER_OF_BOOKS_TO_DISPLAY = process.env.NUMBER_OF_BOOKS_TO_DISPLAY as unknown as number;
 class BackendService {
     private static instance: BackendService | null = null;
@@ -444,6 +444,11 @@ class BackendService {
 
     public putLinkCart = async () => {
         try {
+
+            if (this.cart_id === null) {
+                this.cart_id = localStorage.getItem("cart_id");
+            }
+
             const response = await axios.put(
                 `${API_CART}/link-cart`,
                 {

@@ -11,6 +11,7 @@ export default defineConfig(({ mode }) => {
       'process.env.PRODUCT_CATALOG_URL': JSON.stringify(env.PRODUCT_CATALOG_URL),
       'process.env.SHOPPING_CART_URL': JSON.stringify(env.SHOPPING_CART_URL),
       'process.env.NUMBER_OF_BOOKS_TO_DISPLAY': JSON.stringify(env.NUMBER_OF_BOOKS_TO_DISPLAY),
+      'process.env.PROXY_ALB_URL': JSON.stringify(env.PROXY_ALB_URL),
     },
     plugins: [react()],
     resolve: {
@@ -20,7 +21,15 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       host: true,
-      port: 8000,
+      port: 8080,
+      // proxy: {
+      //   '/api': {
+      //     target: process.env.PROXY_ALB_URL,
+      //     changeOrigin: true,
+      //     secure: false,
+      //     rewrite: (path) => path.replace(/^\/api/, '')
+      //   }
+      // }
       // https: true,
     },
   }

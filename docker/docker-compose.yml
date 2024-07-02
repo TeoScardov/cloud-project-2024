@@ -1,4 +1,16 @@
 services:
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - account_management
+      - product_catalog
+      - shopping_cart
+      - purchase_service
+      - react_app
+
   account_management:
     container_name: account_service
     image: account_service:1.0.0
@@ -72,15 +84,16 @@ services:
   react_app:
     container_name: react_app
     image: frontend:1.0.0
-    build: ./react-app
+    build: ./react_app
     ports:
-      - "8000:8000"
+      - "8080:8080"
     environment:
-      - ACCOUNT_SERVICE_URL=http://localhost:4001/api/account
-      - PRODUCT_CATALOG_URL=http://localhost:4004/api/product
-      - SHOPPING_CART_URL=http://localhost:4005/api/cart
-      - PURCHASE_SERVICE_URL=http://localhost:4003/api/purchase
+      # - ACCOUNT_SERVICE_URL=http://localhost:4001/api/account
+      # - PRODUCT_CATALOG_URL=http://localhost:4004/api/product
+      # - SHOPPING_CART_URL=http://localhost:4005/api/cart
+      # - PURCHASE_SERVICE_URL=http://localhost:4003/api/purchase
       - NUMBER_OF_BOOKS_TO_DISPLAY=10
+      - PROXY_ALB_URL=http://localhost:80
 
   db_account:
     container_name: db_account
