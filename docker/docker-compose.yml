@@ -1,16 +1,5 @@
 services:
 
-  # nginx:
-  #   build: ./nginx
-  #   ports:
-  #     - "80:80"
-  #   depends_on:
-  #     - account_management
-  #     - product_catalog
-  #     - shopping_cart
-  #     - purchase_service
-  #     - react_app
-
   account_management:
     container_name: account_service
     image: account_service:1.0.0
@@ -88,7 +77,7 @@ services:
     image: frontend:1.0.0
     build: ./react_app
     ports:
-      - "80:8080"
+      - "80:80"
     environment:
       - ACCOUNT_SERVICE_URL=http://account_management:4001
       - PRODUCT_CATALOG_URL=http://product_catalog:4003
