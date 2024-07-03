@@ -8,7 +8,8 @@ import Profile from "./Profile";
 import { ThemeProvider } from "./ThemeProvider";
 import Checkout from "./Checkout";
 import { useBackend } from "./services/backendService";
-import { useEffect } from "react";  
+import { useEffect } from "react";
+import cat404 from "../public/404.png"; // Tell webpack this JS file uses this image
 
 function App() {
     const backend = useBackend();
@@ -16,7 +17,6 @@ function App() {
     useEffect(() => {
         if (localStorage.getItem("token") !== null) {
             backend.getAuth().then(() => {
-
                 if (localStorage.getItem("cart_id") === null) {
                     backend.getCart();
                 } else {
@@ -41,6 +41,31 @@ function App() {
                         <Route path="/signup" element={<Signup />} />
                         <Route path="/profile" element={<Profile />} />
                         <Route path="/checkout" element={<Checkout />} />
+                        {/* all other routes */}
+                        <Route
+                            path="*"
+                            element={<div
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  height: "100vh",
+                                }}
+                              >
+                                <h1
+                                  style={{
+                                    fontSize: "3rem",
+                                    color: "#333",
+                                    marginBottom: "20px",
+                                  }}
+                                >
+                                  404 - Not Found
+                                </h1>
+                                <img src={cat404} alt="404" style={{ maxWidth: "50%", height: "auto" }} />
+                              </div>
+                            }
+                        />
                     </Routes>
                 </main>
                 <Toaster />
