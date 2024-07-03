@@ -12,6 +12,7 @@ import {CircleUserRound} from "lucide-react";
 import { ModeToggle } from "./ModeToggle";
 import { useBackend } from "./services/backendService";
 import { useState } from "react";
+import { AuthResponse } from "./services/backendService";
 
 
 function Navbar() {
@@ -20,11 +21,17 @@ function Navbar() {
     
     const [isAuth, setIsAuth] = useState(false);
 
-    if (localStorage.getItem("token") !== null) {
-        backend.getAuth().then((data: any) => {
-            if (data.status === 200) {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+        backend.getAuth().then((data: AuthResponse) => {
+            if (data && data.status === 200) {
                 setIsAuth(true);
+            } else {
+                console.error("Unexpected response:", data);
             }
+        }).catch((error: any) => {
+            console.error("Error during authentication:", error);
         });
     }
 
