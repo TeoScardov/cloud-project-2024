@@ -1,11 +1,22 @@
 #!/bin/sh
 
-# Sostituisci le variabili d'ambiente in env.js
-sed -i "s|\${VITE_ACCOUNT_SERVICE_URL}|$VITE_ACCOUNT_SERVICE_URL|g" /usr/share/nginx/html/env.js
-sed -i "s|\${VITE_PURCHASE_SERVICE_URL}|$VITE_PURCHASE_SERVICE_URL|g" /usr/share/nginx/html/env.js
-sed -i "s|\${VITE_PRODUCT_CATALOG_URL}|$VITE_PRODUCT_CATALOG_URL|g" /usr/share/nginx/html/env.js
-sed -i "s|\${VITE_SHOPPING_CART_URL}|$VITE_SHOPPING_CART_URL|g" /usr/share/nginx/html/env.js
-sed -i "s|\${VITE_NUMBER_OF_BOOKS_TO_DISPLAY}|$VITE_NUMBER_OF_BOOKS_TO_DISPLAY|g" /usr/share/nginx/html/env.js
+# Crea il file di configurazione runtime
+echo "window._env_ = {" > /usr/share/nginx/html/env-config.js
 
-# Esegui il comando originale
+# Itera su tutte le variabili d'ambiente
+env | while IFS='=' read -r key value
+do
+    # Controlla se la chiave inizia con VITE_
+    case $key in
+        VITE_*)
+            # Escapa eventuali caratteri speciali nel valore
+            escaped_value=$(printf '%s\n' "$value" | sed -e 's/[\/&]/\\&/g')
+            echo "  $key: \"$escaped_value\"," >> /usr/share/nginx/html/env-config.js
+            ;;
+    esac
+done
+
+echo "};" >> /usr/share/nginx/html/env-config.js
+
+# Esegui nginx
 exec "$@"

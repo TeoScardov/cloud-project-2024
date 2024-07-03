@@ -5,17 +5,18 @@ import {
     CustomerInformation,
 } from "../EditInformationForm";
 
-// const API_ACCOUNT = process.env.ACCOUNT_SERVICE_URL + "/api/account";
-// const API_PURCHASE = process.env.PURCHASE_SERVICE_URL + "/api/purchase";
-// const API_PRODUCT = process.env.PRODUCT_CATALOG_URL + "/api/product";
-// const API_CART = process.env.SHOPPING_CART_URL + "/api/cart";
-// const NUMBER_OF_BOOKS_TO_DISPLAY = process.env.NUMBER_OF_BOOKS_TO_DISPLAY as unknown as number;
+const getEnvVariable = (key: string): string => {
+    if (window._env_ && key in window._env_) {
+      return window._env_[key];
+    }
+    return import.meta.env[key as keyof ImportMetaEnv] || '';
+  };
 
-const API_ACCOUNT = window.env?.VITE_ACCOUNT_SERVICE_URL || import.meta.env.VITE_ACCOUNT_SERVICE_URL
-const API_PURCHASE = window.env?.VITE_PURCHASE_SERVICE_URL || import.meta.env.VITE_PURCHASE_SERVICE_URL
-const API_PRODUCT = window.env?.VITE_PRODUCT_CATALOG_URL || import.meta.env.VITE_PRODUCT_CATALOG_URL
-const API_CART = window.env?.VITE_SHOPPING_CART_URL || import.meta.env.VITE_SHOPPING_CART_URL
-const NUMBER_OF_BOOKS_TO_DISPLAY = window.env?.VITE_NUMBER_OF_BOOKS_TO_DISPLAY || import.meta.env.VITE_NUMBER_OF_BOOKS_TO_DISPLAY as unknown as number
+const API_ACCOUNT = getEnvVariable('VITE_ACCOUNT_SERVICE_URL')
+const API_PURCHASE = getEnvVariable('VITE_PURCHASE_SERVICE_URL')
+const API_PRODUCT = getEnvVariable('VITE_PRODUCT_CATALOG_URL')
+const API_CART = getEnvVariable('VITE_SHOPPING_CART_URL')
+const NUMBER_OF_BOOKS_TO_DISPLAY = getEnvVariable('VITE_NUMBER_OF_BOOKS_TO_DISPLAY') as unknown as number
 
 export interface AuthResponse {
     status: number;
