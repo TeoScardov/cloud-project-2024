@@ -17,7 +17,7 @@ def create_app(config_class="production"):
 
     if config_class == "production":
         JWTManager(app)
-        CORS(app)
+        CORS(app, origins="*")
         Swagger(app)
         
         db.init_app(app)
