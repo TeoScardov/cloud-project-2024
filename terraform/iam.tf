@@ -1,3 +1,76 @@
+#########################################
+## Create IAM user and attach policies ##
+#########################################
+
+resource "aws_iam_user" "github_actions" {
+  name = "github_actions"
+  path = "/"
+}
+
+resource "aws_iam_policy" "ecr_access_policy" {
+  name = "ecr_access_policy"
+  description = "Allows access to ECR"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+        {
+            Effect = "Allow"
+            Action = [
+                "ecr:CompleteLayerUpload",
+                "ecr:UploadLayerPart",
+                "ecr:InitiateLayerUpload",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:PutImage"
+            ],
+            Resource = [aws_ecr_repository.react_app.arn, 
+                       aws_ecr_repository.account_management.arn, 
+                       aws_ecr_repository.payment_service.arn, 
+                       aws_ecr_repository.purchase_service.arn, 
+                       aws_ecr_repository.product_catalog.arn, 
+                       aws_ecr_repository.shopping_cart.arn]
+        },
+        {
+            Effect = "Allow",
+            Action = "ecr:GetAuthorizationToken",
+            Resource = "*"
+        }
+    ]
+})
+  
+}
+
+resource "aws_iam_policy" "s3_tfstate_upload_download" {
+  name = "s3_tfstate_upload_download"
+  description = "Allows access to S3"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+        {
+            Effect = "Allow"
+            Action = [
+                "s3:GetObject",
+                "s3:PutObject"
+            ],
+            Resource = [aws_s3_bucket.ebook-store-tfstate.arn]
+        }
+    ]
+})
+  
+}
+
+resource "aws_iam_user_policy_attachment" "github_actions_policy_attachment" {
+  user       = aws_iam_user.github_actions.name
+  policy_arn = aws_iam_policy.ecr_access_policy.arn
+}
+
+resource "aws_iam_user_policy_attachment" "s3_tfstate_upload_download_attachment" {
+  user       = aws_iam_user.github_actions.name
+  policy_arn = aws_iam_policy.s3_tfstate_upload_download.arn
+}
+
+#############################################
+
+
 resource "aws_iam_role" "ecs_task_execution_role" {
   name = "ecs_task_execution_role"
   description = "Allows the execution of ECS tasks"

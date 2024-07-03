@@ -34,7 +34,7 @@ resource "aws_ecs_service" "ecs_web_service" {
   }
 
   load_balancer {
-    target_group_arn = aws_alb_target_group.web_alb_target_group.arn
+    target_group_arn = aws_lb_target_group.web_lb_target_group.arn
     container_name   = "web"
     container_port   = 80
   }
@@ -57,7 +57,7 @@ resource "aws_ecs_service" "ecs_account_service" {
   }
 
   load_balancer {
-    target_group_arn = aws_alb_target_group.app_alb_target_group.arn
+    target_group_arn = aws_lb_target_group.app_lb_target_group.arn
     container_name   = "account"
     container_port   = 80
   }
@@ -80,7 +80,7 @@ resource "aws_ecs_service" "ecs_product_service" {
   }
 
   load_balancer {
-    target_group_arn = aws_alb_target_group.app_alb_target_group.arn
+    target_group_arn = aws_lb_target_group.app_lb_target_group.arn
     container_name   = "product"
     container_port   = 80
   }
@@ -103,7 +103,7 @@ resource "aws_ecs_service" "ecs_payment_service" {
   }
 
   load_balancer {
-    target_group_arn = aws_alb_target_group.app_alb_target_group.arn
+    target_group_arn = aws_lb_target_group.app_lb_target_group.arn
     container_name   = "payment"
     container_port   = 80
   }
@@ -126,7 +126,7 @@ resource "aws_ecs_service" "ecs_purchase_service" {
   }
 
   load_balancer {
-    target_group_arn = aws_alb_target_group.app_alb_target_group.arn
+    target_group_arn = aws_lb_target_group.app_lb_target_group.arn
     container_name   = "purchase"
     container_port   = 80
   }
@@ -149,7 +149,7 @@ resource "aws_ecs_service" "ecs_cart_service" {
   }
 
   load_balancer {
-    target_group_arn = aws_alb_target_group.app_alb_target_group.arn
+    target_group_arn = aws_lb_target_group.app_lb_target_group.arn
     container_name   = "cart"
     container_port   = 80
   }
@@ -183,6 +183,16 @@ resource "aws_ecs_task_definition" "ecs_task_definition_web" {
           protocol      = "tcp"
         }
       ]
+      enviroment = [
+        {
+          name  = "NUMBER_OF_BOOKS_TO_DISPLAY"
+          value = env_number_of_books_to_display
+        },
+        {
+          name = "API_BASE_URL"
+          value = "http://${aws_lb.app_lb.dns_name}"
+        }
+      ]
     }
   ])
 }
@@ -213,6 +223,12 @@ resource "aws_ecs_task_definition" "ecs_task_definition_account" {
           containerPort = var.account_containerPort
           hostPort      = var.account_hostPort
           protocol      = "tcp"
+        }
+      ]
+      enviroment = [
+        {
+          name  = "DATABASE_URL"
+          value = "postgresql://${aws_db_instance.account_db.address}:${aws_db_instance.account_db.port}/account"
         }
       ]
     }

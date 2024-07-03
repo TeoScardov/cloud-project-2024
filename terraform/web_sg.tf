@@ -9,19 +9,7 @@ resource "aws_security_group" "web_sg" {
 
   ingress {
     description = "Allow HTTP inbound traffic"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    security_groups = [aws_security_group.web_alb_sg.id]
-
-    }
-
-    ingress {
-    description = "Allow HTTPS inbound traffic"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    security_groups = [aws_security_group.web_alb_sg.id]
+    security_groups = [aws_security_group.web_lb_sg.id]
     }
 
     dynamic "ingress" {

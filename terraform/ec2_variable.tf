@@ -26,6 +26,12 @@ variable "web_hostPort" {
   default     = 80
 }
 
+variable "env_number_of_books_to_display" {
+  description = "The number of books to display in the web application"
+  type        = number
+  default     = 10
+}
+
 ######################
 ## account Variable ##
 ######################
