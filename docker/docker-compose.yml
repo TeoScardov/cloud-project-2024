@@ -13,7 +13,7 @@ services:
 
   account_management:
     container_name: account_service
-    image: account_service:1.0.0
+    image: account_service:1.1.0
     build: ./account_management
     environment:
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
@@ -28,7 +28,7 @@ services:
 
   payment_service:
     container_name: payment_service
-    image: payment_service:1.0.0
+    image: payment_service:1.1.0
     build: ./payment_service
     ports:
       - "4002:4002"
@@ -38,7 +38,7 @@ services:
       
   purchase_service:
     container_name: purchase_service
-    image: purchase-service:1.0.0
+    image: purchase-service:1.1.0
     build: ./purchase_service
     ports:
       - "4004:4004"
@@ -55,7 +55,7 @@ services:
 
   product_catalog:
     container_name: product_catalog
-    image: product_catalog:1.0.0
+    image: product_catalog:1.1.0
     build: ./product_catalog
     ports:
       - "4003:4003"
@@ -69,7 +69,7 @@ services:
 
   shopping_cart:
     container_name: shopping_cart
-    image: shopping_cart:1.0.0
+    image: shopping_cart:1.1.0
     build: ./shopping_cart
     ports:
       - "4005:4005"
@@ -85,7 +85,7 @@ services:
 
   react_app:
     container_name: react_app
-    image: frontend:1.0.0
+    image: frontend:1.1.0
     build: ./react_app
     ports:
       - "8080:8080"
