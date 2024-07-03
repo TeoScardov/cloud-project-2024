@@ -9,19 +9,11 @@ import {
 import { Button } from "./components/ui/button";
 import { Separator } from "./components/ui/separator";
 import {
-    ChevronLeft,
-    ChevronRight,
-    Copy,
     CreditCard,
-    MoreVertical,
-    Truck,
 } from "lucide-react";
 import { HandCoins } from "lucide-react";
-import { Loader } from "lucide-react";
 import { useState, useEffect } from "react";
-import axios from "axios";
-import { set } from "react-hook-form";
-import { CustomerInformation, PersonInformation } from "./EditInformationForm";
+import { CustomerInformation} from "./EditInformationForm";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Book } from "./TableCartBook";

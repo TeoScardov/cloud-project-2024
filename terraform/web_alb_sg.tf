@@ -2,8 +2,8 @@
 ## Security Group for Application Load Balancer ##
 ##################################################
 
-resource "aws_security_group" "web_alb_sg" {
-  name        = "web_alb_sg"
+resource "aws_security_group" "web_lb_sg" {
+  name        = "web_lb_sg"
   description = "Security group for Application Load Balancer"
   vpc_id      = aws_vpc.ebook_store_vpc.id
 
@@ -32,7 +32,7 @@ resource "aws_security_group" "web_alb_sg" {
   }
 
   tags = {
-    Name = "web_alb_sg"
+    Name = "web_lb_sg"
     Terraform = "true"
   }
 }

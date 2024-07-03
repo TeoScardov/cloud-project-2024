@@ -9,8 +9,7 @@ import {
 import CartItems from "./CartItems";
 import { useNavigate } from "react-router-dom";
 import { useBackend } from "./services/backendService";
-import { useEffect, useState } from "react";
-import { set } from "react-hook-form";
+import { useState } from "react";
 
 function Cart() {
     const navigate = useNavigate();

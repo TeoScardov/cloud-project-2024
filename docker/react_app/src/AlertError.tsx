@@ -5,7 +5,6 @@ import {
   AlertDescription,
   AlertTitle,
 } from "./components/ui/alert"
-import { ReactElement } from "react";
 
 
 const AlertError: React.FC<{ message: string }> = ({ message }) => {

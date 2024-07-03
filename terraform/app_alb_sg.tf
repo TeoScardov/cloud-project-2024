@@ -2,17 +2,14 @@
 ## Security Group for Application Load Balancer ##
 ##################################################
 
-resource "aws_security_group" "app_alb_sg" {
-  name        = "app_alb_sg"
+resource "aws_security_group" "app_lb_sg" {
+  name        = "app_lb_sg"
   description = "Security group for Application Load Balancer"
   vpc_id      = aws_vpc.ebook_store_vpc.id
 
   ingress {
     description = "Allow HTTP inbound traffic"
-    from_port   = 4000
-    to_port     = 4010
-    protocol    = "tcp"
-    security_groups = [aws_security_group.web_sg.id, aws_security_group.app_sg.id]
+    security_groups = [aws_security_group.web_sg.id]
   }
 
   egress {
@@ -24,7 +21,7 @@ resource "aws_security_group" "app_alb_sg" {
   }
 
   tags = {
-    Name = "app_alb_sg"
+    Name = "app_lb_sg"
     Terraform = "true"
   }
 }

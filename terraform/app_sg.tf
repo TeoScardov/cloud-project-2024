@@ -7,7 +7,19 @@ resource "aws_security_group" "app_sg" {
   description = "Security group for Application"
   vpc_id      = aws_vpc.ebook_store_vpc.id
 
-  
+  ingress {
+    description = "Allow HTTP inbound traffic"
+    security_groups = [aws_security_group.app_lb_sg.id]
+  }
+
+  # ingress {
+  #   description = "Allow internal traffic"
+  #   from_port = 4000
+  #   to_port = 4000
+  #   protocol = "tcp"
+  #   security_groups = [aws_security_group.app_sg.id]
+  # }
+
   dynamic "ingress" {
         for_each = var.enable_ssh == true ? [0] : []
         content {

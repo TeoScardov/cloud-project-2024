@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 import {CircleUserRound} from "lucide-react";
 import { ModeToggle } from "./ModeToggle";
 import { useBackend } from "./services/backendService";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 
 function Navbar() {

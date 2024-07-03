@@ -1,28 +1,21 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Separator } from "./components/ui/separator";
-import { Button } from "./components/ui/button";
 import {
     Card,
     CardContent,
     CardFooter,
     CardHeader,
     CardTitle,
-    CardDescription,
 } from "./components/ui/card";
-import { Input } from "./components/ui/input";
 import { useState } from "react";
 import Library from "./Library";
 import EditInformation from "./EditInformation";
-import axios from "axios";
 import { Book } from "./TableCartBook";
 import { useBackend } from "./services/backendService";
 import { useNavigate } from "react-router-dom";
 import Information from "./Information";
 import { PersonInformation } from "./EditInformationForm";
-import { set } from "react-hook-form";
 import Orders from "./Orders";
-import { Car } from "lucide-react";
 
 function Profile() {
     const [showLibrary, setShowLibrary] = useState<Boolean>(false);
