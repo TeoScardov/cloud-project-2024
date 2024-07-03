@@ -34,8 +34,8 @@ services:
     environment:
       - SECRET_KEY=${JWT_SECRET_KEY}
       - SQLALCHEMY_DATABASE_URI=postgresql://${POSTGRES_PURCHASE_USER}:${POSTGRES_PURCHASE_PASSWORD}@db_purchase:5432/${POSTGRES_PURCHASE_DB}
-      - PAYMENT_SERVICE_URL=http://payment_service:4002/api/payment
-      - ACCOUNT_SERVICE_URL=http://account_service:4001/api/account
+      - PAYMENT_SERVICE_URL=${PAYMENT_SERVICE_URL}
+      - ACCOUNT_SERVICE_URL=${ACCOUNT_MANAGEMENT_URL}
     depends_on:
       db_purchase:
         condition: service_healthy
@@ -64,8 +64,8 @@ services:
       - "4005:4005"
     environment:
       - DB_URL=postgresql://${POSTGRES_CART_USER}:${POSTGRES_CART_PASSWORD}@db_cart:5432/${POSTGRES_CART_DB}
-      - PRODUCT_SERVICE_URL=http://product_catalog:4003/api/product
-      - USER_SERVICE_URL=http://account_management:4001/api/account
+      - PRODUCT_SERVICE_URL=${PRODUCT_CATALOG_URL}
+      - USER_SERVICE_URL=${ACCOUNT_MANAGEMENT_URL}
     depends_on:
       db_cart:
         condition: service_healthy
@@ -79,11 +79,11 @@ services:
     ports:
       - "80:80"
     environment:
-      - ACCOUNT_SERVICE_URL=http://account_management:4001
-      - PRODUCT_CATALOG_URL=http://product_catalog:4003
-      - SHOPPING_CART_URL=http://shopping_cart:4005
-      - PURCHASE_SERVICE_URL=http://purchase_service:4004
-      - NUMBER_OF_BOOKS_TO_DISPLAY=10
+      - VITE_ACCOUNT_SERVICE_URL=${ACCOUNT_MANAGEMENT_URL}
+      - VITE_PRODUCT_CATALOG_URL=${PRODUCT_CATALOG_URL}
+      - VITE_SHOPPING_CART_URL=${SHOPPING_CART_URL}
+      - VITE_PURCHASE_SERVICE_URL=${PURCHASE_SERVICE_URL}
+      - VITE_NUMBER_OF_BOOKS_TO_DISPLAY=${NUMBER_OF_BOOKS_TO_DISPLAY}
 
   db_account:
     container_name: db_account
