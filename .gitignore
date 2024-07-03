@@ -17,3 +17,4 @@
 __pycache__/
 application/
 TODO.md
+.env
