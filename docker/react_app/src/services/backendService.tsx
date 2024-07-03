@@ -5,10 +5,10 @@ import {
     CustomerInformation,
 } from "../EditInformationForm";
 
-const API_ACCOUNT = /*"/api/account"*/process.env.ACCOUNT_SERVICE_URL + "/api/account";
-const API_PURCHASE = /*"/api/purchase"*/ process.env.PURCHASE_SERVICE_URL + "/api/purchase";
-const API_PRODUCT = /*"/api/product"*/ process.env.PRODUCT_CATALOG_URL + "/api/product";
-const API_CART = /*"/api/cart"*/ process.env.SHOPPING_CART_URL + "/api/cart";
+const API_ACCOUNT = process.env.ACCOUNT_SERVICE_URL + "/api/account";
+const API_PURCHASE = process.env.PURCHASE_SERVICE_URL + "/api/purchase";
+const API_PRODUCT = process.env.PRODUCT_CATALOG_URL + "/api/product";
+const API_CART = process.env.SHOPPING_CART_URL + "/api/cart";
 const NUMBER_OF_BOOKS_TO_DISPLAY = process.env.NUMBER_OF_BOOKS_TO_DISPLAY as unknown as number;
 export interface AuthResponse {
     status: number;
