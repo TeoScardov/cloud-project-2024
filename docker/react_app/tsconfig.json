@@ -19,6 +19,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["src", "src/services/cart-fetch.tsx"],
+  "include": ["src", "types", "types"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
