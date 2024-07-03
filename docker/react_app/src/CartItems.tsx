@@ -1,6 +1,6 @@
 import { Book, columns } from "./TableCartBook";
 import { DataTable } from "./TableCartBookData";
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "./components/ui/card";
 import { useBackend } from "./services/backendService";
 

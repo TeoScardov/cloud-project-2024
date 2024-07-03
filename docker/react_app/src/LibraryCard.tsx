@@ -8,7 +8,6 @@ import {
     CardTitle,
 } from "./components/ui/card";
 
-import { Label } from "./components/ui/label";
 import { useToast } from "./components/ui/use-toast";
 import { Book } from "./TableCartBook";
 import { useBackend } from "./services/backendService";
@@ -19,7 +18,6 @@ function LibraryCard(props:{isbn: Book["isbn"]}) {
     const { toast } = useToast();
     const backend = useBackend();
     const [bookData, setBookData] = useState<Book>({
-        name: "",
         title: "",
         isbn: "",
         price: 0,
