@@ -5,13 +5,13 @@
 variable "web_cpu" {
   description = "The amount of CPU to reserve for the container"
   type        = number
-  default     = 2
+  default     = 1024
 }
 
 variable "web_memory" {
   description = "The amount of memory (in MiB) to reserve for the container"
   type        = number
-  default     = 4
+  default     = 3072
 }
 
 variable "web_containerPort" {
@@ -39,25 +39,25 @@ variable "env_number_of_books_to_display" {
 variable "account_cpu" {
   description = "The amount of CPU to reserve for the container"
   type        = number
-  default     = 2
+  default     = 1024
 }
 
 variable "account_memory" {
   description = "The amount of memory (in MiB) to reserve for the container"
   type        = number
-  default     = 4
+  default     = 3072
 }
 
 variable "account_containerPort" {
   description = "The port on the container to associate with the load balancer"
   type        = number
-  default     = 80
+  default     = 4001
 }
 
 variable "account_hostPort" {
   description = "The port on the host to associate with the load balancer"
   type        = number
-  default     = 80
+  default     = 4001
 }
 
 ######################
@@ -67,25 +67,25 @@ variable "account_hostPort" {
 variable "product_cpu" {
   description = "The amount of CPU to reserve for the container"
   type        = number
-  default     = 2
+  default     = 1024
 }
 
 variable "product_memory" {
   description = "The amount of memory (in MiB) to reserve for the container"
   type        = number
-  default     = 4
+  default     = 3072
 }
 
 variable "product_containerPort" {
   description = "The port on the container to associate with the load balancer"
   type        = number
-  default     = 80
+  default     = 4003
 }
 
 variable "product_hostPort" {
   description = "The port on the host to associate with the load balancer"
   type        = number
-  default     = 80
+  default     = 4003
 }
 
 ######################
@@ -95,25 +95,25 @@ variable "product_hostPort" {
 variable "payment_cpu" {
   description = "The amount of CPU to reserve for the container"
   type        = number
-  default     = 2
+  default     = 1024
 }
 
 variable "payment_memory" {
   description = "The amount of memory (in MiB) to reserve for the container"
   type        = number
-  default     = 4
+  default     = 3072
 }
 
 variable "payment_containerPort" {
   description = "The port on the container to associate with the load balancer"
   type        = number
-  default     = 80
+  default     = 4002
 }
 
 variable "payment_hostPort" {
   description = "The port on the host to associate with the load balancer"
   type        = number
-  default     = 80
+  default     = 4002
 }
 
 ######################
@@ -123,25 +123,25 @@ variable "payment_hostPort" {
 variable "purchase_cpu" {
   description = "The amount of CPU to reserve for the container"
   type        = number
-  default     = 2
+  default     = 1024
 }
 
 variable "purchase_memory" {
   description = "The amount of memory (in MiB) to reserve for the container"
   type        = number
-  default     = 4
+  default     = 3072
 }
 
 variable "purchase_containerPort" {
   description = "The port on the container to associate with the load balancer"
   type        = number
-  default     = 80
+  default     = 4004
 }
 
 variable "purchase_hostPort" {
   description = "The port on the host to associate with the load balancer"
   type        = number
-  default     = 80
+  default     = 4004
 }
 
 ######################
@@ -151,23 +151,23 @@ variable "purchase_hostPort" {
 variable "cart_cpu" {
   description = "The amount of CPU to reserve for the container"
   type        = number
-  default     = 2
+  default     = 1024
 }
 
 variable "cart_memory" {
   description = "The amount of memory (in MiB) to reserve for the container"
   type        = number
-  default     = 4
+  default     = 3072
 }
 
 variable "cart_containerPort" {
   description = "The port on the container to associate with the load balancer"
   type        = number
-  default     = 80
+  default     = 4005
 }
 
 variable "cart_hostPort" {
   description = "The port on the host to associate with the load balancer"
   type        = number
-  default     = 80
+  default     = 4005
 }

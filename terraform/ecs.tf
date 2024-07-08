@@ -57,9 +57,9 @@ resource "aws_ecs_service" "ecs_account_service" {
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.app_lb_target_group.arn
+    target_group_arn = aws_lb_target_group.account_lb_target_group.arn
     container_name   = "account"
-    container_port   = 80
+    container_port   = 4001
   }
 }
 
@@ -80,9 +80,9 @@ resource "aws_ecs_service" "ecs_product_service" {
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.app_lb_target_group.arn
+    target_group_arn = aws_lb_target_group.product_lb_target_group.arn
     container_name   = "product"
-    container_port   = 80
+    container_port   = 4003
   }
 }
 
@@ -103,9 +103,9 @@ resource "aws_ecs_service" "ecs_payment_service" {
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.app_lb_target_group.arn
+    target_group_arn = aws_lb_target_group.payment_lb_target_group.arn
     container_name   = "payment"
-    container_port   = 80
+    container_port   = 4002
   }
 }
 
@@ -126,9 +126,9 @@ resource "aws_ecs_service" "ecs_purchase_service" {
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.app_lb_target_group.arn
+    target_group_arn = aws_lb_target_group.purchase_lb_target_group.arn
     container_name   = "purchase"
-    container_port   = 80
+    container_port   = 4004
   }
 }
 
@@ -149,9 +149,9 @@ resource "aws_ecs_service" "ecs_cart_service" {
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.app_lb_target_group.arn
+    target_group_arn = aws_lb_target_group.cart_lb_target_group.arn
     container_name   = "cart"
-    container_port   = 80
+    container_port   = 4005
   }
 }
 
@@ -186,7 +186,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition_web" {
       enviroment = [
         {
           name  = "NUMBER_OF_BOOKS_TO_DISPLAY"
-          value = env_number_of_books_to_display
+          value = var.env_number_of_books_to_display
         },
         {
           name = "API_BASE_URL"
@@ -223,12 +223,13 @@ resource "aws_ecs_task_definition" "ecs_task_definition_account" {
           containerPort = var.account_containerPort
           hostPort      = var.account_hostPort
           protocol      = "tcp"
+          appProtocol   = "http"
         }
       ]
       enviroment = [
         {
           name  = "DATABASE_URL"
-          value = "postgresql://${aws_db_instance.account_db.address}:${aws_db_instance.account_db.port}/account"
+          value = "postgresql://${aws_rds_cluster.ebook_store_db.master_username}:${aws_rds_cluster.ebook_store_db.master_password}@${aws_rds_cluster.ebook_store_db.endpoint}:5432/${aws_rds_cluster.ebook_store_db.database_name}"
         }
       ]
     }
