@@ -6,14 +6,14 @@ services:
     build: ./account_management
     environment:
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
-      - DATABASE_URL=postgresql://${POSTGRES_ACCOUNT_USER}:${POSTGRES_ACCOUNT_PASSWORD}@db_account:5432/${POSTGRES_ACCOUNT_DB}
+      - DATABASE_URL=postgresql://${POSTGRES_ACCOUNT_USER}:${POSTGRES_ACCOUNT_PASSWORD}@db:5432/${POSTGRES_ACCOUNT_DB}
     ports:
       - "4001:4001"
     depends_on:
-      db_account:
+      db:
         condition: service_healthy
     links:
-      - db_account
+      - db
 
   payment_service:
     container_name: payment_service
@@ -33,14 +33,14 @@ services:
       - "4004:4004"
     environment:
       - SECRET_KEY=${JWT_SECRET_KEY}
-      - SQLALCHEMY_DATABASE_URI=postgresql://${POSTGRES_PURCHASE_USER}:${POSTGRES_PURCHASE_PASSWORD}@db_purchase:5432/${POSTGRES_PURCHASE_DB}
+      - SQLALCHEMY_DATABASE_URI=postgresql://${POSTGRES_PURCHASE_USER}:${POSTGRES_PURCHASE_PASSWORD}@db:5432/${POSTGRES_PURCHASE_DB}
       - PAYMENT_SERVICE_URL=${PAYMENT_SERVICE_URL}
       - ACCOUNT_SERVICE_URL=${ACCOUNT_MANAGEMENT_URL}
     depends_on:
-      db_purchase:
+      db:
         condition: service_healthy
     links:
-      - db_purchase
+      - db
 
   product_catalog:
     container_name: product_catalog
@@ -49,12 +49,12 @@ services:
     ports:
       - "4003:4003"
     environment:
-      - DB_URL=postgresql://${POSTGRES_PRODUCT_USER}:${POSTGRES_PRODUCT_PASSWORD}@db_product:5432/${POSTGRES_PRODUCT_DB}
+      - DB_URL=postgresql://${POSTGRES_PRODUCT_USER}:${POSTGRES_PRODUCT_PASSWORD}@db:5432/${POSTGRES_PRODUCT_DB}
     depends_on:
-      db_product:
+      db:
         condition: service_healthy
     links:
-      - db_product
+      - db
 
   shopping_cart:
     container_name: shopping_cart
@@ -63,14 +63,14 @@ services:
     ports:
       - "4005:4005"
     environment:
-      - DB_URL=postgresql://${POSTGRES_CART_USER}:${POSTGRES_CART_PASSWORD}@db_cart:5432/${POSTGRES_CART_DB}
+      - DB_URL=postgresql://${POSTGRES_CART_USER}:${POSTGRES_CART_PASSWORD}@db:5432/${POSTGRES_CART_DB}
       - PRODUCT_SERVICE_URL=${PRODUCT_CATALOG_URL}
       - USER_SERVICE_URL=${ACCOUNT_MANAGEMENT_URL}
     depends_on:
-      db_cart:
+      db:
         condition: service_healthy
     links:
-      - db_cart
+      - db
 
   react_app:
     container_name: react_app
@@ -85,8 +85,8 @@ services:
       - VITE_PURCHASE_SERVICE_URL=${PURCHASE_SERVICE_URL}
       - VITE_NUMBER_OF_BOOKS_TO_DISPLAY=${NUMBER_OF_BOOKS_TO_DISPLAY}
 
-  db_account:
-    container_name: db_account
+  db:
+    container_name: db
     image: postgres:13
     ports:
       - "5432:5432"   
@@ -100,49 +100,64 @@ services:
           timeout: 5s
           retries: 5   
 
-  db_purchase:
-    container_name: db_purchase
-    image: postgres:13
-    ports:
-      - "5433:5432"
-    environment:
-      - POSTGRES_DB=${POSTGRES_PURCHASE_DB}
-      - POSTGRES_USER=${POSTGRES_PURCHASE_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PURCHASE_PASSWORD}
-    healthcheck:
-          test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_PURCHASE_USER} -d ${POSTGRES_PURCHASE_DB} -h localhost -p 5432"]
-          interval: 5s
-          timeout: 5s
-          retries: 5
+  # db_account:
+  #   container_name: db_account
+  #   image: postgres:13
+  #   ports:
+  #     - "5432:5432"   
+  #   environment:
+  #     - POSTGRES_DB=${POSTGRES_ACCOUNT_DB}
+  #     - POSTGRES_USER=${POSTGRES_ACCOUNT_USER}
+  #     - POSTGRES_PASSWORD=${POSTGRES_ACCOUNT_PASSWORD}
+  #   healthcheck:
+  #         test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_ACCOUNT_USER} -d ${POSTGRES_ACCOUNT_DB} -h localhost -p 5432"]
+  #         interval: 5s
+  #         timeout: 5s
+  #         retries: 5   
 
-  db_product:
-    container_name: db_product
-    image: postgres:13
-    ports:
-      - "5434:5432"
-    environment:
-      - POSTGRES_DB=${POSTGRES_PRODUCT_DB}
-      - POSTGRES_USER=${POSTGRES_PRODUCT_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PRODUCT_PASSWORD}
-    healthcheck:
-          test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_PRODUCT_USER} -d ${POSTGRES_PRODUCT_DB} -h localhost -p 5432"]
-          interval: 5s
-          timeout: 5s
-          retries: 5
+  # db_purchase:
+  #   container_name: db_purchase
+  #   image: postgres:13
+  #   ports:
+  #     - "5433:5432"
+  #   environment:
+  #     - POSTGRES_DB=${POSTGRES_PURCHASE_DB}
+  #     - POSTGRES_USER=${POSTGRES_PURCHASE_USER}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PURCHASE_PASSWORD}
+  #   healthcheck:
+  #         test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_PURCHASE_USER} -d ${POSTGRES_PURCHASE_DB} -h localhost -p 5432"]
+  #         interval: 5s
+  #         timeout: 5s
+  #         retries: 5
 
-  db_cart:
-    container_name: db_cart
-    image: postgres:13
-    ports:
-      - "5435:5432"
-    environment:
-      - POSTGRES_DB=${POSTGRES_CART_DB}
-      - POSTGRES_USER=${POSTGRES_CART_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_CART_PASSWORD}
-    healthcheck:
-          test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_CART_USER} -d ${POSTGRES_CART_DB} -h localhost -p 5432"]
-          interval: 5s
-          timeout: 5s
-          retries: 5
+  # db_product:
+  #   container_name: db_product
+  #   image: postgres:13
+  #   ports:
+  #     - "5434:5432"
+  #   environment:
+  #     - POSTGRES_DB=${POSTGRES_PRODUCT_DB}
+  #     - POSTGRES_USER=${POSTGRES_PRODUCT_USER}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PRODUCT_PASSWORD}
+  #   healthcheck:
+  #         test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_PRODUCT_USER} -d ${POSTGRES_PRODUCT_DB} -h localhost -p 5432"]
+  #         interval: 5s
+  #         timeout: 5s
+  #         retries: 5
+
+  # db_cart:
+  #   container_name: db_cart
+  #   image: postgres:13
+  #   ports:
+  #     - "5435:5432"
+  #   environment:
+  #     - POSTGRES_DB=${POSTGRES_CART_DB}
+  #     - POSTGRES_USER=${POSTGRES_CART_USER}
+  #     - POSTGRES_PASSWORD=${POSTGRES_CART_PASSWORD}
+  #   healthcheck:
+  #         test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_CART_USER} -d ${POSTGRES_CART_DB} -h localhost -p 5432"]
+  #         interval: 5s
+  #         timeout: 5s
+  #         retries: 5
 
 
