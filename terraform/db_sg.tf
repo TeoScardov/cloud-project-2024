@@ -9,9 +9,6 @@ resource "aws_security_group" "db_sg" {
 
   ingress {
     description = "Allow PostgreSQL inbound traffic"
-    from_port   = 5432
-    to_port     = 5440
-    protocol    = "tcp"
     security_groups = [aws_security_group.app_sg.id]
   }
 
