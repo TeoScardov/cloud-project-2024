@@ -47,7 +47,7 @@ def create_book():
         )
         db.session.add(new_book)  # Add the new book to the session
         db.session.commit()  # Commit the session to save the book in the database
-        return make_response(jsonify({'message': 'book created'}), 201)
+        return make_response(jsonify({'message': 'book created'}), 200)
     except IntegrityError:
         db.session.rollback()  # Rollback the session in case of an integrity error
         return make_response(jsonify({'message': 'Error: Duplicate ISBN or other integrity violation'}), 500)

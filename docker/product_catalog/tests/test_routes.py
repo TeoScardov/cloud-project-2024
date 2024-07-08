@@ -16,7 +16,7 @@ def test_create_book_success(client):
     }
 
     response = client.post('/api/product/create-book', data=json.dumps(new_book_data), content_type='application/json')
-    assert response.status_code == 201
+    assert response.status_code == 200
     assert response.json['message'] == 'book created'
 
 # test missing fields during creation
