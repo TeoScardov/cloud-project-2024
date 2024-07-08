@@ -246,7 +246,7 @@ resource "aws_lb_listener_rule" "account_lb_listener_rule" {
 }
 
 resource "aws_lb_listener_rule" "product_lb_listener_rule" {
-  listener_arn = aws_lb_listener.app_lb_listener.arn
+  listener_arn = aws_lb_listener.product_lb_listener.arn
   action {
     type             = "forward"
     forward {
@@ -269,7 +269,7 @@ resource "aws_lb_listener_rule" "product_lb_listener_rule" {
 }
 
 resource "aws_lb_listener_rule" "payment_lb_listener_rule" {
-  listener_arn = aws_lb_listener.app_lb_listener.arn
+  listener_arn = aws_lb_listener.payment_lb_listener.arn
   action {
     type             = "forward"
     forward {
@@ -294,7 +294,7 @@ resource "aws_lb_listener_rule" "payment_lb_listener_rule" {
 }
 
 resource "aws_lb_listener_rule" "purchase_lb_listener_rule" {
-  listener_arn = aws_lb_listener.app_lb_listener.arn
+  listener_arn = aws_lb_listener.purchase_lb_listener.arn
   action {
     type             = "forward"
     forward {
@@ -319,7 +319,7 @@ resource "aws_lb_listener_rule" "purchase_lb_listener_rule" {
 }
 
 resource "aws_lb_listener_rule" "cart_lb_listener_rule" {
-  listener_arn = aws_lb_listener.app_lb_listener.arn
+  listener_arn = aws_lb_listener.cart_lb_listener.arn
   action {
     type             = "forward"
     forward {
