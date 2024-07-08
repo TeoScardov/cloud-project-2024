@@ -4,7 +4,7 @@
 
 resource "aws_lb" "app_lb" {
   name               = "applb"
-  internal           = false
+  internal           = true
   load_balancer_type = "application"
   security_groups    = [aws_security_group.app_lb_sg.id]
   subnets            = [aws_subnet.ebook_store_private_subnet_application_1.id, aws_subnet.ebook_store_private_subnet_application_2.id]
@@ -146,9 +146,24 @@ resource "aws_lb_target_group" "cart_lb_target_group" {
 ## ALB Listener ##
 ##################
 
-resource "aws_lb_listener" "app_lb_listener" {
+resource "aws_lb_listener" "account_lb_listener" {
   load_balancer_arn = aws_lb.app_lb.arn
-  port              = "80"
+  port              = var.account_hostPort
+  protocol          = "HTTP"
+
+  default_action {
+    type = "fixed-response"
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "404 Not Found"
+      status_code  = "404"
+    }
+  }
+}
+
+resource "aws_lb_listener" "product_lb_listener" {
+  load_balancer_arn = aws_lb.app_lb.arn
+  port              = var.product_hostPort
   protocol          = "HTTP"
   default_action {
     type = "fixed-response"
@@ -160,43 +175,119 @@ resource "aws_lb_listener" "app_lb_listener" {
   }
 }
 
-resource "aws_lb_listener_rule" "account_lb_listener_rule" {
-  listener_arn = aws_lb_listener.app_lb_listener.arn
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.account_lb_target_group.arn
-  }
-  condition {
-    path_pattern {
-      values = ["/api/account/*"]
+resource "aws_lb_listener" "payment_lb_listener" {
+  load_balancer_arn = aws_lb.app_lb.arn
+  port              = var.payment_hostPort
+  protocol          = "HTTP"
+  default_action {
+    type = "fixed-response"
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "404 Not Found"
+      status_code  = "404"
     }
   }
-  
+}
+
+resource "aws_lb_listener" "purchase_lb_listener" {
+  load_balancer_arn = aws_lb.app_lb.arn
+  port              = var.purchase_hostPort
+  protocol          = "HTTP"
+  default_action {
+    type = "fixed-response"
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "404 Not Found"
+      status_code  = "404"
+    }
+  }
+}
+
+resource "aws_lb_listener" "cart_lb_listener" {
+  load_balancer_arn = aws_lb.app_lb.arn
+  port              = var.cart_hostPort
+  protocol          = "HTTP"
+  default_action {
+    type = "fixed-response"
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "404 Not Found"
+      status_code  = "404"
+    }
+  }
+}
+
+#######################
+## ALB Listener Rule ##
+#######################
+
+resource "aws_lb_listener_rule" "account_lb_listener_rule" {
+  listener_arn = aws_lb_listener.account_lb_listener.arn
+  action {
+    type             = "forward"
+    forward {
+      target_group {
+        arn    = aws_lb_target_group.account_lb_target_group.arn
+        weight = 100
+      }
+
+      stickiness {
+        enabled  = true
+        duration = 600
+      }
+    }
+  }
+
+  condition {
+    path_pattern {
+      values = ["/*"]
+    }
+  }  
 }
 
 resource "aws_lb_listener_rule" "product_lb_listener_rule" {
   listener_arn = aws_lb_listener.app_lb_listener.arn
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.product_lb_target_group.arn
+    forward {
+      target_group {
+        arn    = aws_lb_target_group.product_lb_target_group.arn
+        weight = 100
+      }
+
+      stickiness {
+        enabled  = true
+        duration = 600
+      }
+    }
   }
   condition {
     path_pattern {
-      values = ["/api/product/*"]
+      values = ["/*"]
     }
   }
-  
 }
 
 resource "aws_lb_listener_rule" "payment_lb_listener_rule" {
   listener_arn = aws_lb_listener.app_lb_listener.arn
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.payment_lb_target_group.arn
+    forward {
+      target_group {
+        arn    = aws_lb_target_group.payment_lb_target_group.arn
+        weight = 100
+      }
+
+      stickiness {
+        enabled  = true
+        duration = 600
+      }
+    
+    }
   }
   condition {
     path_pattern {
-      values = ["/api/payment/*"]
+      values = ["/*"]
     }
   }
   
@@ -206,11 +297,22 @@ resource "aws_lb_listener_rule" "purchase_lb_listener_rule" {
   listener_arn = aws_lb_listener.app_lb_listener.arn
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.purchase_lb_target_group.arn
+    forward {
+      target_group {
+        arn    = aws_lb_target_group.purchase_lb_target_group.arn
+        weight = 100
+      }
+
+      stickiness {
+        enabled  = true
+        duration = 600
+      }
+    
+    }
   }
   condition {
     path_pattern {
-      values = ["/api/purchase/*"]
+      values = ["/*"]
     }
   }
   
@@ -220,11 +322,22 @@ resource "aws_lb_listener_rule" "cart_lb_listener_rule" {
   listener_arn = aws_lb_listener.app_lb_listener.arn
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.cart_lb_target_group.arn
+    forward {
+      target_group {
+        arn    = aws_lb_target_group.cart_lb_target_group.arn
+        weight = 100
+      }
+
+      stickiness {
+        enabled  = true
+        duration = 600
+      }
+
+    }
   }
   condition {
     path_pattern {
-      values = ["/api/cart/*"]
+      values = ["/*"]
     }
   }
   
