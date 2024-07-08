@@ -12,10 +12,16 @@ const getEnvVariable = (key: string): string => {
     return import.meta.env[key as keyof ImportMetaEnv] || '';
   };
 
-const API_ACCOUNT = getEnvVariable('VITE_ACCOUNT_SERVICE_URL')
-const API_PURCHASE = getEnvVariable('VITE_PURCHASE_SERVICE_URL')
-const API_PRODUCT = getEnvVariable('VITE_PRODUCT_CATALOG_URL')
-const API_CART = getEnvVariable('VITE_SHOPPING_CART_URL')
+const API_ACCOUNT = "/api/account"
+const API_PURCHASE = "/api/purchase"
+const API_PRODUCT = "/api/product"
+const API_CART = "/api/cart"
+
+// const API_ACCOUNT = getEnvVariable('VITE_ACCOUNT_SERVICE_URL')
+// const API_PURCHASE = getEnvVariable('VITE_PURCHASE_SERVICE_URL')
+// const API_PRODUCT = getEnvVariable('VITE_PRODUCT_CATALOG_URL')
+// const API_CART = getEnvVariable('VITE_SHOPPING_CART_URL')
+
 const NUMBER_OF_BOOKS_TO_DISPLAY = getEnvVariable('VITE_NUMBER_OF_BOOKS_TO_DISPLAY') as unknown as number
 
 export interface AuthResponse {
