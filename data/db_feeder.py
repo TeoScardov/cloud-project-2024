@@ -37,11 +37,10 @@ print(df.head())
 #df.to_sql('books', engine, if_exists='append', index=False)
 
 #to add books you need to call api
-API =" http://localhost:4003/api/product/create-book"
+API = "http://localhost:4003/api/product/create-book"
 
 for i in range(len(df)):
     book = df.iloc[i].to_dict()
-    print(book)
     response = requests.post(API, json=book)
     if response.status_code != 200:
         print('Failed to add book:', book)
