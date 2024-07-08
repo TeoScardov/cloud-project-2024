@@ -23,11 +23,11 @@ resource "aws_iam_policy" "ecr_access_policy" {
                 "ecr:PutImage"
             ],
             Resource = [aws_ecr_repository.react_app.arn, 
-                       aws_ecr_repository.account_management.arn, 
-                       aws_ecr_repository.payment_service.arn, 
-                       aws_ecr_repository.purchase_service.arn, 
-                       aws_ecr_repository.product_catalog.arn, 
-                       aws_ecr_repository.shopping_cart.arn]
+                        aws_ecr_repository.account_management.arn, 
+                        aws_ecr_repository.payment_service.arn, 
+                        aws_ecr_repository.purchase_service.arn, 
+                        aws_ecr_repository.product_catalog.arn, 
+                        aws_ecr_repository.shopping_cart.arn]
         },
         {
             Effect = "Allow",
