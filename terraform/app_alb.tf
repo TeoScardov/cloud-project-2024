@@ -152,12 +152,8 @@ resource "aws_lb_listener" "account_lb_listener" {
   protocol          = "HTTP"
 
   default_action {
-    type = "fixed-response"
-    fixed_response {
-      content_type = "text/plain"
-      message_body = "404 Not Found"
-      status_code  = "404"
-    }
+    type = "forward"
+    target_group_arn = aws_lb_target_group.account_lb_target_group.arn
   }
 }
 
@@ -166,12 +162,8 @@ resource "aws_lb_listener" "product_lb_listener" {
   port              = var.product_hostPort
   protocol          = "HTTP"
   default_action {
-    type = "fixed-response"
-    fixed_response {
-      content_type = "text/plain"
-      message_body = "404 Not Found"
-      status_code  = "404"
-    }
+    type = "forward"
+    target_group_arn = aws_lb_target_group.product_lb_target_group.arn
   }
 }
 
@@ -180,12 +172,8 @@ resource "aws_lb_listener" "payment_lb_listener" {
   port              = var.payment_hostPort
   protocol          = "HTTP"
   default_action {
-    type = "fixed-response"
-    fixed_response {
-      content_type = "text/plain"
-      message_body = "404 Not Found"
-      status_code  = "404"
-    }
+    type = "forward"
+    target_group_arn = aws_lb_target_group.payment_lb_target_group.arn
   }
 }
 
@@ -194,12 +182,8 @@ resource "aws_lb_listener" "purchase_lb_listener" {
   port              = var.purchase_hostPort
   protocol          = "HTTP"
   default_action {
-    type = "fixed-response"
-    fixed_response {
-      content_type = "text/plain"
-      message_body = "404 Not Found"
-      status_code  = "404"
-    }
+    type = "forward"
+    target_group_arn = aws_lb_target_group.purchase_lb_target_group.arn
   }
 }
 
@@ -208,138 +192,7 @@ resource "aws_lb_listener" "cart_lb_listener" {
   port              = var.cart_hostPort
   protocol          = "HTTP"
   default_action {
-    type = "fixed-response"
-    fixed_response {
-      content_type = "text/plain"
-      message_body = "404 Not Found"
-      status_code  = "404"
-    }
+    type = "forward"
+    target_group_arn = aws_lb_target_group.cart_lb_target_group.arn
   }
 }
-
-#######################
-## ALB Listener Rule ##
-#######################
-
-resource "aws_lb_listener_rule" "account_lb_listener_rule" {
-  listener_arn = aws_lb_listener.account_lb_listener.arn
-  action {
-    type             = "forward"
-    forward {
-      target_group {
-        arn    = aws_lb_target_group.account_lb_target_group.arn
-        weight = 100
-      }
-
-      stickiness {
-        enabled  = true
-        duration = 600
-      }
-    }
-  }
-
-  condition {
-    path_pattern {
-      values = ["/*"]
-    }
-  }  
-}
-
-resource "aws_lb_listener_rule" "product_lb_listener_rule" {
-  listener_arn = aws_lb_listener.product_lb_listener.arn
-  action {
-    type             = "forward"
-    forward {
-      target_group {
-        arn    = aws_lb_target_group.product_lb_target_group.arn
-        weight = 100
-      }
-
-      stickiness {
-        enabled  = true
-        duration = 600
-      }
-    }
-  }
-  condition {
-    path_pattern {
-      values = ["/*"]
-    }
-  }
-}
-
-resource "aws_lb_listener_rule" "payment_lb_listener_rule" {
-  listener_arn = aws_lb_listener.payment_lb_listener.arn
-  action {
-    type             = "forward"
-    forward {
-      target_group {
-        arn    = aws_lb_target_group.payment_lb_target_group.arn
-        weight = 100
-      }
-
-      stickiness {
-        enabled  = true
-        duration = 600
-      }
-    
-    }
-  }
-  condition {
-    path_pattern {
-      values = ["/*"]
-    }
-  }
-  
-}
-
-resource "aws_lb_listener_rule" "purchase_lb_listener_rule" {
-  listener_arn = aws_lb_listener.purchase_lb_listener.arn
-  action {
-    type             = "forward"
-    forward {
-      target_group {
-        arn    = aws_lb_target_group.purchase_lb_target_group.arn
-        weight = 100
-      }
-
-      stickiness {
-        enabled  = true
-        duration = 600
-      }
-    
-    }
-  }
-  condition {
-    path_pattern {
-      values = ["/*"]
-    }
-  }
-  
-}
-
-resource "aws_lb_listener_rule" "cart_lb_listener_rule" {
-  listener_arn = aws_lb_listener.cart_lb_listener.arn
-  action {
-    type             = "forward"
-    forward {
-      target_group {
-        arn    = aws_lb_target_group.cart_lb_target_group.arn
-        weight = 100
-      }
-
-      stickiness {
-        enabled  = true
-        duration = 600
-      }
-
-    }
-  }
-  condition {
-    path_pattern {
-      values = ["/*"]
-    }
-  }
-  
-}
-
