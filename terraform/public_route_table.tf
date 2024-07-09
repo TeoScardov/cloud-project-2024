@@ -9,6 +9,11 @@ resource "aws_route_table" "ebook_store_public_route_table" {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.ebook_store_igw.id
   }
+
+  route {
+    cidr_block = "10.0.0.0/16"
+    gateway_id = "local"
+  }
   tags = {
     Name = var.public_route_table_name
     Terraform = "true"

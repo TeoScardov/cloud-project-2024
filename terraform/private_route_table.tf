@@ -10,6 +10,11 @@ resource "aws_route_table" "ebook_store_private_route_table" {
     nat_gateway_id = aws_nat_gateway.nat_gateway.id
   }
 
+  route {
+    cidr_block = "10.0.0.0/16"
+    gateway_id = "local"
+  }
+
   tags = {
     Name = var.private_route_table_name
     Terraform = "true"
