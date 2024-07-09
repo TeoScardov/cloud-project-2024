@@ -21,7 +21,7 @@ resource "aws_ecs_cluster" "ecs_cluster" {
 ############################
 
 resource "aws_ecs_service" "ecs_web_service" {
-  name            = "ecs-service"
+  name            = "web-service"
   cluster         = aws_ecs_cluster.ecs_cluster.id
   task_definition = aws_ecs_task_definition.ecs_task_definition_web.arn
   desired_count   = 2
@@ -36,7 +36,7 @@ resource "aws_ecs_service" "ecs_web_service" {
   load_balancer {
     target_group_arn = aws_lb_target_group.web_lb_target_group.arn
     container_name   = "web"
-    container_port   = 80
+    container_port   = var.web_containerPort
   }
 }
 
@@ -45,7 +45,7 @@ resource "aws_ecs_service" "ecs_web_service" {
 ################################
 
 resource "aws_ecs_service" "ecs_account_service" {
-  name            = "ecs-service"
+  name            = "account-service"
   cluster         = aws_ecs_cluster.ecs_cluster.id
   task_definition = aws_ecs_task_definition.ecs_task_definition_account.arn
   desired_count   = 2
@@ -59,7 +59,7 @@ resource "aws_ecs_service" "ecs_account_service" {
   load_balancer {
     target_group_arn = aws_lb_target_group.account_lb_target_group.arn
     container_name   = "account"
-    container_port   = 4001
+    container_port   = var.account_containerPort
   }
 }
 
@@ -68,7 +68,7 @@ resource "aws_ecs_service" "ecs_account_service" {
 ################################
 
 resource "aws_ecs_service" "ecs_product_service" {
-  name            = "ecs-service"
+  name            = "product-service"
   cluster         = aws_ecs_cluster.ecs_cluster.id
   task_definition = aws_ecs_task_definition.ecs_task_definition_product.arn
   desired_count   = 2
@@ -82,7 +82,7 @@ resource "aws_ecs_service" "ecs_product_service" {
   load_balancer {
     target_group_arn = aws_lb_target_group.product_lb_target_group.arn
     container_name   = "product"
-    container_port   = 4003
+    container_port   = var.product_containerPort
   }
 }
 
@@ -91,7 +91,7 @@ resource "aws_ecs_service" "ecs_product_service" {
 ################################
 
 resource "aws_ecs_service" "ecs_payment_service" {
-  name            = "ecs-service"
+  name            = "payment-service"
   cluster         = aws_ecs_cluster.ecs_cluster.id
   task_definition = aws_ecs_task_definition.ecs_task_definition_payment.arn
   desired_count   = 2
@@ -105,7 +105,7 @@ resource "aws_ecs_service" "ecs_payment_service" {
   load_balancer {
     target_group_arn = aws_lb_target_group.payment_lb_target_group.arn
     container_name   = "payment"
-    container_port   = 4002
+    container_port   = var.payment_containerPort
   }
 }
 
@@ -114,7 +114,7 @@ resource "aws_ecs_service" "ecs_payment_service" {
 ################################
 
 resource "aws_ecs_service" "ecs_purchase_service" {
-  name            = "ecs-service"
+  name            = "purchase-service"
   cluster         = aws_ecs_cluster.ecs_cluster.id
   task_definition = aws_ecs_task_definition.ecs_task_definition_purchase.arn
   desired_count   = 2
@@ -128,7 +128,7 @@ resource "aws_ecs_service" "ecs_purchase_service" {
   load_balancer {
     target_group_arn = aws_lb_target_group.purchase_lb_target_group.arn
     container_name   = "purchase"
-    container_port   = 4004
+    container_port   = var.purchase_containerPort
   }
 }
 
@@ -137,7 +137,7 @@ resource "aws_ecs_service" "ecs_purchase_service" {
 ################################
 
 resource "aws_ecs_service" "ecs_cart_service" {
-  name            = "ecs-service"
+  name            = "cart-service"
   cluster         = aws_ecs_cluster.ecs_cluster.id
   task_definition = aws_ecs_task_definition.ecs_task_definition_cart.arn
   desired_count   = 2
@@ -151,7 +151,7 @@ resource "aws_ecs_service" "ecs_cart_service" {
   load_balancer {
     target_group_arn = aws_lb_target_group.cart_lb_target_group.arn
     container_name   = "cart"
-    container_port   = 4005
+    container_port   = var.cart_containerPort
   }
 }
 
@@ -160,7 +160,7 @@ resource "aws_ecs_service" "ecs_cart_service" {
 ####################################
 
 resource "aws_ecs_task_definition" "ecs_task_definition_web" {
-  family                   = "ecs-task-definition"
+  family                   = "web-task-definition"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.web_cpu
@@ -181,19 +181,25 @@ resource "aws_ecs_task_definition" "ecs_task_definition_web" {
           containerPort = var.web_containerPort
           hostPort      = var.web_hostPort
           protocol      = "tcp"
-        }
+          appProtocol   = "http"
+
+        },
       ]
-      enviroment = [
+      environment = [
         {
-          name  = "NUMBER_OF_BOOKS_TO_DISPLAY"
+          name  = "VITE_NUMBER_OF_BOOKS_TO_DISPLAY"
           value = var.env_number_of_books_to_display
         },
-        {
-          name = "API_BASE_URL"
-          value = "http://${aws_lb.app_lb.dns_name}"
-        }
       ]
-    }
+      # logConfiguration = {
+      #     logDriver = "awslogs"
+      #     options = {
+      #       awslogs-group = aws_cloudwatch_log_group.ebook-store-cloudwatch.name
+      #       awslogs-region = "eu-central-1"
+      #       awslogs-stream-prefix = "ecs"
+      #     }
+      #   }
+    },
   ])
 }
 
@@ -202,7 +208,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition_web" {
 ########################################
 
 resource "aws_ecs_task_definition" "ecs_task_definition_account" {
-  family                   = "ecs-task-definition"
+  family                   = "account-task-definition"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.account_cpu
@@ -210,6 +216,11 @@ resource "aws_ecs_task_definition" "ecs_task_definition_account" {
 
   execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
   task_role_arn      = aws_iam_role.ecs_task_role.arn
+
+  runtime_platform {
+    operating_system_family = "LINUX"
+    cpu_architecture = "X86_64"
+  }
 
   container_definitions = jsonencode([
     {
@@ -226,12 +237,24 @@ resource "aws_ecs_task_definition" "ecs_task_definition_account" {
           appProtocol   = "http"
         }
       ]
-      enviroment = [
+      environment = [
         {
-          name  = "DATABASE_URL"
+          name = "JWT_SECRET_KEY",
+          value = "${var.jwt_secret_key}"
+        },
+        {
+          name  = "DATABASE_URL",
           value = "postgresql://${aws_rds_cluster.ebook_store_db.master_username}:${aws_rds_cluster.ebook_store_db.master_password}@${aws_rds_cluster.ebook_store_db.endpoint}:5432/${aws_rds_cluster.ebook_store_db.database_name}"
         }
       ]
+      # logConfiguration = {
+      #     logDriver = "awslogs"
+      #     options = {
+      #       awslogs-group = aws_cloudwatch_log_group.ebook-store-cloudwatch.name
+      #       awslogs-region = "eu-central-1"
+      #       awslogs-stream-prefix = "ecs"
+      #     }
+      #   }
     }
   ])
 }
@@ -241,7 +264,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition_account" {
 ########################################
 
 resource "aws_ecs_task_definition" "ecs_task_definition_product" {
-  family                   = "ecs-task-definition"
+  family                   = "product-task-definition"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.product_cpu
@@ -249,6 +272,11 @@ resource "aws_ecs_task_definition" "ecs_task_definition_product" {
 
   execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
   task_role_arn      = aws_iam_role.ecs_task_role.arn
+
+  runtime_platform {
+    operating_system_family = "LINUX"
+    cpu_architecture = "X86_64"
+  }
 
   container_definitions = jsonencode([
     {
@@ -264,6 +292,20 @@ resource "aws_ecs_task_definition" "ecs_task_definition_product" {
           protocol      = "tcp"
         }
       ]
+      environment = [
+        {
+          name = "DB_URL",
+          value = "postgresql://${aws_rds_cluster.ebook_store_db.master_username}:${aws_rds_cluster.ebook_store_db.master_password}@${aws_rds_cluster.ebook_store_db.endpoint}:5432/${aws_rds_cluster.ebook_store_db.database_name}"
+        }
+      ]
+      # logConfiguration = {
+      #     logDriver = "awslogs"
+      #     options = {
+      #       awslogs-group =  aws_cloudwatch_log_group.ebook-store-cloudwatch.name
+      #       awslogs-region = "eu-central-1"
+      #       awslogs-stream-prefix = "product"
+      #     }
+      #   }
     }
   ])
 }
@@ -273,11 +315,16 @@ resource "aws_ecs_task_definition" "ecs_task_definition_product" {
 ########################################
 
 resource "aws_ecs_task_definition" "ecs_task_definition_payment" {
-  family                   = "ecs-task-definition"
+  family                   = "payment-task-definition"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.payment_cpu
   memory                   = var.payment_memory
+ 
+  runtime_platform {
+    operating_system_family = "LINUX"
+    cpu_architecture = "X86_64"
+  }
 
   execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
   task_role_arn      = aws_iam_role.ecs_task_role.arn
@@ -296,6 +343,24 @@ resource "aws_ecs_task_definition" "ecs_task_definition_payment" {
           protocol      = "tcp"
         }
       ]
+      environment = [
+        {
+          name = "SECRET_KEY",
+          value = "${var.jwt_secret_key}"
+        },
+        {
+          name  = "URL_PREFIX",
+          value = "${var.payment_prefix}"
+        }
+      ]
+      # logConfiguration = {
+      #     logDriver = "awslogs"
+      #     options = {
+      #       awslogs-group =  aws_cloudwatch_log_group.ebook-store-cloudwatch.name
+      #       awslogs-region = "eu-central-1"
+      #       awslogs-stream-prefix = "payment"
+      #     }
+      #   }
     }
   ])
 }
@@ -305,11 +370,16 @@ resource "aws_ecs_task_definition" "ecs_task_definition_payment" {
 #########################################
 
 resource "aws_ecs_task_definition" "ecs_task_definition_purchase" {
-  family                   = "ecs-task-definition"
+  family                   = "purchase-task-definition"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.purchase_cpu
   memory                   = var.purchase_memory
+
+  runtime_platform {
+    operating_system_family = "LINUX"
+    cpu_architecture = "X86_64"
+  }
 
   execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
   task_role_arn      = aws_iam_role.ecs_task_role.arn
@@ -328,6 +398,32 @@ resource "aws_ecs_task_definition" "ecs_task_definition_purchase" {
           protocol      = "tcp"
         }
       ]
+      environment = [
+        {
+          name = "SECRET_KEY",
+          value = "${var.jwt_secret_key}"
+        },
+        {
+          name  = "SQLALCHEMY_DATABASE_URI",
+          value = "postgresql://${aws_rds_cluster.ebook_store_db.master_username}:${aws_rds_cluster.ebook_store_db.master_password}@${aws_rds_cluster.ebook_store_db.endpoint}:5432/${aws_rds_cluster.ebook_store_db.database_name}"
+        },
+        {
+          name  = "ACCOUNT_SERVICE_URL",
+          value = "http://${aws_route53_record.entrypoint_app_lb_record.fqdn}:4001/api/account"
+        },
+        {
+          name  = "PAYMENT_SERVICE_URL",
+          value = "http://${aws_route53_record.entrypoint_app_lb_record.fqdn}:4002/api/payment"
+        }
+      ]
+      # logConfiguration = {
+      #     logDriver = "awslogs"
+      #     options = {
+      #       awslogs-group =  aws_cloudwatch_log_group.ebook-store-cloudwatch.name
+      #       awslogs-region = "eu-central-1"
+      #       awslogs-stream-prefix = "purchase"
+      #     }
+      #   }
     }
   ])
 }
@@ -337,11 +433,16 @@ resource "aws_ecs_task_definition" "ecs_task_definition_purchase" {
 #####################################
 
 resource "aws_ecs_task_definition" "ecs_task_definition_cart" {
-  family                   = "ecs-task-definition"
+  family                   = "cart-task-definition"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.cart_cpu
   memory                   = var.cart_memory
+
+  runtime_platform {
+    operating_system_family = "LINUX"
+    cpu_architecture = "X86_64"
+  }
 
   execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
   task_role_arn      = aws_iam_role.ecs_task_role.arn
@@ -360,6 +461,28 @@ resource "aws_ecs_task_definition" "ecs_task_definition_cart" {
           protocol      = "tcp"
         }
       ]
+      environment = [
+        {
+          name  = "DB_URL",
+          value = "postgresql://${aws_rds_cluster.ebook_store_db.master_username}:${aws_rds_cluster.ebook_store_db.master_password}@${aws_rds_cluster.ebook_store_db.endpoint}:5432/${aws_rds_cluster.ebook_store_db.database_name}"
+        },
+        {
+          name  = "USER_SERVICE_URL",
+          value = "http://${aws_route53_record.entrypoint_app_lb_record.fqdn}:4001/api/account"
+        },
+        {
+          name  = "PRODUCT_SERVICE_URL",
+          value = "http://${aws_route53_record.entrypoint_app_lb_record.fqdn}:4003/api/product"
+        }
+      ]
+      # logConfiguration = {
+      #     logDriver = "awslogs"
+      #     options = {
+      #       awslogs-group =  aws_cloudwatch_log_group.ebook-store-cloudwatch.name
+      #       awslogs-region = "eu-central-1"
+      #       awslogs-stream-prefix = "cart"
+      #     }
+      #   }
     }
   ])
 }
