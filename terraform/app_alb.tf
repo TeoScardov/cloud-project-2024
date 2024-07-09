@@ -78,7 +78,7 @@ resource "aws_lb_target_group" "payment_lb_target_group" {
   vpc_id      = aws_vpc.ebook_store_vpc.id
 
   health_check {
-    path                = "/api/payment"
+    path                = "/api/payment/"
     protocol            = "HTTP"
     port                = "traffic-port"
     healthy_threshold   = 2
@@ -102,7 +102,7 @@ resource "aws_lb_target_group" "purchase_lb_target_group" {
   vpc_id      = aws_vpc.ebook_store_vpc.id
 
   health_check {
-    path                = "/api/purchase"
+    path                = "/api/purchase/"
     protocol            = "HTTP"
     port                = "traffic-port"
     healthy_threshold   = 2
