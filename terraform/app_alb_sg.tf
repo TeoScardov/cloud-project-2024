@@ -8,7 +8,10 @@ resource "aws_security_group" "app_lb_sg" {
   vpc_id      = aws_vpc.ebook_store_vpc.id
 
   ingress {
-    description = "Allow HTTP inbound traffic"
+    description = "HTTP from VPC"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     security_groups = [aws_security_group.web_sg.id]
   }
 

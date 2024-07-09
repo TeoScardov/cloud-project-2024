@@ -8,7 +8,10 @@ resource "aws_security_group" "web_sg" {
   vpc_id      = aws_vpc.ebook_store_vpc.id
 
   ingress {
-    description = "Allow HTTP inbound traffic"
+    description = "HTTP from VPC"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     security_groups = [aws_security_group.web_lb_sg.id]
     }
 
@@ -24,10 +27,10 @@ resource "aws_security_group" "web_sg" {
     }
 
     egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+        from_port   = 0
+        to_port     = 0
+        protocol    = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
     }
 
     tags = {

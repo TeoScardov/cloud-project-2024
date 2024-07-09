@@ -9,16 +9,11 @@ resource "aws_security_group" "app_sg" {
 
   ingress {
     description = "Allow HTTP inbound traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     security_groups = [aws_security_group.app_lb_sg.id]
   }
-
-  # ingress {
-  #   description = "Allow internal traffic"
-  #   from_port = 4000
-  #   to_port = 4000
-  #   protocol = "tcp"
-  #   security_groups = [aws_security_group.app_sg.id]
-  # }
 
   dynamic "ingress" {
         for_each = var.enable_ssh == true ? [0] : []
@@ -36,7 +31,7 @@ resource "aws_security_group" "app_sg" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
-    }
+  }
 
     tags = {
         Name = "app_sg"
