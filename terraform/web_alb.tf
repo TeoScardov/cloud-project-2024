@@ -10,8 +10,8 @@ resource "aws_lb" "web_lb" {
   subnets            = [aws_subnet.ebook_store_public_subnet_web_1.id, aws_subnet.ebook_store_public_subnet_web_2.id]
 
   enable_deletion_protection = false
-  #enable_http2               = true
-  #enable_cross_zone_load_balancing = true
+  enable_http2               = true
+  enable_cross_zone_load_balancing = true
 
   tags = {
     Name = "web_lb"
@@ -27,7 +27,7 @@ resource "aws_lb_target_group" "web_lb_target_group" {
   vpc_id      = aws_vpc.ebook_store_vpc.id
 
   health_check {
-    path                = "/"
+    path                = "/health"
     protocol            = "HTTP"
     port                = "traffic-port"
     healthy_threshold   = 2
