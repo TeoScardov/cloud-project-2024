@@ -1,3 +1,11 @@
+variable "jwt_secret_key" {
+  description = "The secret key for the JWT token"
+}
+
+variable "payment_prefix" {
+  description = "The prefix for the payment service"
+}
+
 ##################
 ## web Variable ##
 ##################
@@ -28,8 +36,8 @@ variable "web_hostPort" {
 
 variable "env_number_of_books_to_display" {
   description = "The number of books to display in the web application"
-  type        = number
-  default     = 10
+  type        = string
+  default     = "10"
 }
 
 ######################
