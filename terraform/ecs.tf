@@ -285,6 +285,8 @@ resource "aws_ecs_task_definition" "ecs_task_definition_account" {
       #   }
     }
   ])
+
+  depends_on = [ aws_rds_cluster.ebook_store_db, aws_rds_cluster_instance.db_instance ]
 }
 
 ########################################
@@ -336,6 +338,9 @@ resource "aws_ecs_task_definition" "ecs_task_definition_product" {
       #   }
     }
   ])
+
+  depends_on = [ aws_rds_cluster.ebook_store_db, aws_rds_cluster_instance.db_instance ]
+
 }
 
 ########################################
@@ -454,6 +459,9 @@ resource "aws_ecs_task_definition" "ecs_task_definition_purchase" {
       #   }
     }
   ])
+
+  depends_on = [ aws_rds_cluster.ebook_store_db, aws_rds_cluster_instance.db_instance ]
+
 }
 
 #####################################
@@ -513,4 +521,6 @@ resource "aws_ecs_task_definition" "ecs_task_definition_cart" {
       #   }
     }
   ])
+
+  depends_on = [ aws_rds_cluster.ebook_store_db, aws_rds_cluster_instance.db_instance ]
 }
