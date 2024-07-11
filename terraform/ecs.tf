@@ -219,14 +219,14 @@ resource "aws_ecs_task_definition" "ecs_task_definition_web" {
           value = var.env_number_of_books_to_display
         },
       ]
-      # logConfiguration = {
-      #     logDriver = "awslogs"
-      #     options = {
-      #       awslogs-group = aws_cloudwatch_log_group.ebook-store-cloudwatch.name
-      #       awslogs-region = "eu-central-1"
-      #       awslogs-stream-prefix = "ecs"
-      #     }
-      #   }
+      logConfiguration = {
+          logDriver = "awslogs"
+          options = {
+            awslogs-group = aws_cloudwatch_log_group.ebook-store-cloudwatch.name
+            awslogs-region = "us-east-1"
+            awslogs-stream-prefix = "ecs"
+          }
+        }
     },
   ])
 }
@@ -279,7 +279,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition_account" {
       #     logDriver = "awslogs"
       #     options = {
       #       awslogs-group = aws_cloudwatch_log_group.ebook-store-cloudwatch.name
-      #       awslogs-region = "eu-central-1"
+      #       awslogs-region = "us-east-1"
       #       awslogs-stream-prefix = "ecs"
       #     }
       #   }
@@ -332,8 +332,8 @@ resource "aws_ecs_task_definition" "ecs_task_definition_product" {
       #     logDriver = "awslogs"
       #     options = {
       #       awslogs-group =  aws_cloudwatch_log_group.ebook-store-cloudwatch.name
-      #       awslogs-region = "eu-central-1"
-      #       awslogs-stream-prefix = "product"
+      #       awslogs-region = "us-east-1"
+      #       awslogs-stream-prefix = "ecs"
       #     }
       #   }
     }
@@ -390,8 +390,8 @@ resource "aws_ecs_task_definition" "ecs_task_definition_payment" {
       #     logDriver = "awslogs"
       #     options = {
       #       awslogs-group =  aws_cloudwatch_log_group.ebook-store-cloudwatch.name
-      #       awslogs-region = "eu-central-1"
-      #       awslogs-stream-prefix = "payment"
+      #       awslogs-region = "us-east-1"
+      #       awslogs-stream-prefix = "ecs"
       #     }
       #   }
     }
@@ -453,8 +453,8 @@ resource "aws_ecs_task_definition" "ecs_task_definition_purchase" {
       #     logDriver = "awslogs"
       #     options = {
       #       awslogs-group =  aws_cloudwatch_log_group.ebook-store-cloudwatch.name
-      #       awslogs-region = "eu-central-1"
-      #       awslogs-stream-prefix = "purchase"
+      #       awslogs-region = "us-east-1"
+      #       awslogs-stream-prefix = "ecs"
       #     }
       #   }
     }
@@ -515,8 +515,8 @@ resource "aws_ecs_task_definition" "ecs_task_definition_cart" {
       #     logDriver = "awslogs"
       #     options = {
       #       awslogs-group =  aws_cloudwatch_log_group.ebook-store-cloudwatch.name
-      #       awslogs-region = "eu-central-1"
-      #       awslogs-stream-prefix = "cart"
+      #       awslogs-region = "us-east-1"
+      #       awslogs-stream-prefix = "ecs"
       #     }
       #   }
     }
