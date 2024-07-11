@@ -38,6 +38,11 @@ resource "aws_ecs_service" "ecs_web_service" {
     container_name   = "web"
     container_port   = var.web_containerPort
   }
+
+  lifecycle {
+    ignore_changes = [desired_count]
+  
+  }
 }
 
 ################################
@@ -60,6 +65,10 @@ resource "aws_ecs_service" "ecs_account_service" {
     target_group_arn = aws_lb_target_group.account_lb_target_group.arn
     container_name   = "account"
     container_port   = var.account_containerPort
+  }
+
+  lifecycle {
+    ignore_changes = [desired_count]
   }
 }
 
@@ -84,6 +93,10 @@ resource "aws_ecs_service" "ecs_product_service" {
     container_name   = "product"
     container_port   = var.product_containerPort
   }
+  lifecycle {
+    ignore_changes = [desired_count]
+  
+  }
 }
 
 ################################
@@ -106,6 +119,11 @@ resource "aws_ecs_service" "ecs_payment_service" {
     target_group_arn = aws_lb_target_group.payment_lb_target_group.arn
     container_name   = "payment"
     container_port   = var.payment_containerPort
+  }
+
+  lifecycle {
+    ignore_changes = [desired_count]
+  
   }
 }
 
@@ -130,6 +148,11 @@ resource "aws_ecs_service" "ecs_purchase_service" {
     container_name   = "purchase"
     container_port   = var.purchase_containerPort
   }
+
+  lifecycle {
+    ignore_changes = [desired_count]
+  
+  }
 }
 
 ################################
@@ -152,6 +175,11 @@ resource "aws_ecs_service" "ecs_cart_service" {
     target_group_arn = aws_lb_target_group.cart_lb_target_group.arn
     container_name   = "cart"
     container_port   = var.cart_containerPort
+  }
+
+  lifecycle {
+    ignore_changes = [desired_count]
+  
   }
 }
 
