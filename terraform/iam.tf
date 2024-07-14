@@ -1,95 +1,95 @@
-#########################################
-## Create IAM user and attach policies ##
-#########################################
+# #########################################
+# ## Create IAM user and attach policies ##
+# #########################################
 
-resource "aws_iam_user" "github_actions" {
-  name = "github_actions"
-}
+# resource "aws_iam_user" "github_actions" {
+#   name = "github_actions"
+# }
 
-###################
-# Create policies #
-###################
+# ###################
+# # Create policies #
+# ###################
 
-resource "aws_iam_policy" "ecr_pull_policy" {
-  name = "ecr_pull_policy"
-  description = "Allows access to ECR"
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-        {
-            Sid = "AllowPull"
-            Effect = "Allow"
-            Action = [
-                "ecr:CompleteLayerUpload",
-                "ecr:UploadLayerPart",
-                "ecr:InitiateLayerUpload",
-                "ecr:BatchCheckLayerAvailability",
-                "ecr:DescribeRepositories",
-                "ecr:DescribeImages",
-                "ecr:PutImage",
-                "ecr:ListTagsForResource",
-            ],
-            Resource = [aws_ecr_repository.react_app.arn, 
-                        aws_ecr_repository.account_management.arn, 
-                        aws_ecr_repository.payment_service.arn, 
-                        aws_ecr_repository.purchase_service.arn, 
-                        aws_ecr_repository.product_catalog.arn, 
-                        aws_ecr_repository.shopping_cart.arn]
-        }
-    ]
-})
+# resource "aws_iam_policy" "ecr_pull_policy" {
+#   name = "ecr_pull_policy"
+#   description = "Allows access to ECR"
+#   policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#         {
+#             Sid = "AllowPull"
+#             Effect = "Allow"
+#             Action = [
+#                 "ecr:CompleteLayerUpload",
+#                 "ecr:UploadLayerPart",
+#                 "ecr:InitiateLayerUpload",
+#                 "ecr:BatchCheckLayerAvailability",
+#                 "ecr:DescribeRepositories",
+#                 "ecr:DescribeImages",
+#                 "ecr:PutImage",
+#                 "ecr:ListTagsForResource",
+#             ],
+#             Resource = [aws_ecr_repository.react_app.arn, 
+#                         aws_ecr_repository.account_management.arn, 
+#                         aws_ecr_repository.payment_service.arn, 
+#                         aws_ecr_repository.purchase_service.arn, 
+#                         aws_ecr_repository.product_catalog.arn, 
+#                         aws_ecr_repository.shopping_cart.arn]
+#         }
+#     ]
+# })
   
-}
+# }
 
 
-resource "aws_iam_policy" "s3_tfstate_upload_download" {
-  name = "s3_tfstate_upload_download"
-  description = "Allows access to S3"
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-        {
-            Effect = "Allow"
-            Action = [
-                "s3:GetObject",
-                "s3:PutObject",
-                "s3:ListBucket"
-            ],
-            Resource = [aws_s3_bucket.ebook-store-tfstate.arn]
-        }
-    ]
-})
+# resource "aws_iam_policy" "s3_tfstate_upload_download" {
+#   name = "s3_tfstate_upload_download"
+#   description = "Allows access to S3"
+#   policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#         {
+#             Effect = "Allow"
+#             Action = [
+#                 "s3:GetObject",
+#                 "s3:PutObject",
+#                 "s3:ListBucket"
+#             ],
+#             Resource = [aws_s3_bucket.ebook-store-tfstate.arn]
+#         }
+#     ]
+# })
   
-}
+# }
 
-resource "aws_iam_policy" "ecr_push_policy" {
-  name = "ecr_push_policy"
-  description = "Allows push to ECR"
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-        {
-            Sid = "AllowPush"
-            Effect = "Allow",
-            Action = "ecr:GetAuthorizationToken",
-            Resource = "*"
-        }
-    ]
-})
+# resource "aws_iam_policy" "ecr_push_policy" {
+#   name = "ecr_push_policy"
+#   description = "Allows push to ECR"
+#   policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#         {
+#             Sid = "AllowPush"
+#             Effect = "Allow",
+#             Action = "ecr:GetAuthorizationToken",
+#             Resource = "*"
+#         }
+#     ]
+# })
     
-}
+# }
 
 
 
-resource "aws_iam_user_policy_attachment" "github_actions_policy_attachment" {
-  user       = aws_iam_user.github_actions.name
-  policy_arn = aws_iam_policy.ecr_push_policy.arn
-}
+# resource "aws_iam_user_policy_attachment" "github_actions_policy_attachment" {
+#   user       = aws_iam_user.github_actions.name
+#   policy_arn = aws_iam_policy.ecr_push_policy.arn
+# }
 
-resource "aws_iam_user_policy_attachment" "s3_tfstate_upload_download_attachment" {
-  user       = aws_iam_user.github_actions.name
-  policy_arn = aws_iam_policy.s3_tfstate_upload_download.arn
-}
+# resource "aws_iam_user_policy_attachment" "s3_tfstate_upload_download_attachment" {
+#   user       = aws_iam_user.github_actions.name
+#   policy_arn = aws_iam_policy.s3_tfstate_upload_download.arn
+# }
 
 #################################
 ## Create ecsTaskExecutionRole ##
