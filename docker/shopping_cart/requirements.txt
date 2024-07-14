@@ -1,0 +1,8 @@
+flask
+flask-sqlalchemy
+psycopg2-binary
+flask_jwt_extended
+requests
+flask_cors
+flasgger
+waitress

@@ -1,0 +1,54 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - 'dev'
+      - 'main'
+
+  pull_request:
+    branches:
+      - 'dev'
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        service: [account_management, product_catalog, purchase_service, shopping_cart]
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Set timezone
+        uses: szenius/set-timezone@v2.0
+        with:
+          timezoneLinux: "Europe/Rome"
+          timezoneMacos: "Europe/Rome"
+          timezoneWindows: "Europe/Rome"
+
+      - name: Update 
+        run: sudo apt-get update
+
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Create virtualenv
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov pytest-mock pytest-md pytest-emoji
+          cd docker/${{ matrix.service }}
+          pip install --ignore-installed -r requirements.txt
+      
+      - name: Run pytest
+        uses: pavelzw/pytest-action@v2.2.0
+        with:
+          verbose: true
+          emoji: true
+          job-summary: true
+          custom-arguments: 'docker/${{ matrix.service }}/tests/test_routes.py'
+          click-to-expand: true
+          report-title: '${{ matrix.service }} Test Report'

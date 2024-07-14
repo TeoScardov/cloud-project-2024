@@ -1,0 +1,163 @@
+services:
+
+  account_management:
+    container_name: account_service
+    image: account_service:1.0.0
+    build: ./account_management
+    environment:
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - DATABASE_URL=postgresql://${POSTGRES_ACCOUNT_USER}:${POSTGRES_ACCOUNT_PASSWORD}@db:5432/${POSTGRES_ACCOUNT_DB}
+    ports:
+      - "4001:4001"
+    depends_on:
+      db:
+        condition: service_healthy
+    links:
+      - db
+
+  payment_service:
+    container_name: payment_service
+    image: payment_service:1.0.0
+    build: ./payment_service
+    ports:
+      - "4002:4002"
+    environment:
+      - SECRET_KEY=${JWT_SECRET_KEY}
+      - URL_PREFIX=/api/payment
+      
+  purchase_service:
+    container_name: purchase_service
+    image: purchase-service:1.0.0
+    build: ./purchase_service
+    ports:
+      - "4004:4004"
+    environment:
+      - SECRET_KEY=${JWT_SECRET_KEY}
+      - SQLALCHEMY_DATABASE_URI=postgresql://${POSTGRES_PURCHASE_USER}:${POSTGRES_PURCHASE_PASSWORD}@db:5432/${POSTGRES_PURCHASE_DB}
+      - PAYMENT_SERVICE_URL=${PAYMENT_SERVICE_URL}
+      - ACCOUNT_SERVICE_URL=${ACCOUNT_MANAGEMENT_URL}
+    depends_on:
+      db:
+        condition: service_healthy
+    links:
+      - db
+
+  product_catalog:
+    container_name: product_catalog
+    image: product_catalog:1.0.0
+    build: ./product_catalog
+    ports:
+      - "4003:4003"
+    environment:
+      - DB_URL=postgresql://${POSTGRES_PRODUCT_USER}:${POSTGRES_PRODUCT_PASSWORD}@db:5432/${POSTGRES_PRODUCT_DB}
+    depends_on:
+      db:
+        condition: service_healthy
+    links:
+      - db
+
+  shopping_cart:
+    container_name: shopping_cart
+    image: shopping_cart:1.0.0
+    build: ./shopping_cart
+    ports:
+      - "4005:4005"
+    environment:
+      - DB_URL=postgresql://${POSTGRES_CART_USER}:${POSTGRES_CART_PASSWORD}@db:5432/${POSTGRES_CART_DB}
+      - PRODUCT_SERVICE_URL=${PRODUCT_CATALOG_URL}
+      - USER_SERVICE_URL=${ACCOUNT_MANAGEMENT_URL}
+    depends_on:
+      db:
+        condition: service_healthy
+    links:
+      - db
+
+  react_app:
+    container_name: react_app
+    image: frontend:1.0.0
+    build: ./react_app
+    ports:
+      - "80:80"
+    environment:
+      - VITE_ACCOUNT_SERVICE_URL=${ACCOUNT_MANAGEMENT_URL}
+      - VITE_PRODUCT_CATALOG_URL=${PRODUCT_CATALOG_URL}
+      - VITE_SHOPPING_CART_URL=${SHOPPING_CART_URL}
+      - VITE_PURCHASE_SERVICE_URL=${PURCHASE_SERVICE_URL}
+      - VITE_NUMBER_OF_BOOKS_TO_DISPLAY=${NUMBER_OF_BOOKS_TO_DISPLAY}
+
+  db:
+    container_name: db
+    image: postgres:13
+    ports:
+      - "5432:5432"   
+    environment:
+      - POSTGRES_DB=${POSTGRES_ACCOUNT_DB}
+      - POSTGRES_USER=${POSTGRES_ACCOUNT_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_ACCOUNT_PASSWORD}
+    healthcheck:
+          test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_ACCOUNT_USER} -d ${POSTGRES_ACCOUNT_DB} -h localhost -p 5432"]
+          interval: 5s
+          timeout: 5s
+          retries: 5   
+
+  # db_account:
+  #   container_name: db_account
+  #   image: postgres:13
+  #   ports:
+  #     - "5432:5432"   
+  #   environment:
+  #     - POSTGRES_DB=${POSTGRES_ACCOUNT_DB}
+  #     - POSTGRES_USER=${POSTGRES_ACCOUNT_USER}
+  #     - POSTGRES_PASSWORD=${POSTGRES_ACCOUNT_PASSWORD}
+  #   healthcheck:
+  #         test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_ACCOUNT_USER} -d ${POSTGRES_ACCOUNT_DB} -h localhost -p 5432"]
+  #         interval: 5s
+  #         timeout: 5s
+  #         retries: 5   
+
+  # db_purchase:
+  #   container_name: db_purchase
+  #   image: postgres:13
+  #   ports:
+  #     - "5433:5432"
+  #   environment:
+  #     - POSTGRES_DB=${POSTGRES_PURCHASE_DB}
+  #     - POSTGRES_USER=${POSTGRES_PURCHASE_USER}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PURCHASE_PASSWORD}
+  #   healthcheck:
+  #         test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_PURCHASE_USER} -d ${POSTGRES_PURCHASE_DB} -h localhost -p 5432"]
+  #         interval: 5s
+  #         timeout: 5s
+  #         retries: 5
+
+  # db_product:
+  #   container_name: db_product
+  #   image: postgres:13
+  #   ports:
+  #     - "5434:5432"
+  #   environment:
+  #     - POSTGRES_DB=${POSTGRES_PRODUCT_DB}
+  #     - POSTGRES_USER=${POSTGRES_PRODUCT_USER}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PRODUCT_PASSWORD}
+  #   healthcheck:
+  #         test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_PRODUCT_USER} -d ${POSTGRES_PRODUCT_DB} -h localhost -p 5432"]
+  #         interval: 5s
+  #         timeout: 5s
+  #         retries: 5
+
+  # db_cart:
+  #   container_name: db_cart
+  #   image: postgres:13
+  #   ports:
+  #     - "5435:5432"
+  #   environment:
+  #     - POSTGRES_DB=${POSTGRES_CART_DB}
+  #     - POSTGRES_USER=${POSTGRES_CART_USER}
+  #     - POSTGRES_PASSWORD=${POSTGRES_CART_PASSWORD}
+  #   healthcheck:
+  #         test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_CART_USER} -d ${POSTGRES_CART_DB} -h localhost -p 5432"]
+  #         interval: 5s
+  #         timeout: 5s
+  #         retries: 5
+
+

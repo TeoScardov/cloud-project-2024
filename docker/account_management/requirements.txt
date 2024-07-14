@@ -1,0 +1,7 @@
+Flask
+Flask-JWT-Extended
+Flask-SQLAlchemy
+psycopg2-binary
+flask_cors
+flasgger
+waitress
