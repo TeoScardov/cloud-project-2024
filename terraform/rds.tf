@@ -17,20 +17,25 @@ resource "aws_db_subnet_group" "ebook_store_db_subnet_group" {
 ##################
 
 resource "aws_rds_cluster" "ebook_store_db" {
-  cluster_identifier      = "db"
-  engine                  = "aurora-postgresql"
-  database_name           = var.postgres_db_name
-  master_username         = var.postgres_username
-  master_password         = var.postgres_password
-  db_subnet_group_name    = aws_db_subnet_group.ebook_store_db_subnet_group.name
-  vpc_security_group_ids  = [aws_security_group.db_sg.id]
-  skip_final_snapshot     = true
-  backup_retention_period = 7
-  apply_immediately       = true
+  cluster_identifier        = "db"
+  engine                    = "postgres"
+  engine_mode               = "serverless"
+  storage_type              = "io1"
+  db_cluster_instance_class = "db.serverless"
+  allocated_storage         = 1
+  iops                      = 50
+  database_name             = var.postgres_db_name
+  master_username           = var.postgres_username
+  master_password           = var.postgres_password
+  db_subnet_group_name      = aws_db_subnet_group.ebook_store_db_subnet_group.name
+  vpc_security_group_ids    = [aws_security_group.db_sg.id]
+  skip_final_snapshot       = true
+  backup_retention_period   = 7
+  apply_immediately         = true
 
   serverlessv2_scaling_configuration {
-    max_capacity = 2
-    min_capacity = 2
+    max_capacity = 5.0
+    min_capacity = 0.5
   }
   tags = {
     Name = "ebook_store_db"
@@ -47,6 +52,7 @@ resource "aws_rds_cluster_instance" "db_instance" {
   
   publicly_accessible = false
   apply_immediately  = true
+  
   tags = {
     Name = "db_instance"
     Terraform = "true"
