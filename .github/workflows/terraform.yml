@@ -39,6 +39,10 @@ jobs:
         run: |
           aws s3 cp s3://ebook-store-tfstate/terraform.tfstate terraform/terraform.tfstate || true
 
+      - name: Fetch Terraform variables, 
+        run: |
+          aws s3 cp s3://ebook-store-tfstate/terraform.tfvars terraform/terraform.tfvars
+
       - name: Terraform Init
         run: |
           cd terraform
