@@ -1,7 +1,7 @@
 #!/bin/bash
 
 EXCLUDE_RESOURCES=(
-  "aws_route53_record.ebook_store_zone"
+  "aws_route53_zone.ebook_store_zone"
   "aws_ecr_repository.react_app"
   "aws_ecr_repository.account_management"
   "aws_ecr_repository.product_catalog"
