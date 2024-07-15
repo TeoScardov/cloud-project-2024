@@ -21,7 +21,7 @@ resource "aws_ecs_cluster" "ecs_cluster" {
 ############################
 
 resource "aws_ecs_service" "ecs_web_service" {
-  name            = "web-service"
+  name            = "react_app"
   cluster         = aws_ecs_cluster.ecs_cluster.id
   task_definition = aws_ecs_task_definition.ecs_task_definition_web.arn
   desired_count   = 2
@@ -50,7 +50,7 @@ resource "aws_ecs_service" "ecs_web_service" {
 ################################
 
 resource "aws_ecs_service" "ecs_account_service" {
-  name            = "account-service"
+  name            = "account_management"
   cluster         = aws_ecs_cluster.ecs_cluster.id
   task_definition = aws_ecs_task_definition.ecs_task_definition_account.arn
   desired_count   = 2
@@ -77,7 +77,7 @@ resource "aws_ecs_service" "ecs_account_service" {
 ################################
 
 resource "aws_ecs_service" "ecs_product_service" {
-  name            = "product-service"
+  name            = "product_catalog"
   cluster         = aws_ecs_cluster.ecs_cluster.id
   task_definition = aws_ecs_task_definition.ecs_task_definition_product.arn
   desired_count   = 2
@@ -104,7 +104,7 @@ resource "aws_ecs_service" "ecs_product_service" {
 ################################
 
 resource "aws_ecs_service" "ecs_payment_service" {
-  name            = "payment-service"
+  name            = "payment_service"
   cluster         = aws_ecs_cluster.ecs_cluster.id
   task_definition = aws_ecs_task_definition.ecs_task_definition_payment.arn
   desired_count   = 2
@@ -132,7 +132,7 @@ resource "aws_ecs_service" "ecs_payment_service" {
 ################################
 
 resource "aws_ecs_service" "ecs_purchase_service" {
-  name            = "purchase-service"
+  name            = "purchase_service"
   cluster         = aws_ecs_cluster.ecs_cluster.id
   task_definition = aws_ecs_task_definition.ecs_task_definition_purchase.arn
   desired_count   = 2
@@ -160,7 +160,7 @@ resource "aws_ecs_service" "ecs_purchase_service" {
 ################################
 
 resource "aws_ecs_service" "ecs_cart_service" {
-  name            = "cart-service"
+  name            = "shopping_cart"
   cluster         = aws_ecs_cluster.ecs_cluster.id
   task_definition = aws_ecs_task_definition.ecs_task_definition_cart.arn
   desired_count   = 2
