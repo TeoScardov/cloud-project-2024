@@ -40,3 +40,8 @@ jobs:
           docker tag $REGISTRY/$REPOSITORY:$IMAGE_TAG $REGISTRY/$REPOSITORY:latest
           docker push $REGISTRY/$REPOSITORY:latest
         working-directory: ./docker
+
+      - name: Deploy to ECS
+        run: |
+          aws ecs update-service --cluster ecs-cluster --service ${{ matrix.service }} --force-new-deployment 
+        
