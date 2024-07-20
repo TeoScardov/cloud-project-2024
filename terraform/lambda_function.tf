@@ -23,7 +23,7 @@ resource "aws_lambda_layer_version" "postgres_utils_layer" {
 ############################
 
 resource "aws_lambda_function" "restore_dump" {
-  filename         = aws_s3_object.lambda_code.id
+  filename         = aws_s3_object.lambda_code.source
   function_name    = "restore_dump"
   role             = aws_iam_role.lambda_role.arn
   handler          = "lambda_function.lambda_handler"
