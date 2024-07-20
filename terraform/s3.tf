@@ -41,3 +41,8 @@ resource "aws_s3_bucket" "ebook-store-tfstate" {
 #         Resources = [aws_s3_bucket.books_files.arn]
 #     }
 # }
+
+resource "aws_s3_bucket" "elastic-book-store-bucket" {
+  bucket = "elastic-book-store-bucket"
+
+}
