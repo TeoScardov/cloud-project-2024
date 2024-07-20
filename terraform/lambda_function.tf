@@ -26,7 +26,7 @@ resource "aws_lambda_function" "restore_dump" {
   filename         = aws_s3_object.lambda_code.source
   function_name    = "restore_dump"
   role             = aws_iam_role.lambda_role.arn
-  handler          = "lambda_function.lambda_handler"
+  handler          = "lambda_function/lambda_function.lambda_handler"
   runtime          = var.lambda_runtime
   memory_size      = var.lambda_memory_size
   timeout          = var.lambda_timeout
