@@ -215,9 +215,10 @@ resource "aws_iam_policy" "s3_lambda_policy" {
       {
         Effect = "Allow",
         Action = [
-          "s3:GetObject"
+          "s3:GetObject",
+          "s3:ListBucket"
         ],
-        Resource = "${aws_s3_bucket.elastic-book-store-bucket.arn}"
+        Resource = "${aws_s3_bucket.elastic-book-store-bucket.arn}/*"
       }
     ]
   })
