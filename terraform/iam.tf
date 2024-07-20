@@ -185,4 +185,96 @@ resource "aws_iam_role_policy_attachment" "ecs-task-role-CloudWatchFullAccess" {
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchFullAccess"
 }
 
+########################
+## Create lambdaRole ##
+########################
 
+resource "aws_iam_role" "lambda_role" {
+  name        = "lambda_role"
+  description = "Allows Lambda functions to call AWS services on your behalf."
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        },
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "s3_lambda_policy" {
+  name = "s3_lambda_policy"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "s3:GetObject",
+          "s3:ListBucket"
+        ],
+        Resource = "${aws_s3_bucket.elastic-book-store-bucket.arn}/*"
+      }
+    ]
+  })
+  
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_role_policy_attachment" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = aws_iam_policy.s3_lambda_policy.arn
+}
+
+resource "aws_iam_policy" "basic_lambda_execution" {
+  name = "basic_lambda_execution"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "ec2:CreateNetworkInterface",
+          "ec2:DeleteNetworkInterface",
+          "ec2:DescribeNetworkInterfaces"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+  
+}
+
+resource "aws_iam_role_policy_attachment" "basic_lambda_execution_attachment" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = aws_iam_policy.basic_lambda_execution.arn
+}
+
+resource "aws_iam_policy" "db_lambda_policy" {
+  name = "db_lambda_policy"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement= [
+      {
+        Effect= "Allow",
+        Action= [
+          "rds-db:connect"
+        ],
+        Resource= "${aws_rds_cluster.ebook_store_db.arn}"
+      }
+    ]
+  })
+  
+}
+
+resource "aws_iam_role_policy_attachment" "db_lambda_role_policy_attachment" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = aws_iam_policy.db_lambda_policy.arn
+}

@@ -41,3 +41,32 @@ resource "aws_s3_bucket" "ebook-store-tfstate" {
 #         Resources = [aws_s3_bucket.books_files.arn]
 #     }
 # }
+
+resource "aws_s3_bucket" "elastic-book-store-bucket" {
+  bucket = "elastic-book-store-bucket"
+
+}
+
+resource "aws_s3_object" "postgres_dump" {
+  bucket = aws_s3_bucket.elastic-book-store-bucket.bucket
+  key    = var.dump_key
+  source = "${path.module}/../data/flask_db.dump"
+}
+
+resource "aws_s3_object" "lambda_code" {
+  bucket = aws_s3_bucket.elastic-book-store-bucket.bucket
+  key    = var.lambda_code_key
+  source = "${path.module}/../cloud/lambda_function.zip"
+}
+
+resource "aws_s3_object" "psycopg2_layer" {
+  bucket = aws_s3_bucket.elastic-book-store-bucket.bucket
+  key    = var.psycopg2_layer_key
+  source = "${path.module}/../cloud/psycopg2_layer.zip"
+}
+
+resource "aws_s3_object" "postgres_utils_layer" {
+  bucket = aws_s3_bucket.elastic-book-store-bucket.bucket
+  key    = var.postgres_utils_layer_key
+  source = "${path.module}/../cloud/pg_client_tools_layer.zip"
+}
