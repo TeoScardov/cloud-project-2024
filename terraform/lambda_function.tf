@@ -46,6 +46,6 @@ resource "aws_lambda_function" "restore_dump" {
   }
   vpc_config {
     security_group_ids = [aws_security_group.app_sg.id]
-    subnet_ids         = [aws_subnet.ebook_store_public_subnet_web_1.id, aws_subnet.ebook_store_public_subnet_web_2.id, aws_subnet.ebook_store_private_subnet_application_1.id, aws_subnet.ebook_store_private_subnet_application_2.id]
+    subnet_ids         = [aws_subnet.ebook_store_private_subnet_application_1.id, aws_subnet.ebook_store_private_subnet_application_2.id]
   }
 }
