@@ -217,7 +217,7 @@ resource "aws_iam_policy" "s3_lambda_policy" {
         Action = [
           "s3:GetObject"
         ],
-        Resource = "${aws_s3_bucket.ebook-store-tfstate.arn}"
+        Resource = "${aws_s3_bucket.elastic-book-store-bucket.arn}"
       }
     ]
   })
