@@ -22,14 +22,8 @@ resource "aws_lambda_layer_version" "postgres_utils_layer" {
 ## Create Lambda Function ##
 ############################
 
-resource "aws_s3_object" "lambda_code" {
-  bucket = aws_s3_bucket.elastic-book-store-bucket.bucket
-  key    = var.lambda_code_key
-  source = var.lambda_code_source
-}
-
 resource "aws_lambda_function" "restore_dump" {
-  filename         = aws_s3_bucket_object.lambda_code.id
+  filename         = aws_s3_object.lambda_code.id
   function_name    = "restore_dump"
   role             = aws_iam_role.lambda_role.arn
   handler          = "lambda_function.lambda_handler"
