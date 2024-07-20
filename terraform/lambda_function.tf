@@ -22,7 +22,7 @@ resource "aws_lambda_layer_version" "postgres_utils_layer" {
 ## Create Lambda Function ##
 ############################
 
-resource "aws_s3_bucket_object" "lambda_code" {
+resource "aws_s3_object" "lambda_code" {
   bucket = aws_s3_bucket.elastic-book-store-bucket.bucket
   key    = var.lambda_code_key
   source = var.lambda_code_source
@@ -41,11 +41,11 @@ resource "aws_lambda_function" "restore_dump" {
   layers           = [aws_lambda_layer_version.psycopg2_layer.arn, aws_lambda_layer_version.postgres_utils_layer.arn]
   environment {
     variables = {
-      DB_HOST   = ${aws_rds_cluster.ebook_store_db.endpoint}
-      DB_NAME   = ${aws_rds_cluster.ebook_store_db.database_name}
-      DB_PASSWORD = ${aws_rds_cluster.ebook_store_db.master_password}
+      DB_HOST   = aws_rds_cluster.ebook_store_db.endpoint
+      DB_NAME   = aws_rds_cluster.ebook_store_db.database_name
+      DB_PASSWORD = aws_rds_cluster.ebook_store_db.master_password
       DB_PORT   = "5432"
-      DB_USER   = ${aws_rds_cluster.ebook_store_db.master_username}
+      DB_USER   = aws_rds_cluster.ebook_store_db.master_username
       S3_BUCKET = aws_s3_bucket.elastic-book-store-bucket.bucket
       S3_KEY    = var.dump_key
     }
