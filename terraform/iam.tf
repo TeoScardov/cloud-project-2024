@@ -229,6 +229,33 @@ resource "aws_iam_role_policy_attachment" "lambda_role_policy_attachment" {
   policy_arn = aws_iam_policy.s3_lambda_policy.arn
 }
 
+resource "aws_iam_policy" "basic_lambda_execution" {
+  name = "basic_lambda_execution"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "ec2:CreateNetworkInterface",
+          "ec2:DeleteNetworkInterface",
+          "ec2:DescribeNetworkInterfaces"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+  
+}
+
+resource "aws_iam_role_policy_attachment" "basic_lambda_execution_attachment" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = aws_iam_policy.basic_lambda_execution.arn
+}
+
 resource "aws_iam_policy" "db_lambda_policy" {
   name = "db_lambda_policy"
   policy = jsonencode({
