@@ -12,7 +12,8 @@ resource "aws_security_group" "app_lb_sg" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    security_groups = [aws_security_group.web_sg.id]
+    #security_groups = [aws_security_group.web_sg.id]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
