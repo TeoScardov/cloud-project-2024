@@ -224,12 +224,19 @@ resource "aws_ecs_task_definition" "ecs_task_definition_web" {
           value = var.env_number_of_books_to_display
         },
       ]
+      # healthCheck = {
+      #   command = ["CMD-SHELL", "curl -f http://localhost/health || exit 1"]
+      #   interval = 30
+      #   timeout  = 5
+      #   retries  = 3
+      #   start_period = 60
+      # }
       logConfiguration = {
           logDriver = "awslogs"
           options = {
-            awslogs-group = aws_cloudwatch_log_group.ebook-store-cloudwatch.name
+            awslogs-group = var.cloudwatch_group
             awslogs-region = "us-east-1"
-            awslogs-stream-prefix = "ecs"
+            awslogs-stream-prefix = "web"
           }
         }
     },
@@ -280,14 +287,21 @@ resource "aws_ecs_task_definition" "ecs_task_definition_account" {
           value = "postgresql://${aws_rds_cluster.ebook_store_db.master_username}:${aws_rds_cluster.ebook_store_db.master_password}@${aws_rds_cluster.ebook_store_db.endpoint}:5432/${aws_rds_cluster.ebook_store_db.database_name}"
         }
       ]
-      # logConfiguration = {
-      #     logDriver = "awslogs"
-      #     options = {
-      #       awslogs-group = aws_cloudwatch_log_group.ebook-store-cloudwatch.name
-      #       awslogs-region = "us-east-1"
-      #       awslogs-stream-prefix = "ecs"
-      #     }
-      #   }
+      # healthCheck = {
+      #   command = ["CMD-SHELL", "curl -f http://localhost:4001/api/account/health || exit 1"]
+      #   interval = 30
+      #   timeout  = 5
+      #   retries  = 3
+      #   start_period = 60
+      # }
+      logConfiguration = {
+          logDriver = "awslogs"
+          options = {
+            awslogs-group = var.cloudwatch_group
+            awslogs-region = "us-east-1"
+            awslogs-stream-prefix = "account"
+          }
+        }
     }
   ])
 
@@ -333,14 +347,21 @@ resource "aws_ecs_task_definition" "ecs_task_definition_product" {
           value = "postgresql://${aws_rds_cluster.ebook_store_db.master_username}:${aws_rds_cluster.ebook_store_db.master_password}@${aws_rds_cluster.ebook_store_db.endpoint}:5432/${aws_rds_cluster.ebook_store_db.database_name}"
         }
       ]
-      # logConfiguration = {
-      #     logDriver = "awslogs"
-      #     options = {
-      #       awslogs-group =  aws_cloudwatch_log_group.ebook-store-cloudwatch.name
-      #       awslogs-region = "us-east-1"
-      #       awslogs-stream-prefix = "ecs"
-      #     }
-      #   }
+      # healthCheck = {
+      #   command = ["CMD-SHELL", "curl -f http://localhost:4003/api/product/test || exit 1"]
+      #   interval = 30
+      #   timeout  = 5
+      #   retries  = 3
+      #   start_period = 60
+      # }
+      logConfiguration = {
+          logDriver = "awslogs"
+          options = {
+            awslogs-group = var.cloudwatch_group
+            awslogs-region = "us-east-1"
+            awslogs-stream-prefix = "product"
+          }
+        }
     }
   ])
 
@@ -391,14 +412,21 @@ resource "aws_ecs_task_definition" "ecs_task_definition_payment" {
           value = "${var.payment_prefix}"
         }
       ]
-      # logConfiguration = {
-      #     logDriver = "awslogs"
-      #     options = {
-      #       awslogs-group =  aws_cloudwatch_log_group.ebook-store-cloudwatch.name
-      #       awslogs-region = "us-east-1"
-      #       awslogs-stream-prefix = "ecs"
-      #     }
-      #   }
+      # healthCheck = {
+      #   command = ["CMD-SHELL", "curl -f http://localhost:4002/api/payment || exit 1"]
+      #   interval = 30
+      #   timeout  = 5
+      #   retries  = 3
+      #   start_period = 60
+      # }
+      logConfiguration = {
+          logDriver = "awslogs"
+          options = {
+            awslogs-group = var.cloudwatch_group
+            awslogs-region = "us-east-1"
+            awslogs-stream-prefix = "payment"
+          }
+        }
     }
   ])
 }
@@ -454,14 +482,21 @@ resource "aws_ecs_task_definition" "ecs_task_definition_purchase" {
           value = "http://${aws_route53_record.entrypoint_app_lb_record.fqdn}:4002/api/payment"
         }
       ]
-      # logConfiguration = {
-      #     logDriver = "awslogs"
-      #     options = {
-      #       awslogs-group =  aws_cloudwatch_log_group.ebook-store-cloudwatch.name
-      #       awslogs-region = "us-east-1"
-      #       awslogs-stream-prefix = "ecs"
-      #     }
-      #   }
+      # healthCheck = {
+      #   command = ["CMD-SHELL", "curl -f http://localhost:4004/api/purchase || exit 1"]
+      #   interval = 30
+      #   timeout  = 5
+      #   retries  = 3
+      #   start_period = 60
+      # }
+      logConfiguration = {
+          logDriver = "awslogs"
+          options = {
+            awslogs-group = var.cloudwatch_group
+            awslogs-region = "us-east-1"
+            awslogs-stream-prefix = "purchase"
+          }
+        }
     }
   ])
 
@@ -516,14 +551,21 @@ resource "aws_ecs_task_definition" "ecs_task_definition_cart" {
           value = "http://${aws_route53_record.entrypoint_app_lb_record.fqdn}:4003/api/product"
         }
       ]
-      # logConfiguration = {
-      #     logDriver = "awslogs"
-      #     options = {
-      #       awslogs-group =  aws_cloudwatch_log_group.ebook-store-cloudwatch.name
-      #       awslogs-region = "us-east-1"
-      #       awslogs-stream-prefix = "ecs"
-      #     }
-      #   }
+      # healthCheck = {
+      #   command = ["CMD-SHELL", "curl -f http://localhost:4005/api/cart/health || exit 1"]
+      #   interval = 30
+      #   timeout  = 5
+      #   retries  = 3
+      #   start_period = 60
+      # }
+      logConfiguration = {
+          logDriver = "awslogs"
+          options = {
+            awslogs-group = var.cloudwatch_group
+            awslogs-region = "us-east-1"
+            awslogs-stream-prefix = "cart"
+          }
+        }
     }
   ])
 

@@ -152,6 +152,12 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role-ECRPolicy" {
   policy_arn = aws_iam_policy.ecr-policy.arn
 }
 
+resource "aws_iam_policy_attachment" "ecs_task_execution_role-log_policy" {
+  name = "ecs_task_execution_role-log_policy"
+  roles = [aws_iam_role.ecs_task_execution_role.name]
+  policy_arn = aws_iam_policy.logs_policy.arn
+}
+
 ########################
 ## Create ecsTaskRole ##
 ########################
@@ -175,15 +181,97 @@ resource "aws_iam_role" "ecs_task_role" {
   })
 }
 
+resource "aws_iam_policy" "logs_policy" {
+  name        = "logs_policy"
+  description = "Allows ECS tasks to write logs to CloudWatch"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+        {
+            Sid = "AllowLogs",
+            Effect = "Allow",
+            Action = [
+                "logs:CreateLogStream",
+                "logs:CreateLogGroup",
+                "logs:DescribeLogStreams",
+                "logs:PutLogEvents",
+            ],
+            Resource = "*"
+        }
+    ]
+})
+}
+
+resource "aws_iam_role_policy_attachment" "ecs-task-role-logs_policy" {
+  role       = aws_iam_role.ecs_task_role.id
+  policy_arn = aws_iam_policy.logs_policy.arn
+}
+
+resource "aws_iam_policy" "cloudwatch_policy" {
+  name        = "cloudwatch_policy"
+  description = "Allows ECS tasks to write logs to CloudWatch"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+        {
+            Sid = "AllowCloudWatch",
+            Effect = "Allow",
+            Action = [
+                "cloudwatch:PutMetricData",
+                "cloudwatch:GetMetricStatistics",
+                "cloudwatch:ListMetrics",
+                "cloudwatch:PutMetricAlarm",
+            ],
+            Resource = "*"
+        }
+    ]
+})
+  
+}
+
+resource "aws_iam_role_policy_attachment" "ecs-task-role-cloudwatch_policy" {
+  role       = aws_iam_role.ecs_task_role.id
+  policy_arn = aws_iam_policy.cloudwatch_policy.arn
+}
+
+resource "aws_iam_policy" "ssmmessages_policy" {
+  name        = "ssm_policy"
+  description = "Allows ECS tasks to write logs to CloudWatch"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+        {
+            Sid = "AllowSSM",
+            Effect = "Allow",
+            Action = [
+                "ssmmessages:CreateControlChannel",
+                "ssmmessages:CreateDataChannel",
+                "ssmmessages:OpenControlChannel",
+                "ssmmessages:OpenDataChannel"
+            ],
+            Resource = "*"
+        }
+    ]
+})
+  
+}
+
+resource "aws_iam_role_policy_attachment" "ecs-task-role-ssmmessages_policy" {
+  role       = aws_iam_role.ecs_task_role.id
+  policy_arn = aws_iam_policy.ssmmessages_policy.arn
+}
+
+
+
 resource "aws_iam_role_policy_attachment" "ecs-task-role-AmazonECS_FullAccesst" {
   role       = aws_iam_role.ecs_task_role.id
   policy_arn = "arn:aws:iam::aws:policy/AmazonECS_FullAccess"
 }
 
-resource "aws_iam_role_policy_attachment" "ecs-task-role-CloudWatchFullAccess" {
-  role      = aws_iam_role.ecs_task_role.id
-  policy_arn = "arn:aws:iam::aws:policy/CloudWatchFullAccess"
-}
+# resource "aws_iam_role_policy_attachment" "ecs-task-role-CloudWatchFullAccess" {
+#   role      = aws_iam_role.ecs_task_role.id
+#   policy_arn = "arn:aws:iam::aws:policy/CloudWatchFullAccess"
+#}
 
 ########################
 ## Create lambdaRole ##

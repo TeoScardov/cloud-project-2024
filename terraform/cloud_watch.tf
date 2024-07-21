@@ -1,7 +1,5 @@
-resource "aws_cloudwatch_log_group" "ebook-store-cloudwatch" {
-  name              = "/aws/ecs/ebook-store"
-  retention_in_days = 90
-
+resource "aws_cloudwatch_log_group" "ebook_store_cloudwatch" {
+  name              = var.cloudwatch_group
   tags = {
     Name = "ebook-store-cloudwatch"
     Terraform = "true"

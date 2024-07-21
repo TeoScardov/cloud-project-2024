@@ -5,10 +5,10 @@
 resource "aws_route_table" "ebook_store_private_route_table" {
   vpc_id = aws_vpc.ebook_store_vpc.id
 
-  # route {
-  #   cidr_block = "0.0.0.0/0"
-  #   nat_gateway_id = aws_nat_gateway.nat_gateway.id
-  # }
+  route {
+    cidr_block = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat_gateway.id
+  }
 
   route {
     cidr_block = "10.0.0.0/16"

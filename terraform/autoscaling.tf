@@ -4,7 +4,7 @@
 
 resource "aws_appautoscaling_target" "web-scaling-tg" {
   max_capacity = 5
-  min_capacity = 1
+  min_capacity = 2
   resource_id = "service/${aws_ecs_cluster.ecs_cluster.name}/${aws_ecs_service.ecs_web_service.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace = "ecs"
@@ -12,7 +12,7 @@ resource "aws_appautoscaling_target" "web-scaling-tg" {
 
 resource "aws_appautoscaling_target" "account-scaling-tg" {
   max_capacity = 5
-  min_capacity = 1
+  min_capacity = 2
   resource_id = "service/${aws_ecs_cluster.ecs_cluster.name}/${aws_ecs_service.ecs_account_service.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace = "ecs"
@@ -20,7 +20,7 @@ resource "aws_appautoscaling_target" "account-scaling-tg" {
 
 resource "aws_appautoscaling_target" "payment-scaling-tg" {
   max_capacity = 5
-  min_capacity = 1
+  min_capacity = 2
   resource_id = "service/${aws_ecs_cluster.ecs_cluster.name}/${aws_ecs_service.ecs_payment_service.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace = "ecs"
@@ -28,7 +28,7 @@ resource "aws_appautoscaling_target" "payment-scaling-tg" {
 
 resource "aws_appautoscaling_target" "purchase-scaling-tg" {
   max_capacity = 5
-  min_capacity = 1
+  min_capacity = 2
   resource_id = "service/${aws_ecs_cluster.ecs_cluster.name}/${aws_ecs_service.ecs_purchase_service.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace = "ecs"
@@ -36,7 +36,7 @@ resource "aws_appautoscaling_target" "purchase-scaling-tg" {
 
 resource "aws_appautoscaling_target" "product-scaling-tg" {
   max_capacity = 5
-  min_capacity = 1
+  min_capacity = 2
   resource_id = "service/${aws_ecs_cluster.ecs_cluster.name}/${aws_ecs_service.ecs_product_service.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace = "ecs"
@@ -44,7 +44,7 @@ resource "aws_appautoscaling_target" "product-scaling-tg" {
 
 resource "aws_appautoscaling_target" "cart-scaling-tg" {
   max_capacity = 5
-  min_capacity = 1
+  min_capacity = 2
   resource_id = "service/${aws_ecs_cluster.ecs_cluster.name}/${aws_ecs_service.ecs_cart_service.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace = "ecs"
