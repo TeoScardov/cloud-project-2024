@@ -547,7 +547,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition_cart" {
           value = "http://${aws_route53_record.entrypoint_app_lb_record.fqdn}:4001/api/account"
         },
         {
-          name  = "PRODUCT_SERVICE_URL",
+          name  = "PRODUCT_CATALOG_URL",
           value = "http://${aws_route53_record.entrypoint_app_lb_record.fqdn}:4003/api/product"
         }
       ]
