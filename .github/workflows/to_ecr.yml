@@ -5,6 +5,7 @@ on:
     workflows: ["Terraform"]
     types: [completed]
     branches: [main]
+  workflow_dispatch:
  
 jobs:        
   build-docker-images:
